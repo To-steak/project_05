@@ -30,6 +30,10 @@ namespace Project05.Core
         private LevelUpChoicePresenter _levelUpChoicePresenter;
         // 건설 목록 Presenter (씬에 BuildMenuView가 없으면 null)
         private BuildMenuPresenter _buildMenuPresenter;
+        // 코어 UI Presenter (씬에 CoreMenuView가 없으면 null)
+        private CoreMenuPresenter _coreMenuPresenter;
+        // 일시정지 메뉴 Presenter (씬에 PauseMenuView가 없으면 null)
+        private PauseMenuPresenter _pauseMenuPresenter;
         // 이번 판의 기록을 저장했는지 (패배 감지 시 한 번만 저장)
         private bool _hasSavedRecord;
         // [Main] 메인 메뉴 Presenter (Main 씬 밖이거나 View가 없으면 null)
@@ -140,6 +144,14 @@ namespace Project05.Core
             {
                 _buildMenuPresenter.Present(_world);
             }
+            if (_coreMenuPresenter != null)
+            {
+                _coreMenuPresenter.Present(_world);
+            }
+            if (_pauseMenuPresenter != null)
+            {
+                _pauseMenuPresenter.Present(_world);
+            }
             if (_levelUpChoicePresenter != null)
             {
                 _levelUpChoicePresenter.Present(_world);
@@ -234,6 +246,10 @@ namespace Project05.Core
             _levelUpChoicePresenter = levelUpChoiceView != null ? new LevelUpChoicePresenter(levelUpChoiceView, _world) : null;
             BuildMenuView buildMenuView = FindAnyObjectByType<BuildMenuView>();
             _buildMenuPresenter = buildMenuView != null ? new BuildMenuPresenter(buildMenuView, _world) : null;
+            CoreMenuView coreMenuView = FindAnyObjectByType<CoreMenuView>();
+            _coreMenuPresenter = coreMenuView != null ? new CoreMenuPresenter(coreMenuView, _world) : null;
+            PauseMenuView pauseMenuView = FindAnyObjectByType<PauseMenuView>();
+            _pauseMenuPresenter = pauseMenuView != null ? new PauseMenuPresenter(pauseMenuView, _world) : null;
         }
 
         private void EndSession()
@@ -248,6 +264,8 @@ namespace Project05.Core
             _resultPresenter = null;
             _levelUpChoicePresenter = null;
             _buildMenuPresenter = null;
+            _coreMenuPresenter = null;
+            _pauseMenuPresenter = null;
             _hasSavedRecord = false;
             _mainMenuPresenter = null;
             _loadingPresenter = null;
@@ -296,6 +314,16 @@ namespace Project05.Core
             int requiredXP = requiredXPByLevel.Length == 0 ? 0 : requiredXPByLevel[Mathf.Clamp(progress.level - 1, 0, requiredXPByLevel.Length - 1)];
             GUILayout.Label("── Progress ──");
             GUILayout.Label("Gold " + progress.gold + " (" + progress.goldGainPercent + "%) / Lv " + progress.level + " XP " + progress.currentXP + "/" + requiredXP + " (" + progress.xpGainPercent + "%) / Pending " + progress.pendingLevelUpCount);
+            bool[] isUnlockedByTowerType = _world.towerUnlock.isUnlockedByTowerType;
+            int unlockedCount = 0;
+            for (int towerTypeIndex = 0; towerTypeIndex < isUnlockedByTowerType.Length; towerTypeIndex++)
+            {
+                if (isUnlockedByTowerType[towerTypeIndex])
+                {
+                    unlockedCount++;
+                }
+            }
+            GUILayout.Label("Tower types unlocked " + unlockedCount + "/" + isUnlockedByTowerType.Length);
             GUILayout.Label("Towers " + _world.towers.Count + "/" + _world.towers.Capacity + " / Build menu slot " + _world.buildMenuSlotIndex + " / Pointer held " + _world.input.isPointerHeld);
             for (int towerIndex = 0; towerIndex < _world.towers.Capacity; towerIndex++)
             {

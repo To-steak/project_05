@@ -14,6 +14,8 @@ namespace Project05.UI.View
         [SerializeField] private BuildMenuEntryView _entryTemplate;
         [SerializeField] private Transform _entryContainer;
         [SerializeField] private Button _closeButton;
+        // 해금된 타워가 하나도 없을 때 보일 안내 (예: "코어에서 타워를 해금하세요", 없어도 된다)
+        [SerializeField] private GameObject _noUnlockedMessage;
 
         /// <summary>
         /// 닫기 버튼. Presenter가 onClick을 구독한다.
@@ -43,6 +45,18 @@ namespace Project05.UI.View
                 entries[entryIndex] = Instantiate(_entryTemplate, container);
             }
             return entries;
+        }
+
+        /// <summary>
+        /// 해금된 타워가 없을 때의 안내를 보이거나 숨긴다.
+        /// </summary>
+        /// <param name="isVisible">보이면 true</param>
+        public void SetNoUnlockedMessageVisible(bool isVisible)
+        {
+            if (_noUnlockedMessage != null && _noUnlockedMessage.activeSelf != isVisible)
+            {
+                _noUnlockedMessage.SetActive(isVisible);
+            }
         }
 
         /// <summary>
