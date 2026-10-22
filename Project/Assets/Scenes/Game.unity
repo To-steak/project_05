@@ -461,6 +461,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1033754275}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!224 &131031252 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 2275886464527654869, guid: 19f0ddba7e2f39b46a41c4db60443083, type: 3}
+  m_PrefabInstance: {fileID: 6803667666833013508}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &220508804
 GameObject:
   m_ObjectHideFlags: 0
@@ -1382,6 +1387,81 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 2215086961527067472, guid: 904c48926ef8d244b8e621b426b88fe4, type: 3}
   m_PrefabInstance: {fileID: 6243278133106336149}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1147499957
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1147499958}
+  - component: {fileID: 1147499960}
+  - component: {fileID: 1147499959}
+  m_Layer: 5
+  m_Name: Image - icon
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1147499958
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1147499957}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 131031252}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1147499959
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1147499957}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: 1e310490855601649a997a55e20b67f8, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1147499960
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1147499957}
+  m_CullTransparentMesh: 1
 --- !u!1 &1169202641
 GameObject:
   m_ObjectHideFlags: 0
@@ -1430,7 +1510,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1013cbe84c024dda889c22aeec51bc3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Project05.View::Project05.View.OffscreenIndicatorView
-  _arrowTemplate: {fileID: 1323927995}
+  _arrowTemplate: {fileID: 1147499958}
   _maxArrowCount: 8
   _edgeMargin: 40
 --- !u!1 &1247178129
@@ -1478,11 +1558,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!224 &1323927995 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 807800778482294979, guid: 19f0ddba7e2f39b46a41c4db60443083, type: 3}
-  m_PrefabInstance: {fileID: 6803667666833013508}
-  m_PrefabAsset: {fileID: 0}
 --- !u!224 &1363633002 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 4973452698658055272, guid: 033b2481517b4ab4d820c1891721a656, type: 3}
@@ -1620,8 +1695,8 @@ RectTransform:
   - {fileID: 1363633002}
   - {fileID: 32914176}
   - {fileID: 1169202642}
-  - {fileID: 1978463668}
   - {fileID: 1843851758}
+  - {fileID: 1978463668}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -3310,8 +3385,12 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 7160007705854613467, guid: 19f0ddba7e2f39b46a41c4db60443083, type: 3}
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 2275886464527654869, guid: 19f0ddba7e2f39b46a41c4db60443083, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1147499958}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 19f0ddba7e2f39b46a41c4db60443083, type: 3}
 --- !u!1001 &6868164757117743807
