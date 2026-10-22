@@ -249,6 +249,13 @@ public static class HeroSystem
 - Unity에서 어떤 씬을 열고 무엇을 하면 확인되는지
 ```
 
+### 7.5 병렬 작업과 파일 충돌
+- 여러 브랜치를 동시에 진행할 때 **같은 파일을 동시에 고치지 않는다.** 레인별 담당 파일은 `ROADMAP.md`를 따른다.
+- **`Game.unity`, `Main.unity`는 한 번에 한 브랜치만 수정한다.** Unity 씬 파일은 병합이 거의 불가능하다.
+  - 다른 브랜치는 프리팹 또는 레인별 테스트 씬(`Assets/Scenes/Test/~.unity`)에서 작업하고, 본 씬 배치는 병합 후 별도로 한다.
+  - 테스트 씬은 Build Settings에 넣지 않는다.
+- `World.cs`, Component, Runner의 틱 연결은 `feat/component-contract`에서 미리 고정한다. 이후 브랜치에서 Component를 바꿔야 하면 PR 설명의 리뷰 포인트에 명시한다.
+
 ---
 
 ## 8. 미결정
