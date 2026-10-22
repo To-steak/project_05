@@ -24,6 +24,8 @@ namespace Project05.Component
         public GameFlowState flow;
         // 일시정지 사유. None이 아니면 CommandSystem만 실행
         public PauseReason pauseReason;
+        // 건설 목록이 열린 공터 인덱스 (BuildMenu 일시정지 중에만 유효, 아니면 -1)
+        public int buildMenuSlotIndex = NO_SLOT;
         // 시드 고정 랜덤. System은 UnityEngine.Random 대신 이것만 쓴다 (SessionSystem.InitializeRandom으로 판마다 Runner가 시드를 정한다)
         public global::System.Random random;
 
@@ -151,6 +153,8 @@ namespace Project05.Component
         public const int MAX_DROP_COUNT = 256;
         // 투사체 저장소 용량 (공격 주기와 비행 시간으로 보아 동시에 날아가는 투사체 상한)
         public const int MAX_PROJECTILE_COUNT = 128;
+        // 공터를 가리키지 않는 값
+        public const int NO_SLOT = -1;
         // 기록 목록·작은 큐의 초기 용량 (넘치면 List가 늘어나므로 상한이 아니다)
         public const int INITIAL_RECORD_CAPACITY = 16;
     }

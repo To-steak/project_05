@@ -11,5 +11,7 @@ namespace Project05.Component
         LevelUpChoice,
         // 코어 UI 열림
         CoreMenu,
+        // 공터 건설 목록 열림 (world.buildMenuSlotIndex 공터에 건설)
+        BuildMenu,
     }
 }

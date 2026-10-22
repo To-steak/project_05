@@ -18,5 +18,11 @@ namespace Project05.Foundation
         public GameObject xpDropPrefab;
         // 레벨업 선택지 표시 이름 (인덱스 = GameData.levelUpOptions와 같음)
         public string[] levelUpOptionNames = new string[0];
+        // 타워 종류별 View 프리팹 (인덱스 = GameData.towerStats와 같음, 비어 있으면 null)
+        public GameObject[] towerPrefabs = new GameObject[0];
+        // 타워 종류별 건설 목록 아이콘 (비어 있으면 null)
+        public Sprite[] towerIcons = new Sprite[0];
+        // 타워 종류별 표시 이름
+        public string[] towerNames = new string[0];
     }
 }

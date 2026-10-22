@@ -13,6 +13,10 @@ namespace Project05.Component.Data
         public int repairCost;
         // 적이 경로를 멈추고 이 타워를 공격하기 시작하는 거리
         public float aggroRange;
+        // 투사체 이동 속도 (유닛 / 틱)
+        public float projectileSpeed;
+        // 투사체 명중 판정 반경
+        public float projectileRadius;
         // 단계별 수치 (0번이 건설 직후 단계)
         public TowerLevelStats[] levels;
     }

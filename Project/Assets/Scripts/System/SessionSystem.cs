@@ -81,7 +81,14 @@ namespace Project05.System
             progress.goldGainPercent = BASE_GAIN_PERCENT;
             progress.xpGainPercent = BASE_GAIN_PERCENT;
 
+            world.buildMenuSlotIndex = World.NO_SLOT;
+
+            // 임시: 해금(코어 UI)은 feat/core-menu에서 만든다. 그 전까지 모든 종류를 해금 상태로 시작한다
             world.towerUnlock.isUnlockedByTowerType = new bool[world.towerStats.Length];
+            for (int towerTypeIndex = 0; towerTypeIndex < world.towerUnlock.isUnlockedByTowerType.Length; towerTypeIndex++)
+            {
+                world.towerUnlock.isUnlockedByTowerType[towerTypeIndex] = true;
+            }
 
             // 시드는 Runner가 InitializeRandom으로 판마다 다시 정한다. 그 전에 쓰여도 null이 아니도록 고정 시드로 만들어 둔다
             InitializeRandom(world, DEFAULT_RANDOM_SEED);

@@ -27,6 +27,58 @@ namespace Project05.System
             SpawnEnemies(world);
             SpawnProjectiles(world);
             SpawnDrops(world);
+            SpawnTowers(world);
+        }
+
+        /// <summary>
+        /// 타워 건설 요청을 처리한다. 0단계 수치를 복사하고 공터에 타워 ID를 기록한다 (비용은 CommandSystem이 이미 냈다).
+        /// 타워 저장소 용량은 공터 수와 같아 실패하지 않지만, 실패하면 다음 틱에 다시 시도한다.
+        /// </summary>
+        private static void SpawnTowers(World world)
+        {
+            Queue<TowerBuildRequest> requests = world.towerBuildRequests;
+            while (requests.Count > 0)
+            {
+                TowerBuildRequest request = requests.Peek();
+                if (request.slotIndex < 0 || request.slotIndex >= world.towerSlots.Length
+                    || request.towerTypeIndex < 0 || request.towerTypeIndex >= world.towerStats.Length
+                    || world.towerStats[request.towerTypeIndex].levels.Length == 0)
+                {
+                    Debug.LogWarning("[SpawnSystem] 잘못된 타워 건설 요청을 버린다. 공터 " + request.slotIndex + ", 종류 " + request.towerTypeIndex);
+                    requests.Dequeue();
+                    continue;
+                }
+
+                EntityID towerID;
+                if (!world.towers.TryCreate(out towerID))
+                {
+                    return;
+                }
+                requests.Dequeue();
+
+                ref TowerSlot slot = ref world.towerSlots[request.slotIndex];
+                ref TowerStats stats = ref world.towerStats[request.towerTypeIndex];
+                ref Tower tower = ref world.towers.Get(towerID);
+                tower.position = slot.position;
+                tower.slotIndex = request.slotIndex;
+                tower.towerTypeIndex = request.towerTypeIndex;
+                tower.aggroRange = stats.aggroRange;
+                tower.projectileSpeed = stats.projectileSpeed;
+                tower.projectileRadius = stats.projectileRadius;
+                tower.attackCooldownTicks = 0;
+                tower.siegeSlotAssignedCount = 0;
+                tower.isBoarded = false;
+                TowerSystem.ApplyLevel(world, ref tower, 0);
+                tower.currentHP = tower.maxHP;
+
+                slot.towerID = towerID;
+                slot.isBuildPending = false;
+
+                TowerBuiltRecord builtRecord = new TowerBuiltRecord();
+                builtRecord.towerID = towerID;
+                builtRecord.position = tower.position;
+                world.towerBuiltRecords.Add(builtRecord);
+            }
         }
 
         /// <summary>
