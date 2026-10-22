@@ -16,7 +16,8 @@
 | `View/` | 공통 표현 관심사. 애니메이션, VFX, SFX, 카메라, 보간. static `~ViewSystem`과 MonoBehaviour `~View` | `EnemyViewSystem`, `EnemyView` |
 | `UI/View/` | UI 화면 표시 | `GoldView` |
 | `UI/Presenter/` | UI View와 World를 연결 | `GoldPresenter` |
-| `Core/` | DDOL Runner, 부트스트랩, App 기능 | `Runner`, `App` |
+| `Foundation/` | 프로그램 전체 수명의 기반 기능. static `App`과 그 기능들 | `App`, `SettingsStore`, `ViewPool` |
+| `Core/` | DDOL Runner, 부트스트랩, 베이킹. 모든 어셈블리를 조립하는 최상위 | `Runner`, `Bootstrap` |
 
 - **베이킹 채택:** Authoring의 원본은 Core에서 Component의 struct로 변환된다. System은 Component만 참조한다.
 - 각 폴더의 `README.txt`에 들어갈 `.cs` 목록이 있다. 구현하면서 목록과 실제 파일을 맞춘다.
@@ -30,11 +31,14 @@
 | Component | (없음) |
 | System | Component |
 | Authoring | Component |
-| View | Component |
-| UI | Component |
+| Foundation | Component |
+| View | Component, Foundation |
+| UI | Component, Foundation |
 | Core | 전부 |
 
-- System이 View나 UI를 참조하면 컴파일 에러가 나야 한다.
+- System이 View, UI, Foundation을 참조하면 컴파일 에러가 나야 한다.
+- App을 Core에 두면 View·UI → Core → View·UI 순환 참조가 되므로 Foundation으로 분리한다.
+- 폴더 이름을 `App`으로 하지 않는다. 네임스페이스 `Project05.App`과 클래스 `App`의 이름이 같아져 `App.Settings` 해석이 꼬인다.
 
 ### 1.2 네임스페이스
 - `Project05.*` 형식으로, 폴더 경로와 일치시킨다.
@@ -47,6 +51,7 @@
 | `View/` | `Project05.View` |
 | `UI/View/` | `Project05.UI.View` |
 | `UI/Presenter/` | `Project05.UI.Presenter` |
+| `Foundation/` | `Project05.Foundation` |
 | `Core/` | `Project05.Core` |
 
 - **주의: `Project05.System` 때문에 `Project05.*` 네임스페이스 안에서 `System.`으로 시작하는 정규화된 이름은 .NET이 아니라 `Project05.System`으로 해석된다.**
