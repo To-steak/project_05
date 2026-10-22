@@ -13,7 +13,7 @@
 - CoreViewSystem.cs (static class) : 코어 피격 연출, 화면 경고.
 - InteractionPromptViewSystem.cs (static class) : 지금 Space를 누르면 반응할 대상(World.interactionTargetKind) 위에 Space 아이콘 하나.
 - OffscreenIndicatorViewSystem.cs (static class) : 화면 밖 적 중 코어에 가까운 순 최대 N개를 화면 가장자리 방향 화살표로.
-- CameraViewSystem.cs (static class) : Cinemachine 추적 대상(히어로 View Transform) 연결, 탑승 시 카메라 전환.
+- CameraViewSystem.cs (static class) : Cinemachine 추적 대상(히어로 View Transform) 연결, Q/E로 Follow 오프셋을 히어로 기준 Y축 회전, 탑승 시 카메라 전환.
 - ViewInterpolation.cs (static class) : ViewSystem 공용 보간 비율 계산 (일시정지·패배 중 1 고정). 상태 없음.
 - HeroView.cs (MonoBehaviour) : 히어로 프리팹 컴포넌트 (Renderer 참조, 무적 깜빡임 틱). 보이기·숨기기만 한다. 로직 없음.
 - EnemyView.cs (MonoBehaviour) : 적 프리팹 컴포넌트. Renderer 참조와 피격 플래시 색·시간 설정, 색 바꾸기만 한다. 로직 없음.
@@ -21,7 +21,7 @@
 - TowerView.cs (MonoBehaviour) : 타워 프리팹 컴포넌트. 로직 없음.
 - DropView.cs (MonoBehaviour) : 드롭 프리팹 컴포넌트. 로직 없음.
 - CoreView.cs (MonoBehaviour) : 코어 오브젝트 컴포넌트. 로직 없음.
-- HeroCameraView.cs (MonoBehaviour) : 히어로 추적 CinemachineCamera 표시. 탑승 카메라와 구분용. 로직 없음.
+- HeroCameraView.cs (MonoBehaviour) : 히어로 추적 CinemachineCamera 표시와 CinemachineFollow 참조, 초당 회전 각도. 판 시작 시 Binding Mode를 World Space로. 로직 없음.
 - InteractionPromptView.cs (MonoBehaviour) : Space 아이콘 오브젝트 (높이 오프셋, 카메라 바라보기).
 - OffscreenIndicatorView.cs (MonoBehaviour) : 화면 밖 화살표 묶음 (Overlay Canvas 아래, 화살표 템플릿·최대 수·가장자리 여백). 판 시작 시 화살표를 복제한다.
 

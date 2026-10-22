@@ -17,6 +17,9 @@ namespace Project05.Core
         private InputAction _interactAction;
         // ESC: 일시정지 메뉴 (없어도 나머지 입력은 동작한다)
         private InputAction _pauseAction;
+        // Q/E 카메라 회전 (없어도 나머지 입력은 동작한다)
+        private InputAction _rotateCameraLeftAction;
+        private InputAction _rotateCameraRightAction;
         // 레벨업 선택지 1 / 2 / 3 키 (인덱스 = 제시 칸 번호)
         private readonly InputAction[] _chooseOptionActions = new InputAction[ProgressState.OFFERED_OPTION_COUNT];
         private bool _hasSearchedActions;
@@ -25,6 +28,8 @@ namespace Project05.Core
         private const string POINT_ACTION_PATH = "Game/Point";
         private const string INTERACT_ACTION_PATH = "Game/Interact";
         private const string PAUSE_ACTION_PATH = "Game/Pause";
+        private const string ROTATE_CAMERA_LEFT_ACTION_PATH = "Game/RotateCameraLeft";
+        private const string ROTATE_CAMERA_RIGHT_ACTION_PATH = "Game/RotateCameraRight";
         // 레벨업 선택지 키 액션 경로 앞부분. 뒤에 1부터 붙는다 (Game/ChooseOption1 ~ 3)
         private const string CHOOSE_OPTION_ACTION_PATH_PREFIX = "Game/ChooseOption";
         // 클릭 레이캐스트 최대 거리 (카메라에서 지면까지 충분히 먼 값)
@@ -93,6 +98,30 @@ namespace Project05.Core
         }
 
         /// <summary>
+        /// Q/E 카메라 회전 입력을 읽는다. 카메라는 View라 World 입력 버퍼가 아니라 Runner가 ViewContext로 넘긴다.
+        /// 누르고 있는 상태(IsPressed)를 읽으므로 연속 회전이 된다. 둘 다 누르면 0.
+        /// </summary>
+        /// <returns>-1 = Q(카메라가 자기 왼쪽으로 돈다), 1 = E(오른쪽으로 돈다), 0 = 없음</returns>
+        public float ReadCameraRotateInput()
+        {
+            if (!_hasSearchedActions)
+            {
+                return 0f;
+            }
+
+            float input = 0f;
+            if (_rotateCameraLeftAction != null && _rotateCameraLeftAction.IsPressed())
+            {
+                input -= 1f;
+            }
+            if (_rotateCameraRightAction != null && _rotateCameraRightAction.IsPressed())
+            {
+                input += 1f;
+            }
+            return input;
+        }
+
+        /// <summary>
         /// 레벨업 선택 중에 1 / 2 / 3 키가 눌리면 그 칸을 고르는 명령을 넣는다 (DESIGN 2장, 임시 키).
         /// 선택 중이 아니면 읽지 않는다. 같은 프레임에 여러 키가 눌려도 CommandSystem이 한 틱에 하나만 받는다.
         /// </summary>
@@ -137,6 +166,8 @@ namespace Project05.Core
                 _pointAction = actions.FindAction(POINT_ACTION_PATH);
                 _interactAction = actions.FindAction(INTERACT_ACTION_PATH);
                 _pauseAction = actions.FindAction(PAUSE_ACTION_PATH);
+                _rotateCameraLeftAction = actions.FindAction(ROTATE_CAMERA_LEFT_ACTION_PATH);
+                _rotateCameraRightAction = actions.FindAction(ROTATE_CAMERA_RIGHT_ACTION_PATH);
                 // 선택지 키는 없어도 클릭으로 고를 수 있으므로 필수가 아니다 (액션 찾기는 1회라 문자열 결합은 문제없다)
                 for (int offeredSlot = 0; offeredSlot < _chooseOptionActions.Length; offeredSlot++)
                 {
