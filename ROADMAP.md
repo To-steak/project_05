@@ -10,7 +10,8 @@
 
 - [x] 설계 문서 (DESIGN.md, CONVENTIONS.md, CLAUDE.md)
 - [x] Scripts 폴더 구조와 폴더별 README.txt
-- [ ] `chore/webgl-deploy` (PR #1) — WebGL Decompression Fallback 활성화
+- [x] `chore/webgl-deploy` (PR #1) — WebGL Decompression Fallback 활성화 (병합됨)
+- [x] Actions 워크플로 제거 (로컬 빌드로 전환)
 - [ ] 빈 씬 WebGL 로컬 빌드 → itch.io 업로드 확인 (사용자 작업)
 
 배포는 **로컬 빌드 후 itch.io에 직접 업로드**한다. GitHub Actions 자동 빌드는 쓰지 않는다.
@@ -62,6 +63,14 @@ UI는 이 단계까지 OnGUI 디버그 패널로 대신한다 (결과 패널 제
 - [ ] 카메라 수치와 원거리 사거리 제약 맞추기
 - [ ] 밸런싱 (난이도 계수, 비용, 점수 규칙)
 - [ ] 최종 WebGL 빌드와 itch.io 배포
+
+---
+
+## 순서를 이렇게 잡은 이유
+
+- **UI는 최대한 뒤로:** 2단계까지는 OnGUI 디버그 패널로 수치를 보면 충분하다. UI를 먼저 만들면 구조가 바뀔 때 같이 고쳐야 한다.
+- **타워를 뒤로 미룬 이유:** 타워 종류와 건설 시 종류 선택 방법이 미정이다. 1~2단계와 `feat/drop-progress`는 이 결정 없이 진행할 수 있다.
+- **PR 크기:** `feat/hero-combat`, `feat/core-siege`, `feat/tower`는 큰 편이라 리뷰가 길어지면 둘로 나눈다.
 
 ---
 
