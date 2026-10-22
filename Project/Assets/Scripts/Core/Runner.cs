@@ -5,6 +5,8 @@ using Project05.Component.Input;
 using Project05.Core.Baking;
 using Project05.Foundation;
 using Project05.System;
+using Project05.UI.Presenter;
+using Project05.UI.View;
 using Project05.View;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -21,10 +23,11 @@ namespace Project05.Core
         private readonly InputCollector _inputCollector = new InputCollector();
         private World _world;
         private ViewContext _viewContext;
+        // 결과 패널 Presenter (씬에 ResultView가 없으면 null)
+        private ResultPresenter _resultPresenter;
         private int _activeSceneHandle;
         private bool _hasActiveScene;
 
-        private const string GAME_SCENE_NAME = "Game";
         private const float DEBUG_PANEL_MARGIN = 10f;
         private const float DEBUG_PANEL_WIDTH = 420f;
         private const float DEBUG_PANEL_HEIGHT = 760f;
@@ -114,7 +117,11 @@ namespace Project05.Core
             OffscreenIndicatorViewSystem.Present(_world, _viewContext);
             CameraViewSystem.Present(_world, _viewContext);
 
-            // ② Presenter 호출 (등록 방식은 UI 구현 시 결정)
+            // ② Presenter 호출. 판 시작 시 씬에서 찾은 View로 만든 Presenter를 정해진 순서로 부른다
+            if (_resultPresenter != null)
+            {
+                _resultPresenter.Present(_world);
+            }
 
             // ③ 이번 프레임의 기록은 모두 연출됐으므로 비운다
             SessionSystem.ClearFrameRecords(_world);
@@ -145,7 +152,7 @@ namespace Project05.Core
 
         private static bool IsGameplayScene(Scene scene)
         {
-            return scene.name == GAME_SCENE_NAME || scene.path.StartsWith(TEST_SCENE_FOLDER, global::System.StringComparison.Ordinal);
+            return scene.name == SceneLoader.GAME_SCENE_NAME || scene.path.StartsWith(TEST_SCENE_FOLDER, global::System.StringComparison.Ordinal);
         }
 
         private void BeginSession(Scene scene)
@@ -159,6 +166,10 @@ namespace Project05.Core
             // 씬의 표현용 참조 수집 (판 시작 시 1회)
             _viewContext.heroView = FindAnyObjectByType<HeroView>();
             _viewContext.heroCameraView = FindAnyObjectByType<HeroCameraView>();
+
+            // UI Presenter (판 시작 시 1회). View가 씬에 없으면 그 UI 없이 진행한다
+            ResultView resultView = FindAnyObjectByType<ResultView>();
+            _resultPresenter = resultView != null ? new ResultPresenter(resultView) : null;
         }
 
         private void EndSession()
@@ -170,6 +181,7 @@ namespace Project05.Core
             }
             _world = null;
             _viewContext = null;
+            _resultPresenter = null;
         }
 
         private static void ClearViewPool()
@@ -233,6 +245,7 @@ namespace Project05.Core
         {
             GameFlowState flow = _world.flow;
             GUILayout.Label("── Wave ──");
+            GUILayout.Label("Score " + _world.progress.score + " / Boss " + (flow.bossID.IsValid ? (_world.enemies.IsAlive(flow.bossID) ? "alive" : "dead") : "-"));
             GUILayout.Label("Spawned " + flow.spawnedEnemyCount + "/" + flow.waveEnemyCount + " Kill " + flow.killCount + " Next spawn " + flow.spawnCooldownTicks + "t Prep " + flow.phaseRemainingTicks + "t");
             GUILayout.Label("Enemies alive " + _world.enemies.Count + "/" + _world.enemies.Capacity + " Queue " + _world.enemySpawnRequests.Count);
             GUILayout.Label("Hero attack cooldown " + _world.hero.attackCooldownTicks + "t / Projectiles " + _world.projectiles.Count + "/" + _world.projectiles.Capacity);

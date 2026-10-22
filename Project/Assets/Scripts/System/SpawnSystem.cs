@@ -145,6 +145,7 @@ namespace Project05.System
             enemy.dropGold = Mathf.RoundToInt(stats.baseDropGold * goldScale);
             enemy.dropXP = Mathf.RoundToInt(stats.baseDropXP * xpScale);
             enemy.isBoss = request.isBoss;
+            enemy.killScore = stats.killScore;
         }
     }
 }

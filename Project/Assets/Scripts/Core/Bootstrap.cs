@@ -34,6 +34,7 @@ namespace Project05.Core
             App.Data = DefinitionBaker.Bake(definition);
             App.ViewData = DefinitionBaker.BakeView(definition);
             App.Pool = new ViewPool();
+            App.Scene = new SceneLoader();
         }
     }
 }

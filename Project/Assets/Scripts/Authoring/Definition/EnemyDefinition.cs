@@ -29,6 +29,8 @@ namespace Project05.Authoring.Definition
         [Min(0)] public int baseDropXP;
         // 보스 여부
         public bool isBoss;
+        // 처치 시 얻는 점수 (임시 규칙: 일반 1, 보스 10. DESIGN 3.4.2)
+        [Min(0)] public int killScore = 1;
         // 적 View 프리팹 (View 테이블로 베이킹)
         public GameObject prefab;
         // 사망 VFX 프리팹 (View 테이블로 베이킹, 없으면 null)

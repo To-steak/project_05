@@ -19,7 +19,7 @@ namespace Project05.Component
         public int goldGainPercent;
         // 드롭 XP 획득 퍼센트 (100 = 1배)
         public int xpGainPercent;
-        // 점수 (계산 규칙 미정)
+        // 점수 (적 처치 시 적의 killScore를 더한다. 임시 규칙: 일반 1, 보스 10)
         public int score;
 
         // 한 번에 제시하는 레벨업 선택지 수

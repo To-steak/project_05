@@ -25,5 +25,7 @@ namespace Project05.Component.Data
         public int baseDropXP;
         // 보스 여부
         public bool isBoss;
+        // 처치 점수
+        public int killScore;
     }
 }

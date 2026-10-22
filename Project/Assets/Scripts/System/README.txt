@@ -5,7 +5,7 @@
 
 들어갈 파일:
 - CommandSystem.cs (static class) : [Tick 1] 입력 버퍼 소비. Interact(Space)는 히어로 위치 기준으로 대상(빈 공터 / 타워 / 코어)을 찾아 건설 요청·탑승·하차·코어 UI 열기로 해석. 일시정지 중에는 열린 UI의 명령만 처리.
-- GameFlowSystem.cs (static class) : [Tick 2] 준비 / 웨이브 / 보스 / 패배 전이. 준비 시간 후 웨이브 시작, ClearWave(다음 웨이브 준비), 누적 웨이브 번호 계산. 처치 수가 max에 도달하면 웨이브 클리어 또는 보스 생성 요청. 보스 처치 시 스테이지 클리어. 패배 판정 (코어 HP 0, 히어로 목숨 0).
+- GameFlowSystem.cs (static class) : [Tick 2] 준비 / 웨이브 / 보스 / 패배 전이. 준비 시간 후 웨이브 시작, ClearWave(다음 웨이브 준비), 누적 웨이브 번호 계산. 보스 종류는 isBoss인 첫 종류. 처치 수가 max에 도달하면 웨이브 클리어 또는 보스 생성 요청. 보스 처치 시 스테이지 클리어. 패배 판정 (코어 HP 0, 히어로 목숨 0).
 - WaveSystem.cs (static class) : [Tick 3] 스폰 간격마다 적 생성 요청 (총 max = x × 10). 임시 규칙: 일반 적(보스 아닌 첫 종류)만, 스폰 지점 순서대로.
 - HeroSystem.cs (static class) : [Tick 4] 이동, 공격 타이머 1개로 근거리 광역 / 원거리 자동 공격, 접촉 피해와 무적, 사망·목숨·부활.
 - TowerSystem.cs (static class) : [Tick 5] 미탑승 자동 공격, 탑승 시 클릭 사격 (공격력 = 히어로 공격력). 업그레이드·수리 처리 함수 제공.
