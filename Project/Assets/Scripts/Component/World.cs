@@ -24,7 +24,7 @@ namespace Project05.Component
         public GameFlowState flow;
         // 일시정지 사유. None이 아니면 CommandSystem만 실행
         public PauseReason pauseReason;
-        // 시드 고정 랜덤. System은 UnityEngine.Random 대신 이것만 쓴다 (시드 결정과 생성은 feat/drop-progress)
+        // 시드 고정 랜덤. System은 UnityEngine.Random 대신 이것만 쓴다 (SessionSystem.InitializeRandom으로 판마다 Runner가 시드를 정한다)
         public global::System.Random random;
 
         // ───── 베이킹 테이블 참조 (판 시작 시 App.Data에서 받음, 읽기 전용) ─────
