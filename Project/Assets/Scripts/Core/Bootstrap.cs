@@ -1,3 +1,4 @@
+using Project05.Core.Baking;
 using UnityEngine;
 
 namespace Project05.Core
@@ -19,7 +20,7 @@ namespace Project05.Core
         }
 
         /// <summary>
-        /// 첫 씬 로드 전에 DDOL Runner를 만들고 App을 채운다.
+        /// 첫 씬 로드 전에 DDOL Runner를 만들고 App을 채운다. 정의(~Definition) 베이킹도 여기서 1회 한다.
         /// </summary>
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         public static void Initialize()
@@ -27,6 +28,7 @@ namespace Project05.Core
             GameObject runnerObject = new GameObject(RUNNER_OBJECT_NAME);
             Object.DontDestroyOnLoad(runnerObject);
             App.Runner = runnerObject.AddComponent<Runner>();
+            App.Data = DefinitionBaker.Bake(DefinitionBaker.Load());
         }
     }
 }

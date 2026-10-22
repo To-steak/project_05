@@ -1,4 +1,5 @@
 using Project05.Component;
+using Project05.Component.Data;
 using Project05.Component.Entity;
 using Project05.Component.Path;
 using UnityEngine;
@@ -16,10 +17,12 @@ namespace Project05.System
 
         /// <summary>
         /// 막 만든 World를 판 시작 상태(1-1 준비 단계)로 초기화한다.
-        /// 베이킹 테이블·씬 데이터 연결과 히어로·코어 수치 복사는 feat/baking에서 추가한다.
+        /// 베이킹 테이블 참조를 받아두고, 히어로·코어에 테이블 값을 복사한다.
+        /// 씬 배치 데이터(경로, 스폰 지점, 공터, 코어 위치, 히어로 시작 위치)는 이보다 먼저 SceneBaker가 채워 둔다.
         /// </summary>
-        /// <param name="world">new World()로 만든 월드</param>
-        public static void Initialize(World world)
+        /// <param name="world">new World()로 만들고 씬 베이킹을 마친 월드</param>
+        /// <param name="data">베이킹된 테이블 모음 (Runner가 App.Data를 넘긴다)</param>
+        public static void Initialize(World world, GameData data)
         {
             world.tickCount = 0;
             world.pauseReason = PauseReason.None;
@@ -30,16 +33,36 @@ namespace Project05.System
             flow.waveNumber = 1;
             flow.bossID = default(EntityID);
 
-            // 씬 베이킹 전에도 순회가 안전하도록 빈 배열로 둔다
-            world.waypointPaths = new WaypointPath[0];
-            world.spawnPoints = new SpawnPoint[0];
-            world.towerSlots = new TowerSlot[0];
+            // 베이킹 테이블 참조. 이후 테이블 조회는 생성 시점에만 한다
+            world.heroStats = data.heroStats;
+            world.enemyStats = data.enemyStats;
+            world.towerStats = data.towerStats;
+            world.waveRule = data.waveRule;
+            world.difficulty = data.difficulty;
+            world.levelUpOptions = data.levelUpOptions;
+            world.progression = data.progression;
+
+            // 씬 베이킹이 없었어도 순회가 안전하도록 빈 배열로 둔다
+            if (world.waypointPaths == null)
+            {
+                world.waypointPaths = new WaypointPath[0];
+            }
+            if (world.spawnPoints == null)
+            {
+                world.spawnPoints = new SpawnPoint[0];
+            }
+            if (world.towerSlots == null)
+            {
+                world.towerSlots = new TowerSlot[0];
+            }
             world.towers = new EntityStore<Tower>(world.towerSlots.Length);
 
-            ref Hero hero = ref world.hero;
-            hero.state = HeroState.Idle;
-            hero.pathCorners = new Vector3[Hero.MAX_PATH_CORNER_COUNT];
-            hero.boardedTowerID = default(EntityID);
+            InitializeHero(world);
+
+            ref CoreState core = ref world.core;
+            core.maxHP = data.coreMaxHP;
+            core.currentHP = core.maxHP;
+            core.siegeSlotAssignedCount = 0;
 
             ref ProgressState progress = ref world.progress;
             progress.level = STARTING_LEVEL;
@@ -47,7 +70,7 @@ namespace Project05.System
             progress.goldGainPercent = BASE_GAIN_PERCENT;
             progress.xpGainPercent = BASE_GAIN_PERCENT;
 
-            world.towerUnlock.isUnlockedByTowerType = new bool[0];
+            world.towerUnlock.isUnlockedByTowerType = new bool[world.towerStats.Length];
         }
 
         /// <summary>
@@ -108,6 +131,38 @@ namespace Project05.System
             world.dropCollectedRecords.Clear();
             world.coreDamagedRecords.Clear();
             world.commandRejectedRecords.Clear();
+        }
+
+        /// <summary>
+        /// 히어로를 시작 위치에 세우고 HeroStats 값을 복사한다.
+        /// </summary>
+        private static void InitializeHero(World world)
+        {
+            ref HeroStats heroStats = ref world.heroStats;
+            ref Hero hero = ref world.hero;
+            hero.state = HeroState.Idle;
+            hero.previousPosition = world.heroSpawnPosition;
+            hero.currentPosition = world.heroSpawnPosition;
+            hero.pathCorners = new Vector3[Hero.MAX_PATH_CORNER_COUNT];
+            hero.pathCornerCount = 0;
+            hero.nextPathCornerIndex = 0;
+            hero.moveSpeed = heroStats.moveSpeed;
+            hero.maxHP = heroStats.maxHP;
+            hero.currentHP = heroStats.maxHP;
+            hero.remainingLives = heroStats.lifeCount;
+            hero.attackDamage = heroStats.attackDamage;
+            hero.attackIntervalTicks = heroStats.attackIntervalTicks;
+            hero.attackCooldownTicks = 0;
+            hero.meleeRange = heroStats.meleeRange;
+            hero.rangedRange = heroStats.rangedRange;
+            hero.contactRadius = heroStats.contactRadius;
+            hero.invincibilityTicks = heroStats.invincibilityTicks;
+            hero.invincibilityRemainingTicks = 0;
+            hero.respawnTicks = heroStats.respawnTicks;
+            hero.respawnRemainingTicks = 0;
+            hero.pickupRadius = heroStats.pickupRadius;
+            hero.interactionRadius = heroStats.interactionRadius;
+            hero.boardedTowerID = default(EntityID);
         }
     }
 }

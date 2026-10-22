@@ -5,6 +5,8 @@ namespace Project05.Component.Data
     /// </summary>
     public class GameData
     {
+        // 코어 최대 체력
+        public int coreMaxHP;
         // 히어로 수치
         public HeroStats heroStats;
         // 적 종류별 수치 (인덱스 = 적 종류)

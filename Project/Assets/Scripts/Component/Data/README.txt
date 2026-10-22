@@ -4,7 +4,7 @@
 ScriptableObject(~Definition)에서 베이킹된 읽기 전용 테이블 struct. 생성 시점에만 조회한다.
 
 들어갈 파일:
-- GameData.cs (class) : 베이킹된 테이블 모음 (App.Data의 타입). 판 시작 시 World가 참조를 받는다.
+- GameData.cs (class) : 베이킹된 테이블 모음 (App.Data의 타입) + 코어 최대 HP. 판 시작 시 World가 참조를 받는다.
 - HeroStats.cs (struct) : 최대 HP, 목숨 수, 이동 속도, 공격력, 공격 주기 틱, 근거리 사거리, 원거리 사거리, 접촉 반경, 무적 틱, 부활 틱, 획득 반경, 상호작용 반경.
 - EnemyStats.cs (struct) : 기본 HP, 이동 속도, 접촉 반경, 접촉 피해, 코어·타워 공격력, 공격 주기 틱, 기본 드롭 골드·XP, 보스 여부.
 - TowerStats.cs (struct) : 해금 비용, 건설 비용, 수리 비용, aggroRange, 단계별 수치(TowerLevelStats 배열).
