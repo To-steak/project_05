@@ -143,12 +143,14 @@
 
 - 예시: `hpGrowth = 1.08`이면 w = 10에서 약 2배, w = 30에서 약 9배, w = 50에서 약 43배.
 - 계수는 `~Definition`에 두고, 계산은 적 **스폰 시 1회** 하여 엔티티에 복사한다 (접근 깊이 규칙).
-- 웨이브당 적 수 `max`: x가 증가할수록 늘어나고, 다음 스테이지에서 다시 줄어든다 (예: 1-9 → 90, 1-10 → 100, 2-1 → 10). 정확한 규칙은 확인 필요. 무작위 값은 World의 시드 고정 랜덤을 쓴다.
+- 웨이브당 적 수 **`max = x × 10`** (1-1 → 10, 1-10 → 100, 2-1 → 10). **임시 규칙**이며 밸런싱 때 수정한다.
 - 웨이브별 적 종류 구성: 무한이므로 생성 규칙으로 정한다 (적 종류 해금 조건, 등장 비율). **세부 규칙은 나중에 정한다.**
 
 #### 3.4.2 점수
 - World에 `score` 필드를 둔다. 결과 화면에 도달 웨이브와 함께 표시한다.
-- 미결정: 점수 계산 규칙, 최고 점수·최고 도달 웨이브 저장 여부.
+- **최고 점수와 최고 도달 웨이브를 PlayerPrefs에 저장하고 Main 화면에 표시한다.**
+  - 저장은 게임 종료(GameEndedEvent) 시 Core가 World 값을 읽어 기존 기록과 비교해 갱신한다. System은 저장에 관여하지 않는다.
+- 미결정: 점수 계산 규칙 (나중에 정한다).
 
 ### 3.5 코어
 - HP 보유.
@@ -183,7 +185,7 @@
 
 | 씬 | 구성 |
 |---|---|
-| Main | 게임 시작 버튼, 설정 버튼, 로딩 패널 |
+| Main | 게임 시작 버튼, 설정 버튼, 로딩 패널, 최고 점수·최고 도달 웨이브 |
 | Game | 게임 플레이, 결과 패널 |
 
 - **로딩 패널:** `LoadSceneAsync` + `allowSceneActivation = false`로 로드. 진행률이 0.9에 도달하면 로드 완료로 보고 시작 버튼을 활성화. 클릭 시 `allowSceneActivation = true`.
@@ -247,7 +249,8 @@
 ```csharp
 public static class App {
     public static GameData Data;          // 베이킹된 struct 테이블, 읽기 전용
-    public static SettingsStore Settings; // PlayerPrefs 저장/로드
+    public static SettingsStore Settings; // 설정 PlayerPrefs 저장/로드
+    public static RecordStore Records;    // 최고 점수·최고 도달 웨이브 PlayerPrefs 저장/로드
     public static SceneLoader Scene;      // 비동기 씬 로드
     public static AudioPlayer Audio;      // AudioSource 관리
     public static ViewPool Pool;          // View GameObject 풀 (UnityEngine.Pool.ObjectPool 기반)
@@ -439,8 +442,9 @@ Tick 없이 다른 System이 직접 호출하는 것:
 - [ ] 수치 전반 (HP, 데미지, 사거리, 비용, 탑승 배율, 부활 시간)
 - [ ] 적 4번째 종류, 보스 패턴
 - [ ] 난이도 증가 수식 계수 (밸런싱)
-- [ ] 웨이브당 적 수 `max` 규칙
+- [x] 웨이브당 적 수 → `x × 10` (임시)
 - [ ] 적 구성 생성 규칙 (나중에)
-- [ ] 점수 계산 규칙, 최고 기록 저장
+- [ ] 점수 계산 규칙 (나중에)
+- [x] 최고 점수·최고 도달 웨이브 → PlayerPrefs 저장, Main 표시
 - [ ] 레벨업 선택지 목록
 - [ ] 아트/사운드 에셋 출처
