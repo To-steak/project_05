@@ -1,4 +1,6 @@
 using Project05.Component;
+using Project05.Component.Data;
+using Project05.Core.Baking;
 using Project05.System;
 using Project05.View;
 using UnityEngine;
@@ -19,6 +21,11 @@ namespace Project05.Core
         private bool _hasActiveScene;
 
         private const string GAME_SCENE_NAME = "Game";
+        private const float DEBUG_PANEL_MARGIN = 10f;
+        private const float DEBUG_PANEL_WIDTH = 420f;
+        private const float DEBUG_PANEL_HEIGHT = 560f;
+        // 레인별 테스트 씬 폴더 (CONVENTIONS 7.5). Build Settings에 넣지 않으므로 에디터에서만 판이 시작된다
+        private const string TEST_SCENE_FOLDER = "Assets/Scenes/Test/";
 
         /// <summary>
         /// 현재 판의 월드. Game 씬 밖에서는 null.
@@ -110,7 +117,7 @@ namespace Project05.Core
         /// <summary>
         /// 활성 씬이 바뀌었는지 매 루프 시작 시 확인해 판을 시작하거나 끝낸다.
         /// 이벤트 사용 금지 규칙에 따라 SceneManager 이벤트를 구독하지 않고 활성 씬 handle을 비교한다.
-        /// Game 씬 재로드(재시작)도 handle이 바뀌므로 새 판으로 처리된다.
+        /// Game 씬 재로드(재시작)도 handle이 바뀌므로 새 판으로 처리된다. 테스트 씬도 판을 시작한다.
         /// </summary>
         private void SynchronizeSession()
         {
@@ -124,16 +131,23 @@ namespace Project05.Core
             _activeSceneHandle = activeScene.handle;
             EndSession();
 
-            if (activeScene.name == GAME_SCENE_NAME)
+            if (IsGameplayScene(activeScene))
             {
-                BeginSession();
+                BeginSession(activeScene);
             }
         }
 
-        private void BeginSession()
+        private static bool IsGameplayScene(Scene scene)
+        {
+            return scene.name == GAME_SCENE_NAME || scene.path.StartsWith(TEST_SCENE_FOLDER, global::System.StringComparison.Ordinal);
+        }
+
+        private void BeginSession(Scene scene)
         {
             _world = new World();
-            SessionSystem.Initialize(_world);
+            // 씬 배치 데이터를 먼저 채운다. Initialize가 공터 수로 타워 저장소를 만들고 히어로를 시작 위치에 세운다
+            SceneBaker.Bake(_world, scene);
+            SessionSystem.Initialize(_world, App.Data);
             _viewContext = new ViewContext();
         }
 
@@ -146,7 +160,7 @@ namespace Project05.Core
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         private void OnGUI()
         {
-            GUILayout.BeginArea(new Rect(10f, 10f, 320f, 200f), GUI.skin.box);
+            GUILayout.BeginArea(new Rect(DEBUG_PANEL_MARGIN, DEBUG_PANEL_MARGIN, DEBUG_PANEL_WIDTH, DEBUG_PANEL_HEIGHT), GUI.skin.box);
             GUILayout.Label("[Runner Debug]");
             GUILayout.Label("Scene: " + SceneManager.GetActiveScene().name);
             GUILayout.Label("Fixed Timestep: " + Time.fixedDeltaTime + " / Max Allowed: " + Time.maximumDeltaTime);
@@ -159,8 +173,40 @@ namespace Project05.Core
                 GUILayout.Label("Tick: " + _world.tickCount);
                 GUILayout.Label("Phase: " + _world.flow.phase + " (" + _world.flow.stageNumber + "-" + _world.flow.waveNumber + ")");
                 GUILayout.Label("Pause: " + _world.pauseReason);
+                DrawBakingDebug();
             }
             GUILayout.EndArea();
+        }
+
+        /// <summary>
+        /// 베이킹된 값이 World에 들어갔는지 보여준다 (feat/baking 확인용).
+        /// </summary>
+        private void DrawBakingDebug()
+        {
+            GUILayout.Label("── Baked: Scene ──");
+            GUILayout.Label("Paths: " + _world.waypointPaths.Length + " / Spawns: " + _world.spawnPoints.Length + " / Slots: " + _world.towerSlots.Length + " (Tower cap " + _world.towers.Capacity + ")");
+            for (int pathIndex = 0; pathIndex < _world.waypointPaths.Length; pathIndex++)
+            {
+                GUILayout.Label("  Path " + pathIndex + ": " + _world.waypointPaths[pathIndex].waypoints.Length + " waypoints");
+            }
+            for (int spawnIndex = 0; spawnIndex < _world.spawnPoints.Length; spawnIndex++)
+            {
+                GUILayout.Label("  Spawn " + spawnIndex + ": " + _world.spawnPoints[spawnIndex].position + " → Path " + _world.spawnPoints[spawnIndex].pathIndex);
+            }
+            GUILayout.Label("Core: " + _world.core.position + " HP " + _world.core.currentHP + "/" + _world.core.maxHP);
+            GUILayout.Label("Hero: " + _world.hero.currentPosition + " HP " + _world.hero.currentHP + "/" + _world.hero.maxHP + " Lives " + _world.hero.remainingLives);
+            GUILayout.Label("  Speed " + _world.hero.moveSpeed + " Atk " + _world.hero.attackDamage + "/" + _world.hero.attackIntervalTicks + "t Melee " + _world.hero.meleeRange + " Ranged " + _world.hero.rangedRange);
+
+            GUILayout.Label("── Baked: Definition ──");
+            GUILayout.Label("Enemy types: " + _world.enemyStats.Length);
+            for (int enemyTypeIndex = 0; enemyTypeIndex < _world.enemyStats.Length; enemyTypeIndex++)
+            {
+                ref EnemyStats enemyStats = ref _world.enemyStats[enemyTypeIndex];
+                GUILayout.Label("  [" + enemyTypeIndex + "] HP " + enemyStats.baseHP + " Speed " + enemyStats.moveSpeed + " Gold " + enemyStats.baseDropGold + " XP " + enemyStats.baseDropXP + (enemyStats.isBoss ? " (Boss)" : ""));
+            }
+            GUILayout.Label("Wave: x × " + _world.waveRule.enemyCountPerWaveNumber + ", spawn " + _world.waveRule.spawnIntervalTicks + "t, prep " + _world.waveRule.preparationTicks + "t, boss " + _world.waveRule.bossWaveNumber);
+            GUILayout.Label("Difficulty: HP ×" + _world.difficulty.hpGrowth + "^(w-1), Gold +" + _world.difficulty.goldGrowth + ", XP +" + _world.difficulty.xpGrowth);
+            GUILayout.Label("Progression: " + _world.progression.requiredXPByLevel.Length + " levels");
         }
 #endif
     }
