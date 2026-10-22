@@ -21,8 +21,8 @@ ECS 패키지(DOTS)는 쓰지 않는다. "System은 함수, 상태는 데이터"
 - **엔티티 생성은 SpawnSystem(틱 마지막)에서만 한다.** 다른 System은 World의 생성 요청 큐(`Queue<~Request>`)에 넣기만 한다. 소멸은 즉시 하고, 이후 System은 `IsAlive`로 건너뛴다.
 - System 간 호출은 직접 호출한다. 틱 순서는 Runner가 관리하며 `DESIGN.md` 5.5를 따른다.
 - 입력 처리 System 이름은 `CommandSystem`이다 (`UnityEngine.InputSystem`과 충돌 방지).
-- 프로그램 전체 수명의 기능은 **static `App`**(Data, Settings, Scene, Audio, Pool)에 둔다.
-- **System은 App을 쓰지 않는다. World만 본다.** 데이터 테이블은 판 시작 시 World가 참조를 받아둔다. App은 View, UI, Core만 쓴다.
+- 프로그램 전체 수명의 기능은 **static `App`**(Data, Settings, Records, Scene, Audio, Pool)에 둔다. App은 **Foundation** 어셈블리에 있다 (View·UI가 참조, System은 참조 금지).
+- **System은 App을 쓰지 않는다. World만 본다.** 데이터 테이블은 판 시작 시 World가 참조를 받아둔다. App은 View, UI, Core만 쓴다. System 어셈블리는 Foundation을 참조하지 않는다.
 - **베이킹:** ScriptableObject(`~Definition`)는 게임 시작 시, 씬 Authoring 컴포넌트는 판 시작 시 Component의 struct로 변환한다. System은 Authoring을 참조하지 않는다.
 - **테이블 조회는 생성 시점(스폰, 건설, 강화)에만** 하고 필요한 값은 엔티티에 복사한다. 매 틱 로직은 엔티티 자신의 값만 쓴다.
 - DDOL에는 `Runner` 하나만 올린다. `RuntimeInitializeOnLoadMethod(BeforeSceneLoad)`에서 생성한다. 씬은 Main, Game 2개뿐이며 Boot 씬은 없다.
