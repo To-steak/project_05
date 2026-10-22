@@ -238,6 +238,15 @@ namespace Project05.Core
             // 씬의 표현용 참조 수집 (판 시작 시 1회)
             _viewContext.heroView = FindAnyObjectByType<HeroView>();
             _viewContext.heroCameraView = FindAnyObjectByType<HeroCameraView>();
+            _viewContext.mainCamera = Camera.main;
+            _viewContext.interactionPromptView = FindAnyObjectByType<InteractionPromptView>();
+            _viewContext.offscreenIndicatorView = FindAnyObjectByType<OffscreenIndicatorView>();
+            if (_viewContext.offscreenIndicatorView != null)
+            {
+                _viewContext.offscreenArrows = _viewContext.offscreenIndicatorView.CreateArrows();
+                _viewContext.offscreenScreenPoints = new Vector3[_viewContext.offscreenArrows.Length];
+                _viewContext.offscreenSqrDistances = new float[_viewContext.offscreenArrows.Length];
+            }
 
             // UI Presenter (판 시작 시 1회). View가 씬에 없으면 그 UI 없이 진행한다
             ResultView resultView = FindAnyObjectByType<ResultView>();

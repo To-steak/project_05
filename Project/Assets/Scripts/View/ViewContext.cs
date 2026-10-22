@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Project05.Component;
+using UnityEngine;
 
 namespace Project05.View
 {
@@ -16,6 +17,18 @@ namespace Project05.View
         public HeroCameraView heroCameraView;
         // 코어 View (씬에 없으면 null)
         public CoreView coreView;
+        // 화면을 그리는 메인 카메라 (화면 밖 판정, 아이콘 빌보드. 없으면 null)
+        public Camera mainCamera;
+        // Space 아이콘 (씬에 없으면 null)
+        public InteractionPromptView interactionPromptView;
+        // 화면 밖 적 화살표 묶음 (씬에 없으면 null)
+        public OffscreenIndicatorView offscreenIndicatorView;
+        // 판 시작 시 만든 화면 밖 적 화살표 (없으면 빈 배열)
+        public RectTransform[] offscreenArrows = new RectTransform[0];
+        // 화살표마다 고른 적의 화면 좌표 (화살표 수만큼, 매 프레임 재사용)
+        public Vector3[] offscreenScreenPoints = new Vector3[0];
+        // 화살표마다 고른 적의 코어까지 거리 제곱 (가까운 순 선택용, 매 프레임 재사용)
+        public float[] offscreenSqrDistances = new float[0];
         // 살아있는 적 ID → 적 View
         public readonly Dictionary<EntityID, EnemyView> enemyViews = new Dictionary<EntityID, EnemyView>(World.MAX_ENEMY_COUNT);
         // 살아있는 드롭 ID → 드롭 View
