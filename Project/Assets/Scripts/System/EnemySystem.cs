@@ -9,7 +9,7 @@ namespace Project05.System
     /// <summary>
     /// [Tick 6] 적 경로 이동, aggroRange 안 타워 우선 공격, 코어 포위·공격, 사망 처리(드롭 생성 요청, 처치 수 증가), 타워 파괴(공터 비움, 탑승 중이면 강제 하차)를 처리한다.
     /// feat/enemy-wave: 웨이포인트 경로 이동. 경로 끝에 닿은 적은 마지막 웨이포인트에 멈춰 있다 (코어 포위는 feat/core-siege).
-    /// feat/hero-combat: 피해와 사망(즉시 소멸, 처치 수 증가). 드롭 생성 요청은 feat/drop-progress.
+    /// feat/hero-combat: 피해와 사망(즉시 소멸, 처치 수 증가). feat/drop-progress: 사망 시 드롭 생성 요청.
     /// feat/core-siege: 경로 끝에 닿으면 코어 포위 자리를 배정받아 걸어가고, 도착하면 공격 주기마다 코어를 때린다. 죽으면 자리를 비운다.
     /// 구현 브랜치: feat/enemy-wave, feat/hero-combat, feat/core-siege, feat/tower
     /// </summary>
@@ -91,7 +91,7 @@ namespace Project05.System
 
         /// <summary>
         /// 사망 기록을 남기고 처치 수를 올린 뒤 슬롯을 즉시 비운다. 사망 연출은 ViewSystem이 기록으로 재생한다.
-        /// 처치 점수를 더한다. 처치 수로 웨이브를 끝내는 판정과 보스 처치 판정은 GameFlowSystem이 한다. 드롭 생성 요청은 feat/drop-progress에서 붙인다.
+        /// 처치 점수를 더한다. 처치 수로 웨이브를 끝내는 판정과 보스 처치 판정은 GameFlowSystem이 한다. 죽은 자리에 골드·XP 드롭 생성을 요청한다.
         /// </summary>
         private static void Kill(World world, EntityID enemyID, ref Enemy enemy)
         {
@@ -103,6 +103,7 @@ namespace Project05.System
 
             world.flow.killCount++;
             world.progress.score += enemy.killScore;
+            DropSystem.RequestSpawn(world, enemy.currentPosition, enemy.dropGold, enemy.dropXP);
             ReleaseSiegeSlot(world, ref enemy);
             world.enemies.Destroy(enemyID);
         }

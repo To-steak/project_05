@@ -12,5 +12,11 @@ namespace Project05.Foundation
         public GameObject[] enemyPrefabs = new GameObject[0];
         // 히어로 원거리 투사체 View 프리팹 (비어 있으면 null)
         public GameObject heroProjectilePrefab;
+        // 골드 드롭 View 프리팹 (비어 있으면 null)
+        public GameObject goldDropPrefab;
+        // XP 드롭 View 프리팹 (비어 있으면 null)
+        public GameObject xpDropPrefab;
+        // 레벨업 선택지 표시 이름 (인덱스 = GameData.levelUpOptions와 같음)
+        public string[] levelUpOptionNames = new string[0];
     }
 }

@@ -14,6 +14,8 @@ namespace Project05.System
     {
         private const int STARTING_LEVEL = 1;
         private const int BASE_GAIN_PERCENT = 100;
+        // Runner가 시드를 정하기 전의 기본 시드
+        private const int DEFAULT_RANDOM_SEED = 0;
         // 포위 고리·자리 간격의 하한 (데이터가 0이어도 자리 계산이 끝나도록)
         private const float MIN_SIEGE_SPACING = 0.1f;
 
@@ -72,10 +74,28 @@ namespace Project05.System
             ref ProgressState progress = ref world.progress;
             progress.level = STARTING_LEVEL;
             progress.offeredOptionIndices = new int[ProgressState.OFFERED_OPTION_COUNT];
+            for (int offeredSlot = 0; offeredSlot < progress.offeredOptionIndices.Length; offeredSlot++)
+            {
+                progress.offeredOptionIndices[offeredSlot] = ProgressState.NO_OFFERED_OPTION;
+            }
             progress.goldGainPercent = BASE_GAIN_PERCENT;
             progress.xpGainPercent = BASE_GAIN_PERCENT;
 
             world.towerUnlock.isUnlockedByTowerType = new bool[world.towerStats.Length];
+
+            // 시드는 Runner가 InitializeRandom으로 판마다 다시 정한다. 그 전에 쓰여도 null이 아니도록 고정 시드로 만들어 둔다
+            InitializeRandom(world, DEFAULT_RANDOM_SEED);
+        }
+
+        /// <summary>
+        /// 시드 고정 랜덤을 만든다. Initialize 직후 Runner가 판마다 새 시드로 호출한다.
+        /// 같은 시드와 같은 입력이면 레벨업 선택지 등 랜덤 결과가 같다.
+        /// </summary>
+        /// <param name="world">현재 판의 월드</param>
+        /// <param name="seed">이번 판의 랜덤 시드</param>
+        public static void InitializeRandom(World world, int seed)
+        {
+            world.random = new global::System.Random(seed);
         }
 
         /// <summary>

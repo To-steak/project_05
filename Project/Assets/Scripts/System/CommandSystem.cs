@@ -9,7 +9,7 @@ namespace Project05.System
 {
     /// <summary>
     /// [Tick 1] 입력 버퍼를 소비해 이동·탑승·하차·사격·건설·코어 UI 명령으로 해석한다. 일시정지 중에도 실행되며, 이때는 열린 UI의 명령만 처리하고 나머지는 버린다.
-    /// 구현 브랜치: feat/hero-movement (이동), feat/enemy-wave (디버그 웨이브 클리어), feat/tower (Interact·Fire), feat/drop-progress·feat/core-menu (UI 명령)
+    /// 구현 브랜치: feat/hero-movement (이동), feat/enemy-wave (디버그 웨이브 클리어), feat/tower (Interact·Fire), feat/drop-progress (레벨업 선택), feat/core-menu (코어 UI 명령)
     /// </summary>
     public static class CommandSystem
     {
@@ -25,6 +25,10 @@ namespace Project05.System
         public static void Tick(World world)
         {
             Queue<Command> commands = world.input.commands;
+
+            // 한 틱에 레벨업 선택은 한 번만 받는다. 연타가 아직 보지 않은 다음 선택지를 고르지 않게 한다
+            bool hasChosenLevelUpOption = false;
+
             while (commands.Count > 0)
             {
                 Command command = commands.Dequeue();
@@ -39,6 +43,12 @@ namespace Project05.System
                 {
                     case CommandKind.MoveTo:
                         MoveHero(world, command.groundPosition);
+                        break;
+                    case CommandKind.ChooseLevelUpOption:
+                        if (!hasChosenLevelUpOption)
+                        {
+                            hasChosenLevelUpOption = ProgressSystem.ChooseLevelUpOption(world, command.optionIndex);
+                        }
                         break;
                     case CommandKind.DebugClearWave:
                         GameFlowSystem.ClearWave(world);

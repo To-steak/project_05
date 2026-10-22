@@ -26,6 +26,30 @@ namespace Project05.System
         {
             SpawnEnemies(world);
             SpawnProjectiles(world);
+            SpawnDrops(world);
+        }
+
+        /// <summary>
+        /// 드롭 생성 요청을 앞에서부터 처리한다. 저장소가 가득 차면 남은 요청은 큐에 둔 채 다음 틱에 다시 시도한다.
+        /// </summary>
+        private static void SpawnDrops(World world)
+        {
+            Queue<DropSpawnRequest> requests = world.dropSpawnRequests;
+            EntityStore<Drop> drops = world.drops;
+            while (requests.Count > 0)
+            {
+                EntityID dropID;
+                if (!drops.TryCreate(out dropID))
+                {
+                    return;
+                }
+
+                DropSpawnRequest request = requests.Dequeue();
+                ref Drop drop = ref drops.Get(dropID);
+                drop.position = request.position;
+                drop.kind = request.kind;
+                drop.amount = request.amount;
+            }
         }
 
         /// <summary>

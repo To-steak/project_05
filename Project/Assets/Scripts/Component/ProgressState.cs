@@ -22,6 +22,8 @@ namespace Project05.Component
         // 점수 (적 처치 시 적의 killScore를 더한다. 임시 규칙: 일반 1, 보스 10)
         public int score;
 
+        // 제시 칸이 비어 있음을 나타내는 선택지 인덱스
+        public const int NO_OFFERED_OPTION = -1;
         // 한 번에 제시하는 레벨업 선택지 수
         public const int OFFERED_OPTION_COUNT = 3;
     }

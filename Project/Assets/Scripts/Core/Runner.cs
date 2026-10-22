@@ -25,12 +25,14 @@ namespace Project05.Core
         private ViewContext _viewContext;
         // 결과 패널 Presenter (씬에 ResultView가 없으면 null)
         private ResultPresenter _resultPresenter;
+        // 레벨업 선택지 Presenter (씬에 LevelUpChoiceView가 없으면 null)
+        private LevelUpChoicePresenter _levelUpChoicePresenter;
         private int _activeSceneHandle;
         private bool _hasActiveScene;
 
         private const float DEBUG_PANEL_MARGIN = 10f;
         private const float DEBUG_PANEL_WIDTH = 420f;
-        private const float DEBUG_PANEL_HEIGHT = 760f;
+        private const float DEBUG_PANEL_HEIGHT = 820f;
         // 레인별 테스트 씬 폴더 (CONVENTIONS 7.5). Build Settings에 넣지 않으므로 에디터에서만 판이 시작된다
         private const string TEST_SCENE_FOLDER = "Assets/Scenes/Test/";
 
@@ -118,6 +120,10 @@ namespace Project05.Core
             CameraViewSystem.Present(_world, _viewContext);
 
             // ② Presenter 호출. 판 시작 시 씬에서 찾은 View로 만든 Presenter를 정해진 순서로 부른다
+            if (_levelUpChoicePresenter != null)
+            {
+                _levelUpChoicePresenter.Present(_world);
+            }
             if (_resultPresenter != null)
             {
                 _resultPresenter.Present(_world);
@@ -162,6 +168,8 @@ namespace Project05.Core
             // 씬 배치 데이터를 먼저 채운다. Initialize가 공터 수로 타워 저장소를 만들고 히어로를 시작 위치에 세운다
             SceneBaker.Bake(_world, scene);
             SessionSystem.Initialize(_world, App.Data);
+            // 판마다 다른 시드. System은 시간을 읽지 않으므로 Core가 정해서 넘긴다
+            SessionSystem.InitializeRandom(_world, global::System.Environment.TickCount);
             _viewContext = new ViewContext();
             // 씬의 표현용 참조 수집 (판 시작 시 1회)
             _viewContext.heroView = FindAnyObjectByType<HeroView>();
@@ -170,6 +178,8 @@ namespace Project05.Core
             // UI Presenter (판 시작 시 1회). View가 씬에 없으면 그 UI 없이 진행한다
             ResultView resultView = FindAnyObjectByType<ResultView>();
             _resultPresenter = resultView != null ? new ResultPresenter(resultView) : null;
+            LevelUpChoiceView levelUpChoiceView = FindAnyObjectByType<LevelUpChoiceView>();
+            _levelUpChoicePresenter = levelUpChoiceView != null ? new LevelUpChoicePresenter(levelUpChoiceView, _world) : null;
         }
 
         private void EndSession()
@@ -182,6 +192,7 @@ namespace Project05.Core
             _world = null;
             _viewContext = null;
             _resultPresenter = null;
+            _levelUpChoicePresenter = null;
         }
 
         private static void ClearViewPool()
@@ -209,11 +220,25 @@ namespace Project05.Core
                 GUILayout.Label("Phase: " + _world.flow.phase + " (" + _world.flow.stageNumber + "-" + _world.flow.waveNumber + ")");
                 GUILayout.Label("Pause: " + _world.pauseReason);
                 GUILayout.Label("Hero: " + _world.hero.state + " " + _world.hero.currentPosition + " Path " + _world.hero.nextPathCornerIndex + "/" + _world.hero.pathCornerCount);
+                DrawProgressDebug();
                 DrawSiegeDebug();
                 DrawWaveDebug();
                 DrawBakingDebug();
             }
             GUILayout.EndArea();
+        }
+
+        /// <summary>
+        /// 골드·XP·레벨·레벨업 대기·드롭 수를 보여준다 (feat/drop-progress 확인용. HUD가 생기기 전까지).
+        /// </summary>
+        private void DrawProgressDebug()
+        {
+            ProgressState progress = _world.progress;
+            int[] requiredXPByLevel = _world.progression.requiredXPByLevel;
+            int requiredXP = requiredXPByLevel.Length == 0 ? 0 : requiredXPByLevel[Mathf.Clamp(progress.level - 1, 0, requiredXPByLevel.Length - 1)];
+            GUILayout.Label("── Progress ──");
+            GUILayout.Label("Gold " + progress.gold + " (" + progress.goldGainPercent + "%) / Lv " + progress.level + " XP " + progress.currentXP + "/" + requiredXP + " (" + progress.xpGainPercent + "%) / Pending " + progress.pendingLevelUpCount);
+            GUILayout.Label("Drops " + _world.drops.Count + "/" + _world.drops.Capacity + " Queue " + _world.dropSpawnRequests.Count + " / Hero Atk " + _world.hero.attackDamage);
         }
 
         /// <summary>
