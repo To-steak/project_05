@@ -39,6 +39,10 @@ Unity 프로젝트 루트는 `Project/`다.
 - View-Presenter 구조. Presenter가 서비스 이벤트를 구독하고 View를 갱신한다.
 - View는 서비스를 직접 참조하지 않는다.
 
+### 단위
+- 시뮬레이션은 50Hz 고정 (1틱 = 20ms). 시간 값은 데이터와 로직 모두 **정수 틱**으로 다루고, 필드명은 `~Ticks`로 끝낸다. 초나 ms를 쓰지 않는다.
+- 거리는 월드 유닛(1 = 1m), XZ 평면 기준. 거리 비교는 `sqrMagnitude`로 한다.
+
 ## WebGL 주의
 - `Instantiate` / `Destroy`를 게임 루프에서 반복하지 않는다. PoolService를 쓴다.
 - 멀티스레드(`System.Threading`, `Task.Run`)를 쓰지 않는다.
