@@ -307,12 +307,30 @@ namespace Project05.Core
                 GUILayout.Label("Phase: " + _world.flow.phase + " (" + _world.flow.stageNumber + "-" + _world.flow.waveNumber + ")");
                 GUILayout.Label("Pause: " + _world.pauseReason);
                 GUILayout.Label("Hero: " + _world.hero.state + " " + _world.hero.currentPosition + " Path " + _world.hero.nextPathCornerIndex + "/" + _world.hero.pathCornerCount);
+                DrawIndicatorDebug();
                 DrawProgressDebug();
                 DrawSiegeDebug();
                 DrawWaveDebug();
                 DrawBakingDebug();
             }
             GUILayout.EndArea();
+        }
+
+        /// <summary>
+        /// 화면 밖 화살표가 어디서 막혔는지 보여준다: View를 찾았는지, 화살표를 몇 개 만들었는지, 카메라가 있는지, 지금 켜진 화살표 수.
+        /// </summary>
+        private void DrawIndicatorDebug()
+        {
+            RectTransform[] arrows = _viewContext.offscreenArrows;
+            int activeArrowCount = 0;
+            for (int arrowIndex = 0; arrowIndex < arrows.Length; arrowIndex++)
+            {
+                if (arrows[arrowIndex] != null && arrows[arrowIndex].gameObject.activeSelf)
+                {
+                    activeArrowCount++;
+                }
+            }
+            GUILayout.Label("Offscreen view " + (_viewContext.offscreenIndicatorView != null ? "O" : "X") + " / arrows " + activeArrowCount + "/" + arrows.Length + " / camera " + (_viewContext.mainCamera != null ? _viewContext.mainCamera.name : "X") + " / prompt " + _world.interactionTargetKind);
         }
 
         /// <summary>
