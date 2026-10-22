@@ -308,14 +308,24 @@ Authoring의 원본 데이터를 Component의 struct로 변환한다. System은 
 
 | 순서 | System | 역할 |
 |---|---|---|
-| 1 | CommandSystem | 입력 버퍼를 꺼내 이동·탑승·사격·건설 명령으로 해석 |
+| 1 | CommandSystem | 입력 버퍼를 꺼내 이동·탑승·사격·건설 명령으로 해석 (건설은 비용 지불 후 생성 요청) |
 | 2 | GameFlowSystem | 준비 / 웨이브 / 패배 상태 전이. **패배 판정을 여기서 한 곳에 모아 한다** (코어 HP, 히어로 목숨) |
-| 3 | WaveSystem | 웨이브 스케줄, 적 스폰 |
+| 3 | WaveSystem | 웨이브 스케줄, 적·보스 생성 요청 |
 | 4 | HeroSystem | 이동, 탑승/하차, 자동 공격, 사망/부활 |
 | 5 | TowerSystem | 미탑승 자동 공격, 탑승 사격 |
-| 6 | EnemySystem | 이동, 사망 처리, 코어 포위 자리 배정, 코어 공격 |
+| 6 | EnemySystem | 이동, 사망 처리(드롭 생성 요청), 코어 포위 자리 배정, 코어 공격 |
 | 7 | DropSystem | 드롭 획득 판정 |
 | 8 | CoreSystem | 코어 피해 처리 |
+| 9 | **SpawnSystem** | 생성 요청 큐를 처리해 적, 보스, 드롭, 타워를 실제로 생성 |
+
+#### 생성 규칙
+- **엔티티 생성은 SpawnSystem에서만 한다.** 다른 System은 World의 **생성 요청 큐**에 요청을 넣기만 한다.
+- 생성 요청 큐는 종류별로 둔다: `Queue<EnemySpawnRequest>`, `Queue<DropSpawnRequest>`, `Queue<TowerBuildRequest>`.
+- SpawnSystem은 틱의 마지막에 실행되므로, **이번 틱에 요청된 엔티티는 다음 틱부터 동작한다.** 순회 중 생성되는 예외 상황이 구조적으로 생기지 않는다.
+- 테이블 조회, 난이도 증가 수식 계산, 엔티티에 값 복사는 SpawnSystem에서 한다.
+- 용량이 차서 생성에 실패한 요청은 큐에 남겨 다음 틱에 다시 시도한다.
+- **소멸은 즉시** 한다 (`Destroy`). 이후 System은 `IsAlive` 확인으로 건너뛴다.
+- 생성 요청 큐는 구독이 없는 World 데이터이므로 이벤트 금지 규칙에 해당하지 않는다.
 
 Tick 없이 다른 System이 직접 호출하는 것:
 

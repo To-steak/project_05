@@ -95,6 +95,7 @@
 | System | `~System` | `HeroSystem` |
 | 프레임 기록 struct | `~Record` | `EnemyDiedRecord` |
 | View용 static System | `~ViewSystem` | `EnemyViewSystem` |
+| 생성 요청 struct | `~Request` | `EnemySpawnRequest` |
 | Authoring MonoBehaviour | `~Authoring` | `TowerSlotAuthoring` |
 | ScriptableObject 정의 | `~Definition` | `EnemyDefinition` |
 | View | `~View` | `EnemyView`, `GoldView` |

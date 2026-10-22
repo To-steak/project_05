@@ -18,6 +18,7 @@ ECS 패키지(DOTS)는 쓰지 않는다. "System은 함수, 상태는 데이터"
 ### World / System / App
 - 한 판의 모든 상태는 **World**에 둔다. 판마다 `new World()`로 새로 만든다.
 - 로직은 `~System` 이름의 **static 클래스**로 만든다. **static 필드에 게임 상태를 두지 않는다.** 시그니처는 `public static void Tick(World world)`.
+- **엔티티 생성은 SpawnSystem(틱 마지막)에서만 한다.** 다른 System은 World의 생성 요청 큐(`Queue<~Request>`)에 넣기만 한다. 소멸은 즉시 하고, 이후 System은 `IsAlive`로 건너뛴다.
 - System 간 호출은 직접 호출한다. 틱 순서는 Runner가 관리하며 `DESIGN.md` 5.5를 따른다.
 - 입력 처리 System 이름은 `CommandSystem`이다 (`UnityEngine.InputSystem`과 충돌 방지).
 - 프로그램 전체 수명의 기능은 **static `App`**(Data, Settings, Scene, Audio, Pool)에 둔다.
