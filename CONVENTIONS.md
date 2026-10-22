@@ -10,17 +10,17 @@
 
 | 폴더 | 내용 | 예시 |
 |---|---|---|
-| `Component/` | 순수 데이터. World, 엔티티 struct, 이벤트 struct, 데이터 테이블 struct | `World`, `Enemy`, `EnemyDiedEvent` |
+| `Component/` | 순수 데이터. World, 엔티티 struct, 프레임 기록 struct, 데이터 테이블 struct | `World`, `Enemy`, `EnemyDiedRecord` |
 | `Authoring/` | 에디터에서 작성하는 원본. ScriptableObject 정의, 씬 배치용 MonoBehaviour(타워 슬롯, 웨이포인트 등) | `EnemyDefinition`, `TowerSlotAuthoring` |
 | `System/` | 상태 없는 static 로직 | `HeroSystem`, `CommandSystem` |
-| `View/` | 공통 표현 관심사. 애니메이션, VFX, SFX, 카메라, 보간 | `EnemyView`, `HeroView` |
+| `View/` | 공통 표현 관심사. 애니메이션, VFX, SFX, 카메라, 보간. static `~ViewSystem`과 MonoBehaviour `~View` | `EnemyViewSystem`, `EnemyView` |
 | `UI/View/` | UI 화면 표시 | `GoldView` |
 | `UI/Presenter/` | UI View와 World를 연결 | `GoldPresenter` |
 | `Core/` | DDOL Runner, 부트스트랩, App 기능 | `Runner`, `App` |
 
 - **베이킹 채택:** Authoring의 원본은 Core에서 Component의 struct로 변환된다. System은 Component만 참조한다.
 - 각 폴더의 `README.txt`에 들어갈 `.cs` 목록이 있다. 구현하면서 목록과 실제 파일을 맞춘다.
-- 하위 폴더도 네임스페이스에 반영한다. 예: `Component/Event/` → `Project05.Component.Event`.
+- 하위 폴더도 네임스페이스에 반영한다. 예: `Component/Entity/` → `Project05.Component.Entity`.
 
 ### 1.1 Assembly Definition
 폴더마다 Assembly Definition을 두어 참조 방향을 컴파일 단계에서 강제한다.
@@ -93,7 +93,8 @@
 | 대상 | 규칙 | 예시 |
 |---|---|---|
 | System | `~System` | `HeroSystem` |
-| 이벤트 struct | `~Event` | `EnemyDiedEvent` |
+| 프레임 기록 struct | `~Record` | `EnemyDiedRecord` |
+| View용 static System | `~ViewSystem` | `EnemyViewSystem` |
 | Authoring MonoBehaviour | `~Authoring` | `TowerSlotAuthoring` |
 | ScriptableObject 정의 | `~Definition` | `EnemyDefinition` |
 | View | `~View` | `EnemyView`, `GoldView` |

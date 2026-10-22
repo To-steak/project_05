@@ -149,7 +149,7 @@
 #### 3.4.2 점수
 - World에 `score` 필드를 둔다. 결과 화면에 도달 웨이브와 함께 표시한다.
 - **최고 점수와 최고 도달 웨이브를 PlayerPrefs에 저장하고 Main 화면에 표시한다.**
-  - 저장은 게임 종료(GameEndedEvent) 시 Core가 World 값을 읽어 기존 기록과 비교해 갱신한다. System은 저장에 관여하지 않는다.
+  - 저장은 게임 단계가 패배로 바뀐 것을 Core가 감지했을 때 World 값을 읽어 기존 기록과 비교해 갱신한다. System은 저장에 관여하지 않는다.
 - 미결정: 점수 계산 규칙 (나중에 정한다).
 
 ### 3.5 코어
@@ -233,9 +233,10 @@
    - Logic: 게임 상태와 규칙. **FixedUpdate에서만 실행.**
    - View: 애니메이션, SFX, VFX, UI, 카메라. **Update / LateUpdate에서만 실행.**
 2. **System은 상태를 갖지 않는다.** 한 판의 모든 상태는 **World**에 있다.
-3. Logic은 View를 참조하지 않는다. 일어난 일은 **이벤트 큐**에 남긴다.
-4. View는 World를 읽고 이벤트를 받는다. World를 직접 바꾸지 않는다 (입력은 입력 버퍼 경유).
-5. **Transform은 View만 쓴다.** Logic은 위치를 데이터로 소유한다.
+3. Logic은 View를 참조하지 않는다. 그 순간의 일은 World의 **프레임 기록 목록**에 남긴다.
+4. View는 World를 읽기만 한다. World를 직접 바꾸지 않는다 (입력은 입력 버퍼 경유).
+5. **이벤트를 쓰지 않는다** (5.7).
+6. **Transform은 View만 쓴다.** Logic은 위치를 데이터로 소유한다.
 
 ### 5.2 두 계층: World와 App
 
@@ -243,7 +244,7 @@
 
 | 계층 | 수명 | 내용 |
 |---|---|---|
-| **World** | 한 판 (판마다 `new World()`) | 히어로, 적, 타워, 드롭, 골드, 경험치, 웨이브 진행, 코어 HP, 입력 버퍼, 이벤트 큐 |
+| **World** | 한 판 (판마다 `new World()`) | 히어로, 적, 타워, 드롭, 골드, 경험치, 웨이브 진행, 코어 HP, 입력 버퍼, 프레임 기록 목록 |
 | **App** | 프로그램 전체 (1회 생성) | 데이터 테이블, 설정, 씬 로더, 오디오, View용 GameObject 풀 |
 
 ```csharp
@@ -288,14 +289,14 @@ Authoring의 원본 데이터를 Component의 struct로 변환한다. System은 
   2. App 채우기. AudioSource 등 Unity 컴포넌트가 필요한 것은 Runner 오브젝트에 붙여서 넘긴다.
 - **DDOL에 올라가는 것은 Runner 하나뿐.** Runner가 App 기능과 현재 World를 보관한다.
 - 에디터에서 Game 씬에서 바로 Play해도 동작한다.
-- 도메인 리로드를 끈 Play 대비: `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]`에서 App과 static 이벤트를 초기화한다.
+- 도메인 리로드를 끈 Play 대비: `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]`에서 App 등 static 값을 초기화한다.
 
 #### Runner의 역할
 | 시점 | 하는 일 |
 |---|---|
 | FixedUpdate | World가 있으면 System들을 5.5 순서로 호출 |
-| Update | ① 입력을 수집해 `world.Input`에 적재 ② `world.Events` 큐를 비우며 View에 배달 |
-| LateUpdate | (필요 시) View 마무리 |
+| Update | 입력을 수집해 `world.Input`에 적재 |
+| LateUpdate | ① `~ViewSystem.Present(world)`를 정해진 순서로 호출 (동기화, 보간, 기록 연출) ② Presenter 호출 ③ 프레임 기록 목록 비우기 |
 
 ### 5.4 System
 - `~System` 이름의 **static 클래스**. **static 필드에 상태를 두지 않는다.**
@@ -328,44 +329,46 @@ Tick 없이 다른 System이 직접 호출하는 것:
 ### 5.6 엔티티 ID
 - 엔티티는 객체 참조 대신 **`EntityID { int index; int generation; }`**로 가리킨다.
 - World는 종류별 엔티티를 **배열 + 빈 슬롯 목록**으로 보관한다. 슬롯을 재사용할 때 generation을 1 올린다.
-- generation이 다르면 이미 죽은 엔티티다. 이벤트·타깃 참조가 재사용된 슬롯을 잘못 가리키는 문제를 막는다.
+- generation이 다르면 이미 죽은 엔티티다. 기록·타깃 참조가 재사용된 슬롯을 잘못 가리키는 문제를 막는다.
 - View는 `EntityID → GameObject` 매핑으로 자기 오브젝트를 찾는다.
 
-### 5.7 이벤트 큐 (Logic → View)
-- Logic은 `world.Events`에 이벤트를 **추가만** 한다.
-- Runner가 Update에서 큐를 비우며 View에 배달한다. 한 프레임에 FixedUpdate가 여러 번 돌아도 빠짐없이 전달된다.
-- 이벤트는 **struct**이고, 발생 시점의 **값을 복사**해 담는다 (EntityID, 위치, 종류, 수치). 객체 참조를 담지 않는다.
-- View는 구독 해제를 `OnDisable`에서 반드시 한다.
-- **기준: 순간은 이벤트, 계속 변하는 값은 World 읽기.** 골드, XP, HP 바, 웨이브 번호처럼 화면에 계속 떠 있는 값은 이벤트 없이 매 프레임 World에서 읽는다.
+### 5.7 Logic → View 전달 (이벤트 사용 금지)
+- **이벤트를 쓰지 않는다.** C# `event`, delegate 구독, 이벤트 버스, 이벤트 큐 모두 금지.
+- View는 **Runner가 정해진 순서로 호출하는 `~ViewSystem`**이 World를 읽어 표현한다. 구독이 없으므로 구독 해제 누락 버그도 없다.
+- 전달 방식은 두 가지뿐이다.
 
-#### 이벤트 목록 (초안)
-| 분류 | 이벤트 | 담을 값 | 받는 쪽 |
+| 종류 | 방식 | 예 |
+|---|---|---|
+| 계속 이어지는 상태 | ViewSystem·Presenter가 매 프레임 World를 읽는다 | 위치, HP 바, 골드, 웨이브 번호, 탑승 여부, 감속 상태, 레벨업 대기, 게임 단계 |
+| 그 순간의 일 | Logic이 World의 **프레임 기록 목록**에 추가 → ViewSystem이 읽고 연출 → Runner가 마지막에 비움 | 피격, 사망, 발사, 건설 |
+
+- **프레임 기록**은 종류별 `List<~Record>`이며 World에 있다. struct이고 발생 시점의 값을 복사해 담는다 (EntityID, 위치, 종류, 수치). 객체 참조를 담지 않는다.
+- 연출 순서는 Runner의 ViewSystem 호출 순서로 정한다 (예: 피격 연출 → 사망 연출).
+- **View 오브젝트 생성·반납은 동기화 방식:** 각 ViewSystem이 World의 살아있는 엔티티와 자기가 가진 View를 비교해, 새 EntityID면 풀에서 꺼내고 사라진 EntityID면 반납한다. 생성용 기록은 두지 않는다.
+
+#### 프레임 기록 목록 (초안)
+| 분류 | 기록 | 담을 값 | 연출 |
 |---|---|---|---|
-| 흐름 | WaveStartedEvent | 웨이브 번호 | 시작 배너, BGM |
-| 흐름 | WaveClearedEvent | 웨이브 번호 | 클리어 연출 |
-| 흐름 | BossSpawnedEvent | 보스 ID, 위치 | 보스 등장 연출, 경고 |
-| 흐름 | StageClearedEvent | 스테이지 번호 | 스테이지 클리어 연출 |
-| 흐름 | GameEndedEvent | 도달 스테이지·웨이브 | 결과 패널 |
-| 히어로 | HeroMeleeAttackedEvent | 위치, 반경 | 베기 애니메이션, 범위 VFX |
-| 히어로 | HeroRangedFiredEvent | 시작 위치, 대상 ID, 대상 위치 | 발사 애니메이션, 투사체 연출 |
-| 히어로 | HeroDamagedEvent | 위치, 피해량, 남은 HP | 피격 연출 |
-| 히어로 | HeroDiedEvent | 위치, 남은 목숨 | 사망 연출, 부활 카운트다운 |
-| 히어로 | HeroRespawnedEvent | 위치 | 부활 연출 |
-| 히어로 | HeroBoardedEvent / HeroUnboardedEvent | 타워 ID | 탑승 연출, 카메라 전환 |
-| 타워 | TowerBuiltEvent | 타워 ID, 종류, 위치 | 오브젝트 생성, 건설 연출 |
-| 타워 | TowerUpgradedEvent | 타워 ID, 단계 | 모델 교체, 강화 연출 |
-| 타워 | TowerFiredEvent | 타워 ID, 대상 위치, 탑승 사격 여부 | 사격 VFX·SFX |
-| 적 | EnemySpawnedEvent | 적 ID, 종류, 위치 | 오브젝트 생성 |
-| 적 | EnemyDamagedEvent | 적 ID, 위치, 피해량 | 피격 플래시, 데미지 숫자 |
-| 적 | EnemySlowedEvent | 적 ID | 감속 이펙트 |
-| 적 | EnemyDiedEvent | 적 ID, 종류, 위치 | 오브젝트 반환, 사망 VFX |
-| 적 | EnemyReachedCoreEvent | 적 ID, 위치 | 공격 자세 전환 |
-| 적 | EnemyAttackedCoreEvent | 적 ID, 위치 | 코어 공격 애니메이션 |
-| 드롭 | DropSpawnedEvent | 드롭 ID, 종류, 위치 | 오브젝트 생성 |
-| 드롭 | DropCollectedEvent | 드롭 ID, 종류, 양 | 획득 연출, "+10G" 표시 |
-| 성장 | LevelUpEvent | 새 레벨, 선택지 3개 | 레벨업 연출, 선택 UI |
-| 코어 | CoreDamagedEvent | 피해량, 남은 HP | 피격 연출, 화면 경고 |
-| 명령 | CommandRejectedEvent | 명령 종류, 사유 | 안내 문구, 실패 효과음 |
+| 흐름 | WaveStartedRecord | 스테이지, 웨이브 | 시작 배너, BGM |
+| 흐름 | WaveClearedRecord | 스테이지, 웨이브 | 클리어 연출 |
+| 흐름 | BossSpawnedRecord | 보스 ID, 위치 | 보스 등장 경고 |
+| 흐름 | StageClearedRecord | 스테이지 | 스테이지 클리어 연출 |
+| 히어로 | HeroMeleeAttackRecord | 위치, 반경 | 베기 애니메이션, 범위 VFX |
+| 히어로 | HeroRangedShotRecord | 시작 위치, 대상 ID, 대상 위치 | 발사 애니메이션, 투사체 연출 |
+| 히어로 | HeroDamagedRecord | 위치, 피해량 | 피격 연출 |
+| 히어로 | HeroDiedRecord | 위치, 남은 목숨 | 사망 연출 |
+| 히어로 | HeroRespawnedRecord | 위치 | 부활 연출 |
+| 타워 | TowerBuiltRecord | 타워 ID, 위치 | 건설 연출 |
+| 타워 | TowerUpgradedRecord | 타워 ID, 단계 | 강화 연출 |
+| 타워 | TowerShotRecord | 타워 ID, 대상 위치, 탑승 사격 여부 | 사격 VFX·SFX |
+| 적 | EnemyDamagedRecord | 적 ID, 위치, 피해량 | 피격 플래시, 데미지 숫자 |
+| 적 | EnemyDiedRecord | 적 ID, 종류, 위치 | 사망 VFX |
+| 적 | EnemyCoreAttackRecord | 적 ID, 위치 | 코어 공격 애니메이션 |
+| 드롭 | DropCollectedRecord | 종류, 양, 위치 | 획득 연출, "+10G" 표시 |
+| 코어 | CoreDamagedRecord | 피해량 | 피격 연출, 화면 경고 |
+| 명령 | CommandRejectedRecord | 명령 종류, 사유 | 안내 문구, 실패 효과음 |
+
+- 상태로 읽는 것 (기록 없음): 엔티티 생성·소멸, 탑승/하차, 감속, 코어 포위 도착, 레벨업 선택 대기, 게임 종료.
 
 ### 5.8 세션 수명주기
 - **View 풀:** Unity 내장 `UnityEngine.Pool.ObjectPool<T>`을 쓴다. **Game 씬 진입 시와 퇴장 시 모두 풀과 EntityID → View 매핑을 비운다.**
@@ -392,11 +395,11 @@ Tick 없이 다른 System이 직접 호출하는 것:
 ### 5.12 전투 · 연출 규칙
 - 데미지 판정 시점은 Logic의 타이머가 결정한다. 애니메이션 이벤트로 데미지를 넣지 않는다.
 - **제안:** Logic은 공격 즉시 판정(히트스캔), 투사체 비행은 View 연출로만 표현.
-- 적 사망 시 Logic 슬롯은 즉시 비우고, 사망 연출은 View가 이벤트를 받아 별도로 재생.
+- 적 사망 시 Logic 슬롯은 즉시 비우고, 사망 연출은 ViewSystem이 EnemyDiedRecord를 읽어 재생.
 - 이동 애니메이션은 View가 Logic 속도 값을 읽어 결정.
 
 ### 5.13 View-Presenter (UI)
-- Presenter가 World를 읽고 이벤트를 받아 View를 갱신한다.
+- Runner가 Presenter를 순서대로 호출하고, Presenter는 World를 읽어 View를 갱신한다. (Presenter 등록 방식은 구현 시 결정)
 - View 입력(버튼 등) → Presenter → `world.Input` 버퍼에 명령 적재 (건설, 강화, 레벨업 선택).
 - View는 World를 직접 바꾸지 않는다.
 
@@ -430,7 +433,8 @@ Tick 없이 다른 System이 직접 호출하는 것:
 
 ## 7. 미결정 사항
 - [ ] 게임 제목, 테마/세계관
-- [x] 구조 → World + static System + App(DDOL Runner), 이벤트 큐, 엔티티 ID
+- [x] 구조 → World + static System + App(DDOL Runner), 프레임 기록 + ViewSystem 루프 (이벤트 금지), 엔티티 ID
+- [ ] UI 버튼 입력 처리 (Button.onClick은 UnityEvent → 허용 여부 확인)
 - [x] 레벨업 선택 중 일시정지 → World 일시정지, CommandSystem만 실행
 - [x] 히어로 공격 방식 → 근거리·원거리 둘 다, 거리 x로 자동 전환
 - [x] 공격 타이머 1개, 근거리 광역, 탑승 중 자동 공격 꺼짐
