@@ -185,104 +185,140 @@
 
 ## 5. 아키텍처
 
+> ECS **패키지(DOTS)는 쓰지 않는다.** ECS의 철학(System은 함수, 상태는 데이터)만 순수 C#으로 가져온다.
+
 ### 5.1 원칙
 1. **Logic / View 완전 분리.**
    - Logic: 게임 상태와 규칙. **FixedUpdate에서만 실행.**
-   - View: 애니메이션, SFX, VFX, UI. **Update / LateUpdate에서만 실행.**
-2. Logic은 "무슨 일이 일어났는지"를 이벤트로만 알린다. View를 참조하지 않는다.
-3. View는 Logic의 상태를 읽고 이벤트를 구독한다. Logic 상태를 바꾸지 않는다 (입력은 InputService 경유).
-4. **Transform은 View만 쓴다.** Logic은 위치를 데이터로 소유한다.
+   - View: 애니메이션, SFX, VFX, UI, 카메라. **Update / LateUpdate에서만 실행.**
+2. **System은 상태를 갖지 않는다.** 한 판의 모든 상태는 **World**에 있다.
+3. Logic은 View를 참조하지 않는다. 일어난 일은 **이벤트 큐**에 남긴다.
+4. View는 World를 읽고 이벤트를 받는다. World를 직접 바꾸지 않는다 (입력은 입력 버퍼 경유).
+5. **Transform은 View만 쓴다.** Logic은 위치를 데이터로 소유한다.
 
-### 5.2 서비스 구조
-- 기능은 `~Service` 형태의 **순수 C# 클래스**.
-- **Boot 씬 없이** `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]`로 첫 씬 로드 전에 **1회 등록**, DDOL Runner가 게임 라이프사이클 전체 동안 유지.
-  - 에디터에서 Main이 아닌 Game 씬에서 바로 Play해도 서비스가 올라온다.
-  - Main으로 돌아와도 중복 생성되지 않는다.
-- 접근: `ServiceLocator` (예: `Services.Get<TowerService>()`) — **가결정**.
-- Runner가 FixedUpdate에서 로직 서비스의 `FixedTick()`을 **정해진 순서**로 호출.
+### 5.2 두 계층: World와 App
 
-### 5.3 서비스 목록
+기준: **"한 판이 끝나면 버려도 되는가?"**
 
-| 구분 | 서비스 | 역할 |
+| 계층 | 수명 | 내용 |
 |---|---|---|
-| 기반 | DataService | 타워·적·웨이브·레벨업 데이터 (ScriptableObject) |
-| 기반 | SceneService | 씬 비동기 로드, 진행률, 활성화 |
-| 기반 | SettingsService | 설정 값 로드/저장 |
-| 기반 | PoolService | 적, 드롭, VFX 풀링 |
-| 기반 | InputService | Update에서 입력 버퍼링, FixedTick에서 소비 |
-| 기반 | AudioService | 효과음·BGM (View 쪽에서만 호출) |
-| 기반 | UIService | View 열기/닫기, Presenter 생성 |
-| 게임 | GameFlowService | 준비 / 웨이브 / 승리 / 패배 상태 |
-| 게임 | WaveService | 웨이브 스케줄, 스폰 |
-| 게임 | EnemyService | 적 목록, 이동, 최근접 적 조회 |
-| 게임 | HeroService | 이동, 자동 공격, 사망/부활, 탑승 상태 |
-| 게임 | TowerService | 슬롯, 건설, 강화, 탑승 판정, 공격 |
-| 게임 | EconomyService | 골드 |
-| 게임 | ProgressService | 경험치, 레벨, 레벨업 선택지 |
-| 게임 | DropService | 드롭 생성, 획득 판정 |
-| 게임 | CoreService | 코어 HP, 패배 판정 |
-
-### 5.4 FixedTick 순서 (초안)
-1. InputService — 버퍼된 입력 확정
-2. GameFlowService — 상태 전이
-3. WaveService — 스폰
-4. HeroService — 이동, 탑승/하차, 공격
-5. TowerService — 공격
-6. EnemyService — 이동, 사망 처리, 코어 도달 처리
-7. DropService — 획득 판정
-8. CoreService — 패배 판정
-
-### 5.5 세션 수명주기
-DDOL 서비스는 재시작 시 상태가 남으므로, 게임 서비스는 세션 인터페이스를 구현한다.
+| **World** | 한 판 (판마다 `new World()`) | 히어로, 적, 타워, 드롭, 골드, 경험치, 웨이브 진행, 코어 HP, 입력 버퍼, 이벤트 큐 |
+| **App** | 프로그램 전체 (1회 생성) | 데이터 테이블, 설정, 씬 로더, 오디오, View용 GameObject 풀 |
 
 ```csharp
-public interface IGameSessionListener {
-    void OnSessionStart();
-    void OnSessionEnd();
+public static class App {
+    public static GameData Data;          // ScriptableObject 테이블, 읽기 전용
+    public static SettingsStore Settings; // PlayerPrefs 저장/로드
+    public static SceneLoader Scene;      // 비동기 씬 로드
+    public static AudioPlayer Audio;      // AudioSource 관리
+    public static ViewPool Pool;          // View GameObject 풀
 }
 ```
 
-GameFlowService가 Game 씬 활성화 시 `OnSessionStart()`, Game 씬을 떠날 때(재시작 포함) `OnSessionEnd()`를 일괄 호출.
+#### 접근 규칙
+| 쪽 | World | App.Data | App.Settings / Scene / Audio / Pool |
+|---|---|---|---|
+| Logic (System) | 읽기/쓰기 | 읽기 | **사용 금지** |
+| View | 읽기 | 읽기 | 사용 |
 
-### 5.6 입력
-- 프로젝트는 **새 Input System 전용**이다. 구 `UnityEngine.Input` API(`Input.GetMouseButtonDown` 등)는 사용 금지 (실행 시 예외).
-- FixedUpdate는 프레임당 0회 또는 여러 회 실행될 수 있으므로 `wasPressedThisFrame` 계열을 FixedUpdate에서 읽지 않는다.
-- InputService가 Update에서 입력을 큐에 쌓고(클릭 위치 레이캐스트 포함), FixedTick에서 소비한다.
+### 5.3 부트스트랩과 DDOL Runner
+- `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]`에서 1회:
+  1. `Runner` GameObject 생성, `DontDestroyOnLoad`.
+  2. App 채우기. AudioSource 등 Unity 컴포넌트가 필요한 것은 Runner 오브젝트에 붙여서 넘긴다.
+- **DDOL에 올라가는 것은 Runner 하나뿐.** Runner가 App 기능과 현재 World를 보관한다.
+- 에디터에서 Game 씬에서 바로 Play해도 동작한다.
+- 도메인 리로드를 끈 Play 대비: `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]`에서 App과 static 이벤트를 초기화한다.
+
+#### Runner의 역할
+| 시점 | 하는 일 |
+|---|---|
+| FixedUpdate | World가 있으면 System들을 5.5 순서로 호출 |
+| Update | ① 입력을 수집해 `world.Input`에 적재 ② `world.Events` 큐를 비우며 View에 배달 |
+| LateUpdate | (필요 시) View 마무리 |
+
+### 5.4 System
+- `~System` 이름의 **static 클래스**. **static 필드에 상태를 두지 않는다.**
+- 시그니처: `public static void Tick(World world)`.
+- System 간 호출: **직접 호출**한다 (예: `EnemySystem`이 적 사망 처리 중 `DropSystem.Spawn(world, ...)` 호출). 같은 틱 안에서 순서가 명확하다.
+- Unity 패키지 `UnityEngine.InputSystem`과 이름이 겹치지 않도록 입력 처리 System은 **`CommandSystem`**으로 부른다.
+
+### 5.5 System 목록과 Tick 순서
+
+| 순서 | System | 역할 |
+|---|---|---|
+| 1 | CommandSystem | 입력 버퍼를 꺼내 이동·탑승·사격·건설 명령으로 해석 |
+| 2 | GameFlowSystem | 준비 / 웨이브 / 승리 / 패배 상태 전이 |
+| 3 | WaveSystem | 웨이브 스케줄, 적 스폰 |
+| 4 | HeroSystem | 이동, 탑승/하차, 자동 공격, 사망/부활 |
+| 5 | TowerSystem | 미탑승 자동 공격, 탑승 사격 |
+| 6 | EnemySystem | 이동, 사망 처리, 코어 도달 처리 |
+| 7 | DropSystem | 드롭 획득 판정 |
+| 8 | CoreSystem | 패배 판정 |
+
+Tick 없이 다른 System이 직접 호출하는 것:
+
+| System | 역할 |
+|---|---|
+| EconomySystem | 골드 증감, 건설·강화 비용 지불 |
+| ProgressSystem | 경험치 증가, 레벨업, 선택지 생성·적용 |
+
+### 5.6 엔티티 ID
+- 엔티티는 객체 참조 대신 **`EntityId { int index; int generation; }`**로 가리킨다.
+- World는 종류별 엔티티를 **배열 + 빈 슬롯 목록**으로 보관한다. 슬롯을 재사용할 때 generation을 1 올린다.
+- generation이 다르면 이미 죽은 엔티티다. 이벤트·타깃 참조가 재사용된 슬롯을 잘못 가리키는 문제를 막는다.
+- View는 `EntityId → GameObject` 매핑으로 자기 오브젝트를 찾는다.
+
+### 5.7 이벤트 큐 (Logic → View)
+- Logic은 `world.Events`에 이벤트를 **추가만** 한다.
+- Runner가 Update에서 큐를 비우며 View에 배달한다. 한 프레임에 FixedUpdate가 여러 번 돌아도 빠짐없이 전달된다.
+- 이벤트는 **struct**이고, 발생 시점의 **값을 복사**해 담는다 (EntityId, 위치, 종류, 수치). 객체 참조를 담지 않는다.
+- View는 구독 해제를 `OnDisable`에서 반드시 한다.
+
+### 5.8 세션 수명주기
+- Game 씬 활성화 → `world = new World()` → System 실행 시작.
+- Game 씬을 떠남(재시작 포함) → `world = null`.
+- 서비스별 초기화 코드가 필요 없다.
+
+### 5.9 입력
+- 프로젝트는 **새 Input System 전용**이다. 구 `UnityEngine.Input` API는 사용 금지 (실행 시 예외).
+- `wasPressedThisFrame` 계열은 Update에서만 읽는다.
+- Runner가 Update에서 입력을 수집해 `world.Input` 버퍼에 쌓는다. 클릭 지면 좌표 레이캐스트도 이때 한다.
+- CommandSystem이 FixedTick에서 버퍼를 소비한다.
 - 입력 액션은 `InputSystem_Actions.inputactions`를 기반으로 정의한다 (Click, Board 등).
 
-### 5.7 이동
-- 히어로: 클릭 시 `NavMesh.CalculatePath` → 코너 목록을 FixedTick에서 따라감. `NavMeshAgent` 자동 이동 사용 안 함.
+### 5.10 이동
+- 히어로: 이동 명령 시 `NavMesh.CalculatePath` → 코너 목록을 World에 저장 → HeroSystem이 따라감. `NavMeshAgent` 자동 이동 사용 안 함.
 - 적: 웨이포인트 경로 추종.
 
-### 5.8 View 보간
+### 5.11 View 보간
 - Logic 엔티티는 `prevPosition`, `currPosition`을 보관.
 - View는 Update에서 `alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime`으로 보간해 Transform에 반영.
 
-### 5.9 전투 · 연출 규칙
-- 데미지 판정 시점은 Logic의 쿨다운 타이머가 결정한다. 애니메이션 이벤트로 데미지를 넣지 않는다.
+### 5.12 전투 · 연출 규칙
+- 데미지 판정 시점은 Logic의 타이머가 결정한다. 애니메이션 이벤트로 데미지를 넣지 않는다.
 - **제안:** Logic은 공격 즉시 판정(히트스캔), 투사체 비행은 View 연출로만 표현.
-- 적 사망 시 Logic은 즉시 풀 반환, 사망 VFX는 별도 풀에서 재생.
+- 적 사망 시 Logic 슬롯은 즉시 비우고, 사망 연출은 View가 이벤트를 받아 별도로 재생.
 - 이동 애니메이션은 View가 Logic 속도 값을 읽어 결정.
 
-### 5.10 View-Presenter
-- Presenter가 서비스 이벤트를 구독 → View 갱신.
-- View 입력 → Presenter → 서비스.
-- View는 서비스를 직접 참조하지 않는다.
+### 5.13 View-Presenter (UI)
+- Presenter가 World를 읽고 이벤트를 받아 View를 갱신한다.
+- View 입력(버튼 등) → Presenter → `world.Input` 버퍼에 명령 적재 (건설, 강화, 레벨업 선택).
+- View는 World를 직접 바꾸지 않는다.
 
-### 5.11 시간 설정
+### 5.14 시간 설정
 | 항목 | 값 |
 |---|---|
 | Fixed Timestep | 0.02 (50Hz) — **확정** |
 | Maximum Allowed Timestep | 0.1 |
 
-### 5.12 단위 규칙
+### 5.15 단위 규칙
 | 값 | 단위 | 비고 |
 |---|---|---|
 | 거리, 사거리, 반경 | 월드 유닛 (1 = 1m) | XZ 평면 기준 |
 | 시간, 주기, 쿨다운, 지속시간 | **틱** (1틱 = 20ms, 50틱 = 1초) | 데이터와 로직 모두 정수 틱 |
 | 속도 | 유닛 / 틱 | |
 
-- 시간 값은 데이터(ScriptableObject)에도 **틱 정수**로 저장한다. 필드명은 `~Ticks`로 끝낸다 (예: `meleeIntervalTicks`).
+- 시간 값은 데이터(ScriptableObject)에도 **틱 정수**로 저장한다. 필드명은 `~Ticks`로 끝낸다 (예: `attackIntervalTicks`).
 - Fixed Timestep을 바꾸면 모든 틱 데이터를 다시 조정해야 하므로 **50Hz는 고정**한다.
 
 ---
@@ -299,8 +335,7 @@ GameFlowService가 Game 씬 활성화 시 `OnSessionStart()`, Game 씬을 떠날
 
 ## 7. 미결정 사항
 - [ ] 게임 제목, 테마/세계관
-- [ ] 서비스 접근 방식 최종 확정 (ServiceLocator 가결정)
-- [ ] 서비스 간 이벤트 방식 (C# event / 이벤트 버스)
+- [x] 구조 → World + static System + App(DDOL Runner), 이벤트 큐, 엔티티 ID
 - [ ] 레벨업 선택 중 일시정지 여부
 - [x] 히어로 공격 방식 → 근거리·원거리 둘 다, 거리 x로 자동 전환
 - [x] 공격 타이머 1개, 근거리 광역, 탑승 중 자동 공격 꺼짐
