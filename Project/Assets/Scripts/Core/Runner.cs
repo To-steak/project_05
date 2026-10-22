@@ -28,6 +28,8 @@ namespace Project05.Core
         private ResultPresenter _resultPresenter;
         // 레벨업 선택지 Presenter (씬에 LevelUpChoiceView가 없으면 null)
         private LevelUpChoicePresenter _levelUpChoicePresenter;
+        // 건설 목록 Presenter (씬에 BuildMenuView가 없으면 null)
+        private BuildMenuPresenter _buildMenuPresenter;
         // 이번 판의 기록을 저장했는지 (패배 감지 시 한 번만 저장)
         private bool _hasSavedRecord;
         // [Main] 메인 메뉴 Presenter (Main 씬 밖이거나 View가 없으면 null)
@@ -134,6 +136,10 @@ namespace Project05.Core
             CameraViewSystem.Present(_world, _viewContext);
 
             // ② Presenter 호출. 판 시작 시 씬에서 찾은 View로 만든 Presenter를 정해진 순서로 부른다
+            if (_buildMenuPresenter != null)
+            {
+                _buildMenuPresenter.Present(_world);
+            }
             if (_levelUpChoicePresenter != null)
             {
                 _levelUpChoicePresenter.Present(_world);
@@ -226,6 +232,8 @@ namespace Project05.Core
             _resultPresenter = resultView != null ? new ResultPresenter(resultView) : null;
             LevelUpChoiceView levelUpChoiceView = FindAnyObjectByType<LevelUpChoiceView>();
             _levelUpChoicePresenter = levelUpChoiceView != null ? new LevelUpChoicePresenter(levelUpChoiceView, _world) : null;
+            BuildMenuView buildMenuView = FindAnyObjectByType<BuildMenuView>();
+            _buildMenuPresenter = buildMenuView != null ? new BuildMenuPresenter(buildMenuView, _world) : null;
         }
 
         private void EndSession()
@@ -239,6 +247,7 @@ namespace Project05.Core
             _viewContext = null;
             _resultPresenter = null;
             _levelUpChoicePresenter = null;
+            _buildMenuPresenter = null;
             _hasSavedRecord = false;
             _mainMenuPresenter = null;
             _loadingPresenter = null;
@@ -287,6 +296,7 @@ namespace Project05.Core
             int requiredXP = requiredXPByLevel.Length == 0 ? 0 : requiredXPByLevel[Mathf.Clamp(progress.level - 1, 0, requiredXPByLevel.Length - 1)];
             GUILayout.Label("── Progress ──");
             GUILayout.Label("Gold " + progress.gold + " (" + progress.goldGainPercent + "%) / Lv " + progress.level + " XP " + progress.currentXP + "/" + requiredXP + " (" + progress.xpGainPercent + "%) / Pending " + progress.pendingLevelUpCount);
+            GUILayout.Label("Towers " + _world.towers.Count + "/" + _world.towers.Capacity + " / Build menu slot " + _world.buildMenuSlotIndex);
             GUILayout.Label("Drops " + _world.drops.Count + "/" + _world.drops.Capacity + " Queue " + _world.dropSpawnRequests.Count + " / Hero Atk " + _world.hero.attackDamage);
         }
 
