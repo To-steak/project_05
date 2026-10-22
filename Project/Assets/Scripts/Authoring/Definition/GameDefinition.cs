@@ -22,6 +22,12 @@ namespace Project05.Authoring.Definition
         public ProgressionDefinition progression;
         // 코어 최대 체력
         [Min(1)] public int coreMaxHP = 1;
+        // 코어 포위: 가장 안쪽 고리 반지름 (코어 중심에서)
+        [Min(0f)] public float siegeFirstRingRadius = 2.5f;
+        // 코어 포위: 고리 사이 간격
+        [Min(0.1f)] public float siegeRingSpacing = 1.2f;
+        // 코어 포위: 한 고리 위 자리 사이 간격 (고리별 자리 수 = 둘레 ÷ 이 값)
+        [Min(0.1f)] public float siegeSlotSpacing = 1.2f;
 
         // Resources.Load 경로 (Assets/Resources/GameDefinition.asset)
         public const string RESOURCE_PATH = "GameDefinition";
