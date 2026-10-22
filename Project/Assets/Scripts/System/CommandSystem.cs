@@ -65,10 +65,40 @@ namespace Project05.System
                         GameFlowSystem.ClearWave(world);
                         break;
                     default:
-                        // Fire(탑승 사격), 코어 UI 명령은 담당 브랜치에서 구현한다
+                        // 코어 UI 명령은 feat/core-menu에서 구현한다
                         break;
                 }
             }
+
+            if (world.pauseReason == PauseReason.None)
+            {
+                FollowHeldPointer(world);
+            }
+        }
+
+        /// <summary>
+        /// 좌클릭을 누르고 있는 동안(연속 입력) 지상의 히어로가 커서 지점을 계속 따라가게 한다.
+        /// 목표가 moveRepathDistance 이상 바뀔 때만 경로를 다시 계산한다 (매 틱 NavMesh 계산을 피한다).
+        /// 탑승 중 사격은 TowerSystem이 같은 입력 상태를 읽어 처리한다.
+        /// </summary>
+        private static void FollowHeldPointer(World world)
+        {
+            InputBuffer input = world.input;
+            ref Hero hero = ref world.hero;
+            if (!input.isPointerHeld || !input.hasHeldGroundPosition)
+            {
+                return;
+            }
+            if (hero.state != HeroState.Idle && hero.state != HeroState.Moving)
+            {
+                return;
+            }
+            if (TargetingSystem.GetSqrDistanceXZ(hero.moveTargetPosition, input.heldGroundPosition) < hero.moveRepathDistance * hero.moveRepathDistance)
+            {
+                return;
+            }
+
+            MoveHero(world, input.heldGroundPosition);
         }
 
         /// <summary>
@@ -93,15 +123,21 @@ namespace Project05.System
         }
 
         /// <summary>
-        /// Space 상호작용. 건설 목록이 열려 있으면 닫는다.
-        /// 지상(Idle, Moving)에서 상호작용 반경 안에 빈 공터가 있으면 건설 목록을 열고 일시정지한다 (가장 가까운 공터).
-        /// 타워 탑승(feat/tower 후속)과 코어 UI(feat/core-menu)는 담당 브랜치에서 붙인다.
+        /// Space 상호작용. 건설 목록이 열려 있으면 닫고, 탑승 중이면 하차한다.
+        /// 지상(Idle, Moving)에서 상호작용 반경 안의 가장 가까운 공터에 타워가 있으면 탑승, 비어 있으면 건설 목록을 열고 일시정지한다.
+        /// 코어 UI(feat/core-menu)는 담당 브랜치에서 붙인다.
         /// </summary>
         private static void Interact(World world)
         {
             if (world.pauseReason == PauseReason.BuildMenu)
             {
                 CloseBuildMenu(world);
+                return;
+            }
+
+            if (world.hero.state == HeroState.Boarded)
+            {
+                HeroSystem.Dismount(world);
                 return;
             }
 
@@ -118,9 +154,13 @@ namespace Project05.System
             }
 
             ref TowerSlot slot = ref world.towerSlots[slotIndex];
-            if (slot.towerID.IsValid || slot.isBuildPending)
+            if (world.towers.IsAlive(slot.towerID))
             {
-                // 타워가 있는 공터: 탑승은 feat/tower 후속 PR에서
+                HeroSystem.Board(world, slot.towerID);
+                return;
+            }
+            if (slot.isBuildPending)
+            {
                 return;
             }
 
@@ -225,6 +265,9 @@ namespace Project05.System
             {
                 return;
             }
+
+            // 경로를 못 찾아도 같은 지점으로 매 틱 다시 계산하지 않도록 목표는 먼저 기록한다
+            hero.moveTargetPosition = destination;
 
             NavMeshHit startHit;
             if (!NavMesh.SamplePosition(hero.currentPosition, out startHit, NAVIGATION_SAMPLE_DISTANCE, NavMesh.AllAreas))

@@ -9,8 +9,6 @@ namespace Project05.Component.Input
         MoveTo,
         // Space: 대상에 따라 건설 / 탑승 / 하차 / 코어 UI 열기
         Interact,
-        // 탑승 중 사격 (탑승 중 좌클릭)
-        Fire,
         // 레벨업 선택지 고르기
         ChooseLevelUpOption,
         // 코어 UI: 타워 종류 해금

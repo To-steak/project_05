@@ -9,7 +9,7 @@ namespace Project05.Component.Input
     {
         // 명령 종류
         public CommandKind kind;
-        // 클릭한 지면 좌표 (MoveTo, Fire)
+        // 클릭한 지면 좌표 (MoveTo)
         public Vector3 groundPosition;
         // 대상 공터 인덱스 (UpgradeTower, RepairTower)
         public int slotIndex;

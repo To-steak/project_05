@@ -15,6 +15,8 @@ namespace Project05.Authoring.Definition
         [Min(1)] public int lifeCount = 3;
         // 이동 속도 (유닛 / 틱)
         [Min(0f)] public float moveSpeed;
+        // 마우스를 누르고 이동할 때, 커서 지점이 이 거리 이상 바뀌면 경로를 다시 계산한다
+        [Min(0.05f)] public float moveRepathDistance = 0.5f;
         // 공격력 (근거리·원거리 공용, 탑승 시 타워 공격력)
         [Min(0)] public int attackDamage;
         // 공격 주기 (틱)

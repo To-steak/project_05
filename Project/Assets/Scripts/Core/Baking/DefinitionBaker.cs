@@ -156,6 +156,7 @@ namespace Project05.Core.Baking
             heroStats.maxHP = heroDefinition.maxHP;
             heroStats.lifeCount = heroDefinition.lifeCount;
             heroStats.moveSpeed = heroDefinition.moveSpeed;
+            heroStats.moveRepathDistance = heroDefinition.moveRepathDistance;
             heroStats.attackDamage = heroDefinition.attackDamage;
             heroStats.attackIntervalTicks = heroDefinition.attackIntervalTicks;
             heroStats.meleeRange = heroDefinition.meleeRange;
@@ -265,6 +266,7 @@ namespace Project05.Core.Baking
                 stats.buildCost = towerDefinition.buildCost;
                 stats.repairCost = towerDefinition.repairCost;
                 stats.aggroRange = towerDefinition.aggroRange;
+                stats.siegeFirstRingRadius = towerDefinition.siegeFirstRingRadius;
                 stats.projectileSpeed = towerDefinition.projectileSpeed;
                 stats.projectileRadius = towerDefinition.projectileRadius;
 

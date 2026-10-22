@@ -153,6 +153,8 @@ namespace Project05.Component
         public const int MAX_DROP_COUNT = 256;
         // 투사체 저장소 용량 (공격 주기와 비행 시간으로 보아 동시에 날아가는 투사체 상한)
         public const int MAX_PROJECTILE_COUNT = 128;
+        // 타워 하나를 둘러쌀 수 있는 적 수 (자리가 차면 적은 그 타워를 지나친다)
+        public const int TOWER_SIEGE_SLOT_COUNT = 32;
         // 공터를 가리키지 않는 값
         public const int NO_SLOT = -1;
         // 기록 목록·작은 큐의 초기 용량 (넘치면 List가 늘어나므로 상한이 아니다)
