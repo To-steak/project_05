@@ -291,7 +291,7 @@ Tick 없이 다른 System이 직접 호출하는 것:
 - 적: 웨이포인트 경로 추종.
 
 ### 5.11 View 보간
-- Logic 엔티티는 `prevPosition`, `currPosition`을 보관.
+- Logic 엔티티는 `previousPosition`, `currentPosition`을 보관.
 - View는 Update에서 `alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime`으로 보간해 Transform에 반영.
 
 ### 5.12 전투 · 연출 규칙

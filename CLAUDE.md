@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-이 프로젝트는 Unity 6 (6000.3.11f1, URP), WebGL 타겟의 액션 타워 디펜스다. 게임 설계는 `DESIGN.md`를 기준으로 한다. 작업 전 반드시 읽을 것.
+이 프로젝트는 Unity 6 (6000.3.11f1, URP), WebGL 타겟의 액션 타워 디펜스다. 게임 설계는 `DESIGN.md`, 코드 컨벤션은 `CONVENTIONS.md`를 기준으로 한다. 코드 작성 전 두 문서를 반드시 읽을 것.
 
 Unity 프로젝트 루트는 `Project/`다.
 
@@ -13,7 +13,7 @@ ECS 패키지(DOTS)는 쓰지 않는다. "System은 함수, 상태는 데이터"
 - **View는 Update / LateUpdate에서만 실행한다.** 애니메이션, SFX, VFX, UI, 카메라가 View다.
 - Logic은 View를 참조하지 않는다. 일어난 일은 `world.Events` 큐에 남긴다.
 - View는 World를 읽고 이벤트를 받을 뿐, World를 직접 바꾸지 않는다. 입력은 `world.Input` 버퍼를 거친다.
-- **Transform은 View만 쓴다.** Logic은 위치를 데이터(`prevPosition`, `currPosition`)로 소유하고, View가 보간해서 반영한다.
+- **Transform은 View만 쓴다.** Logic은 위치를 데이터(`previousPosition`, `currentPosition`)로 소유하고, View가 보간해서 반영한다.
 
 ### World / System / App
 - 한 판의 모든 상태는 **World**에 둔다. 판마다 `new World()`로 새로 만든다.
@@ -54,6 +54,11 @@ ECS 패키지(DOTS)는 쓰지 않는다. "System은 함수, 상태는 데이터"
 ### 단위
 - 시뮬레이션은 50Hz 고정 (1틱 = 20ms). 시간 값은 데이터와 로직 모두 **정수 틱**으로 다루고, 필드명은 `~Ticks`로 끝낸다. 초나 ms를 쓰지 않는다.
 - 거리는 월드 유닛(1 = 1m), XZ 평면 기준. 거리 비교는 `sqrMagnitude`로 한다.
+
+## 컨벤션 핵심 (상세는 `CONVENTIONS.md`)
+- 줄임말 금지. `var` 금지. 파일 하나에 타입 하나, 중첩 타입 금지.
+- 배열 원소 struct는 반드시 `ref`로 접근한다.
+- 모든 함수에 한국어 XML 문서 주석, 변수 선언 윗줄에 한 줄 주석.
 
 ## WebGL 주의
 - `Instantiate` / `Destroy`를 게임 루프에서 반복하지 않는다. View 오브젝트는 `App.Pool`을 쓴다.
