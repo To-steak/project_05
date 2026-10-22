@@ -26,6 +26,10 @@ namespace Project05.Component
         public PauseReason pauseReason;
         // 건설 목록이 열린 공터 인덱스 (BuildMenu 일시정지 중에만 유효, 아니면 -1)
         public int buildMenuSlotIndex = NO_SLOT;
+        // 지금 Space를 누르면 반응할 대상 종류 (CommandSystem이 매 틱 갱신, Space 아이콘용)
+        public InteractionTargetKind interactionTargetKind;
+        // 그 대상의 위치 (공터·타워·코어 위치)
+        public Vector3 interactionTargetPosition;
         // 시드 고정 랜덤. System은 UnityEngine.Random 대신 이것만 쓴다 (SessionSystem.InitializeRandom으로 판마다 Runner가 시드를 정한다)
         public global::System.Random random;
 
