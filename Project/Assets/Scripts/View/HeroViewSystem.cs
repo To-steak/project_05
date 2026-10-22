@@ -28,7 +28,7 @@ namespace Project05.View
             }
 
             ref readonly Hero hero = ref world.hero;
-            float alpha = GetInterpolationAlpha(world);
+            float alpha = ViewInterpolation.GetAlpha(world);
             Vector3 position = Vector3.LerpUnclamped(hero.previousPosition, hero.currentPosition, alpha);
 
             // 이번 틱의 이동 방향을 바라본다. 멈춰 있으면 마지막 방향을 유지한다
@@ -44,20 +44,6 @@ namespace Project05.View
             {
                 heroTransform.position = position;
             }
-        }
-
-        /// <summary>
-        /// 직전 틱과 이번 틱 사이 보간 비율 (DESIGN 5.11).
-        /// 시뮬레이션이 멈춘 동안(일시정지, 패배)에는 틱이 진행되지 않으므로 현재 위치(1)에 고정한다.
-        /// </summary>
-        private static float GetInterpolationAlpha(World world)
-        {
-            if (world.pauseReason != PauseReason.None || world.flow.phase == GamePhase.Defeat)
-            {
-                return 1f;
-            }
-
-            return Mathf.Clamp01((Time.time - Time.fixedTime) / Time.fixedDeltaTime);
         }
     }
 }

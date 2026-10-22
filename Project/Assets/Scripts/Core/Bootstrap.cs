@@ -1,3 +1,4 @@
+using Project05.Authoring.Definition;
 using Project05.Core.Baking;
 using Project05.Foundation;
 using UnityEngine;
@@ -29,7 +30,10 @@ namespace Project05.Core
             GameObject runnerObject = new GameObject(RUNNER_OBJECT_NAME);
             Object.DontDestroyOnLoad(runnerObject);
             runnerObject.AddComponent<Runner>();
-            App.Data = DefinitionBaker.Bake(DefinitionBaker.Load());
+            GameDefinition definition = DefinitionBaker.Load();
+            App.Data = DefinitionBaker.Bake(definition);
+            App.ViewData = DefinitionBaker.BakeView(definition);
+            App.Pool = new ViewPool();
         }
     }
 }
