@@ -296,7 +296,15 @@ namespace Project05.Core
             int requiredXP = requiredXPByLevel.Length == 0 ? 0 : requiredXPByLevel[Mathf.Clamp(progress.level - 1, 0, requiredXPByLevel.Length - 1)];
             GUILayout.Label("── Progress ──");
             GUILayout.Label("Gold " + progress.gold + " (" + progress.goldGainPercent + "%) / Lv " + progress.level + " XP " + progress.currentXP + "/" + requiredXP + " (" + progress.xpGainPercent + "%) / Pending " + progress.pendingLevelUpCount);
-            GUILayout.Label("Towers " + _world.towers.Count + "/" + _world.towers.Capacity + " / Build menu slot " + _world.buildMenuSlotIndex);
+            GUILayout.Label("Towers " + _world.towers.Count + "/" + _world.towers.Capacity + " / Build menu slot " + _world.buildMenuSlotIndex + " / Pointer held " + _world.input.isPointerHeld);
+            for (int towerIndex = 0; towerIndex < _world.towers.Capacity; towerIndex++)
+            {
+                if (_world.towers.IsAliveAt(towerIndex))
+                {
+                    Tower tower = _world.towers.GetAt(towerIndex);
+                    GUILayout.Label("  Tower slot " + tower.slotIndex + " Lv " + tower.level + " HP " + tower.currentHP + "/" + tower.maxHP + (tower.isBoarded ? " (Boarded)" : "") + " cooldown " + tower.attackCooldownTicks + "t");
+                }
+            }
             GUILayout.Label("Drops " + _world.drops.Count + "/" + _world.drops.Capacity + " Queue " + _world.dropSpawnRequests.Count + " / Hero Atk " + _world.hero.attackDamage);
         }
 

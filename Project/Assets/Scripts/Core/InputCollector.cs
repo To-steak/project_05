@@ -29,7 +29,7 @@ namespace Project05.Core
 
         /// <summary>
         /// 이번 프레임에 눌린 입력을 명령으로 바꿔 입력 버퍼에 넣는다.
-        /// 좌클릭은 지면 레이캐스트 후 지상이면 MoveTo, 탑승 중이면 Fire. Space는 Interact. 레벨업 선택 중 1 / 2 / 3은 ChooseLevelUpOption.
+        /// 좌클릭은 누르고 있는 상태·커서 지면 좌표를 갱신하고(연속 입력), 누른 순간 지상이면 MoveTo. Space는 Interact. 레벨업 선택 중 1 / 2 / 3은 ChooseLevelUpOption.
         /// </summary>
         /// <param name="world">현재 판의 월드</param>
         public void Collect(World world)
@@ -48,16 +48,37 @@ namespace Project05.Core
 
             CollectLevelUpChoice(world);
 
-            if (_clickAction.WasPressedThisFrame())
+            CollectPointer(world);
+        }
+
+        /// <summary>
+        /// 좌클릭. 누르고 있는 상태와 커서 지면 좌표를 매 프레임 입력 버퍼에 갱신한다 (연속 입력).
+        /// 누른 순간에는 지상이면 MoveTo 명령도 넣어 바로 반응하게 한다. 탑승 중 사격은 TowerSystem이 누르고 있는 상태를 읽는다.
+        /// </summary>
+        private void CollectPointer(World world)
+        {
+            InputBuffer input = world.input;
+            input.isPointerHeld = _clickAction.IsPressed();
+            if (!input.isPointerHeld)
             {
-                Vector3 groundPosition;
-                if (TryRaycastGround(out groundPosition))
-                {
-                    Command clickCommand = new Command();
-                    clickCommand.kind = world.hero.state == HeroState.Boarded ? CommandKind.Fire : CommandKind.MoveTo;
-                    clickCommand.groundPosition = groundPosition;
-                    world.input.commands.Enqueue(clickCommand);
-                }
+                input.hasHeldGroundPosition = false;
+                return;
+            }
+
+            Vector3 groundPosition;
+            input.hasHeldGroundPosition = TryRaycastGround(out groundPosition);
+            if (!input.hasHeldGroundPosition)
+            {
+                return;
+            }
+            input.heldGroundPosition = groundPosition;
+
+            if (_clickAction.WasPressedThisFrame() && world.hero.state != HeroState.Boarded)
+            {
+                Command moveCommand = new Command();
+                moveCommand.kind = CommandKind.MoveTo;
+                moveCommand.groundPosition = groundPosition;
+                input.commands.Enqueue(moveCommand);
             }
         }
 
