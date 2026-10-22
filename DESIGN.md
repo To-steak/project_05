@@ -207,7 +207,7 @@
 
 ```csharp
 public static class App {
-    public static GameData Data;          // ScriptableObject 테이블, 읽기 전용
+    public static GameData Data;          // 베이킹된 struct 테이블, 읽기 전용
     public static SettingsStore Settings; // PlayerPrefs 저장/로드
     public static SceneLoader Scene;      // 비동기 씬 로드
     public static AudioPlayer Audio;      // AudioSource 관리
@@ -216,10 +216,29 @@ public static class App {
 ```
 
 #### 접근 규칙
-| 쪽 | World | App.Data | App.Settings / Scene / Audio / Pool |
-|---|---|---|---|
-| Logic (System) | 읽기/쓰기 | 읽기 | **사용 금지** |
-| View | 읽기 | 읽기 | 사용 |
+| 쪽 | World | App |
+|---|---|---|
+| Logic (System) | 읽기/쓰기 | **사용 금지** (World만 본다) |
+| View | 읽기 | 사용 |
+
+- 판 시작 시 World가 `App.Data`의 테이블 참조를 받아둔다 (`world.enemyStats = App.Data.enemyStats`). 그래서 System은 App을 몰라도 된다.
+
+#### 베이킹 (확정)
+Authoring의 원본 데이터를 Component의 struct로 변환한다. System은 Component만 안다.
+
+| 시점 | 대상 | 결과 저장 위치 |
+|---|---|---|
+| 게임 시작 시 1회 (Core 부트스트랩) | ScriptableObject 정의 (`~Definition`) | `App.Data` (struct 테이블) |
+| 판 시작 시 (Game 씬 활성화) | 씬의 Authoring 컴포넌트 (타워 슬롯, 웨이포인트, 스폰 지점 등) | `World` |
+
+- 하나의 Definition은 로직용 struct(`EnemyStats`)와 View용 테이블(프리팹, VFX)로 나뉜다.
+- 베이킹 결과는 복사본이므로 Play 중 실수로 값을 바꿔도 원본 에셋이 바뀌지 않는다.
+
+#### 접근 깊이 규칙 (체이닝 방지)
+- **테이블 조회는 생성 시점에만 한다** (스폰, 건설, 강화). 필요한 값은 엔티티 struct에 복사해 둔다.
+- 매 틱 로직은 **엔티티 자신의 값만** 쓴다. 예: `enemy.moveSpeed`, `hero.attackIntervalTicks`.
+- 그 외의 긴 접근은 함수 위쪽에서 지역 `ref`로 한 번 받아 둔다.
+- 개별 강화(레벨업으로 특정 타워 강화 등)는 엔티티 값을 바꾸는 것으로 처리한다.
 
 ### 5.3 부트스트랩과 DDOL Runner
 - `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]`에서 1회:

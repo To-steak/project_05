@@ -18,7 +18,9 @@
 | `UI/Presenter/` | UI View와 World를 연결 | `GoldPresenter` |
 | `Core/` | DDOL Runner, 부트스트랩, App 기능 | `Runner`, `App` |
 
-- **미결정:** Authoring → Component 변환(베이킹) 채택 여부. 채택하면 System은 Component만 참조한다.
+- **베이킹 채택:** Authoring의 원본은 Core에서 Component의 struct로 변환된다. System은 Component만 참조한다.
+- 각 폴더의 `README.txt`에 들어갈 `.cs` 목록이 있다. 구현하면서 목록과 실제 파일을 맞춘다.
+- 하위 폴더도 네임스페이스에 반영한다. 예: `Component/Event/` → `Project05.Component.Event`.
 
 ### 1.1 Assembly Definition
 폴더마다 Assembly Definition을 두어 참조 방향을 컴파일 단계에서 강제한다.
@@ -26,7 +28,7 @@
 | 어셈블리 | 참조 가능 |
 |---|---|
 | Component | (없음) |
-| System | Component (+ 베이킹 미채택 시 Authoring) |
+| System | Component |
 | Authoring | Component |
 | View | Component |
 | UI | Component |
@@ -248,6 +250,5 @@ public static class HeroSystem
 ---
 
 ## 8. 미결정
-- [ ] Authoring → Component 베이킹 방식 채택 여부
 - [ ] 메서드 배치 순서 (제안: 필드 아래 public → private)
 - [ ] 커밋 메시지 언어

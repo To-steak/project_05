@@ -21,7 +21,9 @@ ECS 패키지(DOTS)는 쓰지 않는다. "System은 함수, 상태는 데이터"
 - System 간 호출은 직접 호출한다. 틱 순서는 Runner가 관리하며 `DESIGN.md` 5.5를 따른다.
 - 입력 처리 System 이름은 `CommandSystem`이다 (`UnityEngine.InputSystem`과 충돌 방지).
 - 프로그램 전체 수명의 기능은 **static `App`**(Data, Settings, Scene, Audio, Pool)에 둔다.
-- **Logic은 App.Data만 읽을 수 있다.** App.Settings / Scene / Audio / Pool은 View만 쓴다.
+- **System은 App을 쓰지 않는다. World만 본다.** 데이터 테이블은 판 시작 시 World가 참조를 받아둔다. App은 View, UI, Core만 쓴다.
+- **베이킹:** ScriptableObject(`~Definition`)는 게임 시작 시, 씬 Authoring 컴포넌트는 판 시작 시 Component의 struct로 변환한다. System은 Authoring을 참조하지 않는다.
+- **테이블 조회는 생성 시점(스폰, 건설, 강화)에만** 하고 필요한 값은 엔티티에 복사한다. 매 틱 로직은 엔티티 자신의 값만 쓴다.
 - DDOL에는 `Runner` 하나만 올린다. `RuntimeInitializeOnLoadMethod(BeforeSceneLoad)`에서 생성한다. 씬은 Main, Game 2개뿐이며 Boot 씬은 없다.
 - 서비스 클래스, ServiceLocator, `IGameSessionListener`를 만들지 않는다.
 
@@ -73,5 +75,5 @@ ECS 패키지(DOTS)는 쓰지 않는다. "System은 함수, 상태는 데이터"
 ## 작업 방식
 - **구현 단계에서는 main에 직접 커밋·푸시하지 않는다.** `<type>/<이름>` 브랜치에서 작업하고 PR을 연다. 병합은 사용자가 한다. PR 설명은 `CONVENTIONS.md` 7.4 양식을 따른다.
 - 설계에 없는 시스템이나 규칙을 새로 도입해야 하면 코드 작성 전에 먼저 물어본다.
-- 수치는 하드코딩하지 않고 `App.Data`(ScriptableObject)에서 읽는다.
+- 수치는 하드코딩하지 않고 `~Definition`(ScriptableObject)에 둔다.
 - `DESIGN.md`의 미결정 사항에 해당하는 부분은 임의로 정하지 말고 확인한다.
