@@ -1,5 +1,6 @@
 using Project05.Component;
 using Project05.Component.Data;
+using Project05.Component.Input;
 using Project05.Core.Baking;
 using Project05.Foundation;
 using Project05.System;
@@ -25,7 +26,7 @@ namespace Project05.Core
         private const string GAME_SCENE_NAME = "Game";
         private const float DEBUG_PANEL_MARGIN = 10f;
         private const float DEBUG_PANEL_WIDTH = 420f;
-        private const float DEBUG_PANEL_HEIGHT = 560f;
+        private const float DEBUG_PANEL_HEIGHT = 680f;
         // 레인별 테스트 씬 폴더 (CONVENTIONS 7.5). Build Settings에 넣지 않으므로 에디터에서만 판이 시작된다
         private const string TEST_SCENE_FOLDER = "Assets/Scenes/Test/";
 
@@ -146,6 +147,7 @@ namespace Project05.Core
 
         private void BeginSession(Scene scene)
         {
+            ClearViewPool();
             _world = new World();
             // 씬 배치 데이터를 먼저 채운다. Initialize가 공터 수로 타워 저장소를 만들고 히어로를 시작 위치에 세운다
             SceneBaker.Bake(_world, scene);
@@ -158,8 +160,21 @@ namespace Project05.Core
 
         private void EndSession()
         {
+            // 풀링된 View는 떠난 씬과 함께 파괴됐으므로 참조만 남지 않게 비운다 (DESIGN 5.8)
+            if (_world != null)
+            {
+                ClearViewPool();
+            }
             _world = null;
             _viewContext = null;
+        }
+
+        private static void ClearViewPool()
+        {
+            if (App.Pool != null)
+            {
+                App.Pool.Clear();
+            }
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -179,9 +194,28 @@ namespace Project05.Core
                 GUILayout.Label("Phase: " + _world.flow.phase + " (" + _world.flow.stageNumber + "-" + _world.flow.waveNumber + ")");
                 GUILayout.Label("Pause: " + _world.pauseReason);
                 GUILayout.Label("Hero: " + _world.hero.state + " " + _world.hero.currentPosition + " Path " + _world.hero.nextPathCornerIndex + "/" + _world.hero.pathCornerCount);
+                DrawWaveDebug();
                 DrawBakingDebug();
             }
             GUILayout.EndArea();
+        }
+
+        /// <summary>
+        /// 웨이브 진행과 적 수를 보여주고, 처치 판정이 생기기 전까지 웨이브를 넘기는 디버그 버튼을 둔다 (feat/enemy-wave 확인용).
+        /// 버튼은 World를 직접 바꾸지 않고 입력 버퍼에 명령만 넣는다 (UI 이벤트 예외 규칙).
+        /// </summary>
+        private void DrawWaveDebug()
+        {
+            GameFlowState flow = _world.flow;
+            GUILayout.Label("── Wave ──");
+            GUILayout.Label("Spawned " + flow.spawnedEnemyCount + "/" + flow.waveEnemyCount + " Kill " + flow.killCount + " Next spawn " + flow.spawnCooldownTicks + "t Prep " + flow.phaseRemainingTicks + "t");
+            GUILayout.Label("Enemies alive " + _world.enemies.Count + "/" + _world.enemies.Capacity + " Queue " + _world.enemySpawnRequests.Count);
+            if (GUILayout.Button("[Debug] 웨이브 클리어"))
+            {
+                Command clearWaveCommand = new Command();
+                clearWaveCommand.kind = CommandKind.DebugClearWave;
+                _world.input.commands.Enqueue(clearWaveCommand);
+            }
         }
 
         /// <summary>

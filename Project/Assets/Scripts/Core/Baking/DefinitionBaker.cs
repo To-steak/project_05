@@ -1,6 +1,7 @@
 using System;
 using Project05.Authoring.Definition;
 using Project05.Component.Data;
+using Project05.Foundation;
 using UnityEngine;
 
 namespace Project05.Core.Baking
@@ -9,7 +10,7 @@ namespace Project05.Core.Baking
     /// 게임 시작 시 1회, ScriptableObject 정의(~Definition)를 로직용 struct 테이블(GameData)로 베이킹한다.
     /// 결과는 복사본이므로 Play 중 테이블을 바꿔도 원본 에셋은 바뀌지 않는다.
     /// 정의가 빠져 있으면 경고를 남기고 기본값(0)으로 채워, 어떤 경우에도 null 테이블을 돌려주지 않는다.
-    /// View용 테이블(프리팹, VFX)은 그것을 쓰는 ViewSystem 브랜치에서 추가한다.
+    /// View용 테이블(프리팹, VFX)은 BakeView로 따로 만든다. 항목은 그것을 쓰는 ViewSystem 브랜치에서 추가한다.
     /// </summary>
     public static class DefinitionBaker
     {
@@ -52,6 +53,38 @@ namespace Project05.Core.Baking
             data.difficulty = BakeDifficulty(definition.difficulty, definition);
             data.progression = BakeProgression(definition.progression, definition);
             return data;
+        }
+
+        /// <summary>
+        /// 루트 정의의 프리팹·VFX 참조를 View용 테이블로 베이킹한다. 배열은 비어 있을 수는 있어도 null이 아니다.
+        /// 적 프리팹 배열의 인덱스는 GameData.enemyStats와 같다 (빠진 정의는 null 칸으로 자리를 유지).
+        /// </summary>
+        /// <param name="definition">루트 정의 (null이면 빈 테이블)</param>
+        /// <returns>View용 테이블</returns>
+        public static ViewData BakeView(GameDefinition definition)
+        {
+            ViewData viewData = new ViewData();
+            if (definition == null || definition.enemies == null)
+            {
+                return viewData;
+            }
+
+            EnemyDefinition[] enemyDefinitions = definition.enemies;
+            viewData.enemyPrefabs = new GameObject[enemyDefinitions.Length];
+            for (int enemyTypeIndex = 0; enemyTypeIndex < enemyDefinitions.Length; enemyTypeIndex++)
+            {
+                EnemyDefinition enemyDefinition = enemyDefinitions[enemyTypeIndex];
+                if (enemyDefinition == null)
+                {
+                    continue;
+                }
+                if (enemyDefinition.prefab == null)
+                {
+                    Debug.LogWarning("[DefinitionBaker] " + enemyDefinition.name + ".prefab 이(가) 비어 있다. 이 종류의 적은 화면에 보이지 않는다.", enemyDefinition);
+                }
+                viewData.enemyPrefabs[enemyTypeIndex] = enemyDefinition.prefab;
+            }
+            return viewData;
         }
 
         private static HeroStats BakeHero(HeroDefinition heroDefinition, GameDefinition owner)
