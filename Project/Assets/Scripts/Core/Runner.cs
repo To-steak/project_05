@@ -249,7 +249,9 @@ namespace Project05.Core
             CoreMenuView coreMenuView = FindAnyObjectByType<CoreMenuView>();
             _coreMenuPresenter = coreMenuView != null ? new CoreMenuPresenter(coreMenuView, _world) : null;
             PauseMenuView pauseMenuView = FindAnyObjectByType<PauseMenuView>();
-            _pauseMenuPresenter = pauseMenuView != null ? new PauseMenuPresenter(pauseMenuView, _world) : null;
+            SettingsView settingsView = FindAnyObjectByType<SettingsView>();
+            SettingsPresenter settingsPresenter = settingsView != null ? new SettingsPresenter(settingsView) : null;
+            _pauseMenuPresenter = pauseMenuView != null ? new PauseMenuPresenter(pauseMenuView, _world, settingsPresenter) : null;
         }
 
         private void EndSession()

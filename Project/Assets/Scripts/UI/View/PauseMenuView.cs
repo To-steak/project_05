@@ -4,13 +4,14 @@ using UnityEngine.UI;
 namespace Project05.UI.View
 {
     /// <summary>
-    /// [Game] 일시정지 메뉴 (ESC). 계속, 메인으로 버튼. 표시만 담당하며 World와 App을 모른다.
+    /// [Game] 일시정지 메뉴 (ESC). 계속, 설정, 메인으로 버튼. 표시만 담당하며 World와 App을 모른다.
     /// 이 컴포넌트는 항상 켜진 오브젝트에 두고, 실제 패널은 _panelRoot로 켜고 끈다.
     /// </summary>
     public class PauseMenuView : MonoBehaviour
     {
         [SerializeField] private GameObject _panelRoot;
         [SerializeField] private Button _resumeButton;
+        [SerializeField] private Button _settingsButton;
         [SerializeField] private Button _mainMenuButton;
 
         /// <summary>
@@ -19,6 +20,14 @@ namespace Project05.UI.View
         public Button ResumeButton
         {
             get { return _resumeButton; }
+        }
+
+        /// <summary>
+        /// 설정 버튼. Presenter가 onClick을 구독한다.
+        /// </summary>
+        public Button SettingsButton
+        {
+            get { return _settingsButton; }
         }
 
         /// <summary>

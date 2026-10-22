@@ -4,7 +4,7 @@ using UnityEngine.UI;
 namespace Project05.UI.View
 {
     /// <summary>
-    /// [Main] 설정 패널. BGM·SFX 볼륨 슬라이더(0 ~ 1)와 닫기 버튼. 표시만 담당하며 World와 App을 모른다.
+    /// [Main·Game] 설정 패널. BGM·SFX 볼륨 슬라이더(0 ~ 1)와 닫기 버튼. 표시만 담당하며 World와 App을 모른다.
     /// 이 컴포넌트는 항상 켜진 오브젝트에 두고, 실제 패널은 _panelRoot로 켜고 끈다.
     /// </summary>
     public class SettingsView : MonoBehaviour

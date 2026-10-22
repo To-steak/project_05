@@ -4,12 +4,13 @@ using Project05.UI.View;
 namespace Project05.UI.Presenter
 {
     /// <summary>
-    /// [Main] 설정 패널. 열 때 App.Settings의 값을 슬라이더에 맞추고, 슬라이더가 바뀌면 App.Settings에 쓴다.
+    /// [Main·Game] 설정 패널. Main에서는 메인 메뉴가, Game에서는 일시정지 메뉴가 연다. 열 때 App.Settings의 값을 슬라이더에 맞추고, 슬라이더가 바뀌면 App.Settings에 쓴다.
     /// 닫을 때 한 번 디스크에 기록한다 (WebGL에서 슬라이더를 움직일 때마다 IndexedDB에 쓰지 않도록).
     /// </summary>
     public class SettingsPresenter
     {
         private readonly SettingsView _view;
+        private bool _isOpen;
 
         /// <summary>
         /// 설정 패널 View를 받아 슬라이더·닫기 버튼을 연결하고 패널을 숨긴다.
@@ -40,10 +41,20 @@ namespace Project05.UI.Presenter
         {
             _view.SetVolumesWithoutNotify(App.Settings.BGMVolume, App.Settings.SFXVolume);
             _view.SetVisible(true);
+            _isOpen = true;
         }
 
-        private void Close()
+        /// <summary>
+        /// 패널이 열려 있으면 바뀐 설정을 디스크에 기록하고 닫는다. 닫기 버튼과, Game 씬에서 일시정지 메뉴가 닫힐 때 쓴다.
+        /// </summary>
+        public void Close()
         {
+            if (!_isOpen)
+            {
+                return;
+            }
+
+            _isOpen = false;
             App.Settings.Save();
             _view.SetVisible(false);
         }
