@@ -38,7 +38,7 @@
 |---|---|---|---|
 | [x] | `refactor/foundation` | App과 기반 기능(SettingsStore, RecordStore, SceneLoader, AudioPlayer, ViewPool)을 Core에서 `Foundation/` 어셈블리로 분리. View·UI → Foundation 참조, System은 참조 금지 (CONVENTIONS 1.1). 폴더별 README.txt도 이동 | View·UI에서 `App.~` 사용 시 컴파일 성공, System에서는 실패 |
 | [x] | `feat/hero-movement` | InputCollector, CommandSystem(이동), HeroSystem 이동, HeroViewSystem 보간, CameraViewSystem(Cinemachine 추적). 닫힌 PR #7 참고 | 클릭하면 히어로가 NavMesh 경로로 이동, 카메라가 따라옴 |
-| [ ] | `feat/enemy-wave` | WaveSystem(`x × 10`), SpawnSystem과 생성 요청 큐, EnemySystem 경로 이동, EnemyViewSystem 동기화와 풀 | 적이 웨이브마다 스폰돼 길을 따라 이동 |
+| [x] | `feat/enemy-wave` | WaveSystem(`x × 10`), SpawnSystem과 생성 요청 큐, EnemySystem 경로 이동, EnemyViewSystem 동기화와 풀 | 적이 웨이브마다 스폰돼 길을 따라 이동 |
 | [ ] | `feat/hero-combat` | TargetingSystem, 근거리 광역·원거리, 적 피해와 사망, 프레임 기록, 기본 연출 | 히어로가 적을 자동으로 처치 |
 | [ ] | `feat/core-siege` | 코어 포위와 공격, 접촉 피해, 무적, 목숨과 부활, GameFlow(준비·웨이브·보스·스테이지·패배), 결과 패널 | **한 판이 처음부터 패배까지 돌아감** |
 | [ ] | `feat/drop-progress` | 드롭, 골드·XP 획득, 레벨업 일시정지와 선택지 UI. 닫힌 PR #8 참고 | 레벨업 시 멈추고 선택 후 재개 |

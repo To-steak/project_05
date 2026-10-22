@@ -22,5 +22,5 @@ MonoBehaviour:
   baseDropGold: 4
   baseDropXP: 3
   isBoss: 0
-  prefab: {fileID: 0}
+  prefab: {fileID: 4145008173129900958, guid: 28f26c8ab1688e949a362c7eecdd2b48, type: 3}
   deathEffectPrefab: {fileID: 0}
