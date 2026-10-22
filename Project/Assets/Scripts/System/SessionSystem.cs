@@ -42,6 +42,9 @@ namespace Project05.System
             world.levelUpOptions = data.levelUpOptions;
             world.progression = data.progression;
 
+            // 첫 웨이브(1-1)도 준비 시간을 거친다
+            flow.phaseRemainingTicks = world.waveRule.preparationTicks;
+
             // 씬 베이킹이 없었어도 순회가 안전하도록 빈 배열로 둔다
             if (world.waypointPaths == null)
             {

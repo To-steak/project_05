@@ -9,7 +9,7 @@ namespace Project05.System
 {
     /// <summary>
     /// [Tick 1] 입력 버퍼를 소비해 이동·탑승·하차·사격·건설·코어 UI 명령으로 해석한다. 일시정지 중에도 실행되며, 이때는 열린 UI의 명령만 처리하고 나머지는 버린다.
-    /// 구현 브랜치: feat/hero-movement (이동), feat/tower (Interact·Fire), feat/drop-progress·feat/core-menu (UI 명령)
+    /// 구현 브랜치: feat/hero-movement (이동), feat/enemy-wave (디버그 웨이브 클리어), feat/tower (Interact·Fire), feat/drop-progress·feat/core-menu (UI 명령)
     /// </summary>
     public static class CommandSystem
     {
@@ -39,6 +39,9 @@ namespace Project05.System
                 {
                     case CommandKind.MoveTo:
                         MoveHero(world, command.groundPosition);
+                        break;
+                    case CommandKind.DebugClearWave:
+                        GameFlowSystem.ClearWave(world);
                         break;
                     default:
                         // Interact, Fire, UI 명령은 담당 브랜치에서 구현한다
