@@ -1,4 +1,6 @@
 using Project05.Component;
+using Project05.Component.Data;
+using Project05.Core.Baking;
 using Project05.System;
 using Project05.View;
 using UnityEngine;
@@ -13,6 +15,7 @@ namespace Project05.Core
     /// </summary>
     public class Runner : MonoBehaviour
     {
+        private readonly InputCollector _inputCollector = new InputCollector();
         private World _world;
         private ViewContext _viewContext;
         private int _activeSceneHandle;
@@ -80,7 +83,7 @@ namespace Project05.Core
                 return;
             }
 
-            // 입력 수집 → world.input (InputCollector, feat/hero-movement)
+            _inputCollector.Collect(_world);
         }
 
         private void LateUpdate()
@@ -132,9 +135,16 @@ namespace Project05.Core
 
         private void BeginSession()
         {
+            // 초기화 → 씬 베이킹 → 엔티티 배치 순서 (SceneBaker가 쓴 값을 Begin이 읽는다)
+            GameData gameData = App.Data != null ? App.Data : new GameData();
             _world = new World();
-            SessionSystem.Initialize(_world);
+            SessionSystem.Initialize(_world, gameData);
+            SceneBaker.Bake(_world);
+            SessionSystem.Begin(_world);
+
             _viewContext = new ViewContext();
+            _viewContext.heroView = FindAnyObjectByType<HeroView>();
+            _viewContext.heroCameraView = FindAnyObjectByType<HeroCameraView>();
         }
 
         private void EndSession()
@@ -146,7 +156,7 @@ namespace Project05.Core
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         private void OnGUI()
         {
-            GUILayout.BeginArea(new Rect(10f, 10f, 320f, 200f), GUI.skin.box);
+            GUILayout.BeginArea(new Rect(10f, 10f, 320f, 240f), GUI.skin.box);
             GUILayout.Label("[Runner Debug]");
             GUILayout.Label("Scene: " + SceneManager.GetActiveScene().name);
             GUILayout.Label("Fixed Timestep: " + Time.fixedDeltaTime + " / Max Allowed: " + Time.maximumDeltaTime);
@@ -159,6 +169,8 @@ namespace Project05.Core
                 GUILayout.Label("Tick: " + _world.tickCount);
                 GUILayout.Label("Phase: " + _world.flow.phase + " (" + _world.flow.stageNumber + "-" + _world.flow.waveNumber + ")");
                 GUILayout.Label("Pause: " + _world.pauseReason);
+                GUILayout.Label("Hero: " + _world.hero.state + " " + _world.hero.currentPosition);
+                GUILayout.Label("Hero Path: " + _world.hero.nextPathCornerIndex + " / " + _world.hero.pathCornerCount);
             }
             GUILayout.EndArea();
         }
