@@ -26,6 +26,6 @@
 - DropCollectedRecord.cs (struct) : 종류, 양, 위치.
 - CoreDamagedRecord.cs (struct) : 피해량.
 - CommandRejectedRecord.cs (struct) : 명령 종류, 사유 (골드 부족, 범위 밖 등).
-- CommandRejectReason.cs (enum) : NotEnoughGold, OutOfRange, NotUnlocked, SlotOccupied 등.
+- CommandRejectReason.cs (enum) : NotEnoughGold, OutOfRange, NotUnlocked, SlotOccupied, AlreadyUnlocked, MaxLevel, AlreadyFullHP, NoTower.
 
 구현하면서 이 목록과 실제 파일을 맞춘다. 컨벤션은 저장소 루트의 CONVENTIONS.md를 따른다.

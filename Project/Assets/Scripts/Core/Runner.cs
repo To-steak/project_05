@@ -44,14 +44,30 @@ namespace Project05.Core
                 return;
             }
 
-            // [Tick 1] CommandSystem: 일시정지 중에도 실행 (feat/hero-movement)
+            // 패배 시 CommandSystem을 포함한 모든 System을 멈춘다
+            if (!SessionSystem.IsCommandProcessing(_world))
+            {
+                return;
+            }
 
+            // [Tick 1] 일시정지 중에도 실행 (열린 UI의 명령만 처리)
+            CommandSystem.Tick(_world);
+
+            // 일시정지 중이면 CommandSystem만 실행한다. 이번 틱에 패배·일시정지가 됐어도 여기서 멈춘다
             if (!SessionSystem.IsSimulationRunning(_world))
             {
                 return;
             }
 
-            // [Tick 2 ~ 9] GameFlow, Wave, Hero, Tower, Enemy, Drop, Core, Spawn (각 기능 브랜치에서 추가)
+            // [Tick 2 ~ 9] DESIGN 5.5 순서. SpawnSystem은 반드시 마지막
+            GameFlowSystem.Tick(_world);
+            WaveSystem.Tick(_world);
+            HeroSystem.Tick(_world);
+            TowerSystem.Tick(_world);
+            EnemySystem.Tick(_world);
+            DropSystem.Tick(_world);
+            CoreSystem.Tick(_world);
+            SpawnSystem.Tick(_world);
 
             SessionSystem.AdvanceTick(_world);
         }
@@ -64,7 +80,7 @@ namespace Project05.Core
                 return;
             }
 
-            // 입력 수집 → world.Input (feat/hero-movement)
+            // 입력 수집 → world.input (InputCollector, feat/hero-movement)
         }
 
         private void LateUpdate()
@@ -75,9 +91,20 @@ namespace Project05.Core
                 return;
             }
 
-            // ① ~ViewSystem.Present(_world, _viewContext) (각 기능 브랜치에서 추가)
-            // ② Presenter 호출
-            // ③ 프레임 기록 목록 비우기
+            // ① ViewSystem: 엔티티 동기화·보간 → 연출. 카메라는 히어로 보간 이후
+            HeroViewSystem.Present(_world, _viewContext);
+            TowerViewSystem.Present(_world, _viewContext);
+            EnemyViewSystem.Present(_world, _viewContext);
+            DropViewSystem.Present(_world, _viewContext);
+            CoreViewSystem.Present(_world, _viewContext);
+            InteractionPromptViewSystem.Present(_world, _viewContext);
+            OffscreenIndicatorViewSystem.Present(_world, _viewContext);
+            CameraViewSystem.Present(_world, _viewContext);
+
+            // ② Presenter 호출 (등록 방식은 UI 구현 시 결정)
+
+            // ③ 이번 프레임의 기록은 모두 연출됐으므로 비운다
+            SessionSystem.ClearFrameRecords(_world);
         }
 
         /// <summary>
