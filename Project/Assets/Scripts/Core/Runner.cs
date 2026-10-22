@@ -120,6 +120,7 @@ namespace Project05.Core
             }
 
             _inputCollector.Collect(_world);
+            _viewContext.cameraRotateInput = _inputCollector.ReadCameraRotateInput();
         }
 
         private void LateUpdate()

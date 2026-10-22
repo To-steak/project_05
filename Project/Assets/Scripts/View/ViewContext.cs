@@ -17,6 +17,14 @@ namespace Project05.View
         public HeroCameraView heroCameraView;
         // 코어 View (씬에 없으면 null)
         public CoreView coreView;
+        // Q/E 카메라 회전 입력 (-1 = Q 왼쪽, 1 = E 오른쪽, 0 = 없음). Runner가 Update에서 넣는다
+        public float cameraRotateInput;
+        // 판 시작 시의 Cinemachine Follow 오프셋 (회전 기준, 씬에서 정한 값)
+        public Vector3 cameraBaseFollowOffset;
+        // 판 시작 시 기준 오프셋을 읽었는지
+        public bool hasCameraBaseFollowOffset;
+        // 지금까지 돌린 카메라 Y축 각도 (도)
+        public float cameraYawDegrees;
         // 화면을 그리는 메인 카메라 (화면 밖 판정, 아이콘 빌보드. 없으면 null)
         public Camera mainCamera;
         // Space 아이콘 (씬에 없으면 null)
