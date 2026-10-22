@@ -51,6 +51,17 @@ namespace Project05.System
         }
 
         /// <summary>
+        /// 시드 고정 랜덤을 만든다. Initialize 직후 Runner가 판마다 새 시드로 호출한다.
+        /// 같은 시드와 같은 입력이면 레벨업 선택지 등 랜덤 결과가 같다.
+        /// </summary>
+        /// <param name="world">현재 판의 월드</param>
+        /// <param name="seed">이번 판의 랜덤 시드</param>
+        public static void InitializeRandom(World world, int seed)
+        {
+            world.random = new global::System.Random(seed);
+        }
+
+        /// <summary>
         /// 이번 틱에 CommandSystem을 실행해야 하는지 판단한다. 패배 시에는 CommandSystem도 멈춘다.
         /// </summary>
         /// <param name="world">현재 판의 월드</param>

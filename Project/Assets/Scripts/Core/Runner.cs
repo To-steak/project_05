@@ -134,6 +134,8 @@ namespace Project05.Core
         {
             _world = new World();
             SessionSystem.Initialize(_world);
+            // 판마다 다른 시드. System은 시간을 읽지 않으므로 Core가 정해서 넘긴다
+            SessionSystem.InitializeRandom(_world, global::System.Environment.TickCount);
             _viewContext = new ViewContext();
         }
 
@@ -161,6 +163,11 @@ namespace Project05.Core
                 GUILayout.Label("Pause: " + _world.pauseReason);
             }
             GUILayout.EndArea();
+
+            if (_world != null)
+            {
+                ProgressDebugPanel.Draw(_world);
+            }
         }
 #endif
     }

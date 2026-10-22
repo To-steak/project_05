@@ -13,5 +13,6 @@ DDOL Runner, 부트스트랩, App 기능, 베이킹. 모든 어셈블리를 참�
 - AudioPlayer.cs (class) : BGM·SFX 재생, AudioSource 관리.
 - ViewPool.cs (class) : UnityEngine.Pool.ObjectPool<T> 기반 View 풀. Game 씬 진입·퇴장 시 비움.
 - InputCollector.cs (class) : Input System에서 좌클릭·Space를 읽어 클릭 레이캐스트 후 world.Input에 Command 적재.
+- ProgressDebugPanel.cs (static class) : OnGUI 디버그 패널 (에디터·개발 빌드 전용). 레벨·XP·골드·획득 퍼센트 표시, 레벨업 선택지 버튼 → world.input에 ChooseLevelUpOption 적재. 레벨업 UI(View-Presenter)가 생기면 삭제.
 
 구현하면서 이 목록과 실제 파일을 맞춘다. 컨벤션은 저장소 루트의 CONVENTIONS.md를 따른다.
