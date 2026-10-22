@@ -21,4 +21,12 @@ MonoBehaviour:
   waveRule: {fileID: 11400000, guid: 0e861e4a6d3441d6b01c4a0d588b4b56, type: 2}
   difficulty: {fileID: 11400000, guid: 41526376c2d34d7c84cd046526408483, type: 2}
   progression: {fileID: 11400000, guid: 0da9eeeed63949c9bc841a032e1859ea, type: 2}
+  levelUpOptions:
+  - {fileID: 11400000, guid: edeeb024ae38449a934dd7a51bbfdc20, type: 2}
+  - {fileID: 11400000, guid: a0d9738c7d5a466cb8f899bc7b6ad24c, type: 2}
+  - {fileID: 11400000, guid: 68a58ef5afde4dffa1c24ebb560b0f9f, type: 2}
+  - {fileID: 11400000, guid: 53d6b531b93f43e38585131c5e46b599, type: 2}
+  - {fileID: 11400000, guid: 10669fb6e0904ae6b663a1cbb8211a2c, type: 2}
+  goldDropPrefab: {fileID: 0}
+  xpDropPrefab: {fileID: 0}
   coreMaxHP: 500
