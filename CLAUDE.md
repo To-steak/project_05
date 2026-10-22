@@ -26,7 +26,7 @@ ECS 패키지(DOTS)는 쓰지 않는다. "System은 함수, 상태는 데이터"
 - 서비스 클래스, ServiceLocator, `IGameSessionListener`를 만들지 않는다.
 
 ### 엔티티와 이벤트
-- 엔티티는 객체 참조 대신 `EntityId { index, generation }`로 가리킨다. World는 종류별 배열 + 빈 슬롯 목록으로 보관하고, 슬롯 재사용 시 generation을 올린다.
+- 엔티티는 객체 참조 대신 `EntityID { index, generation }`로 가리킨다. World는 종류별 배열 + 빈 슬롯 목록으로 보관하고, 슬롯 재사용 시 generation을 올린다.
 - 이벤트는 **struct**이며 발생 시점의 값을 복사해 담는다. 객체 참조를 담지 않는다.
 - Runner가 Update에서 이벤트 큐를 비우며 View에 배달한다. View는 `OnDisable`에서 구독을 해제한다.
 
@@ -56,9 +56,14 @@ ECS 패키지(DOTS)는 쓰지 않는다. "System은 함수, 상태는 데이터"
 - 거리는 월드 유닛(1 = 1m), XZ 평면 기준. 거리 비교는 `sqrMagnitude`로 한다.
 
 ## 컨벤션 핵심 (상세는 `CONVENTIONS.md`)
-- 줄임말 금지. `var` 금지. 파일 하나에 타입 하나, 중첩 타입 금지.
+- 네임스페이스는 `Project05.*`, 폴더 경로와 일치. 코드 본문에서 .NET 타입은 `using` 또는 `global::System.~`로 접근한다.
+- 줄임말 금지. 허용 약어는 UI, HP, XP, ID뿐이며 항상 대문자 (`currentHP`, `entityID`).
+- 상수는 `MAX_HP`처럼 UPPER_SNAKE_CASE.
+- `var` 금지. 파일 하나에 타입 하나, 중첩 타입 금지.
+- 멤버 배치: public 필드 → 직렬화 private 필드 → private 필드 → const.
 - 배열 원소 struct는 반드시 `ref`로 접근한다.
-- 모든 함수에 한국어 XML 문서 주석, 변수 선언 윗줄에 한 줄 주석.
+- public 함수에는 한국어 XML 문서 주석, public 변수에는 선언 윗줄에 한 줄 주석.
+- 커밋 메시지는 `CONVENTIONS.md` 6장의 type(`feat`, `fix`, `refactor`, `chore`, `docs`, `balance`, `asset`)을 범위에 맞게 쓴다.
 
 ## WebGL 주의
 - `Instantiate` / `Destroy`를 게임 루프에서 반복하지 않는다. View 오브젝트는 `App.Pool`을 쓴다.

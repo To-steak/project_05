@@ -263,15 +263,15 @@ Tick 없이 다른 System이 직접 호출하는 것:
 | ProgressSystem | 경험치 증가, 레벨업, 선택지 생성·적용 |
 
 ### 5.6 엔티티 ID
-- 엔티티는 객체 참조 대신 **`EntityId { int index; int generation; }`**로 가리킨다.
+- 엔티티는 객체 참조 대신 **`EntityID { int index; int generation; }`**로 가리킨다.
 - World는 종류별 엔티티를 **배열 + 빈 슬롯 목록**으로 보관한다. 슬롯을 재사용할 때 generation을 1 올린다.
 - generation이 다르면 이미 죽은 엔티티다. 이벤트·타깃 참조가 재사용된 슬롯을 잘못 가리키는 문제를 막는다.
-- View는 `EntityId → GameObject` 매핑으로 자기 오브젝트를 찾는다.
+- View는 `EntityID → GameObject` 매핑으로 자기 오브젝트를 찾는다.
 
 ### 5.7 이벤트 큐 (Logic → View)
 - Logic은 `world.Events`에 이벤트를 **추가만** 한다.
 - Runner가 Update에서 큐를 비우며 View에 배달한다. 한 프레임에 FixedUpdate가 여러 번 돌아도 빠짐없이 전달된다.
-- 이벤트는 **struct**이고, 발생 시점의 **값을 복사**해 담는다 (EntityId, 위치, 종류, 수치). 객체 참조를 담지 않는다.
+- 이벤트는 **struct**이고, 발생 시점의 **값을 복사**해 담는다 (EntityID, 위치, 종류, 수치). 객체 참조를 담지 않는다.
 - View는 구독 해제를 `OnDisable`에서 반드시 한다.
 
 ### 5.8 세션 수명주기

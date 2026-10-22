@@ -13,9 +13,12 @@
 | `Component/` | 순수 데이터. World, 엔티티 struct, 이벤트 struct, 데이터 테이블 struct | `World`, `Enemy`, `EnemyDiedEvent` |
 | `Authoring/` | 에디터에서 작성하는 원본. ScriptableObject 정의, 씬 배치용 MonoBehaviour(타워 슬롯, 웨이포인트 등) | `EnemyDefinition`, `TowerSlotAuthoring` |
 | `System/` | 상태 없는 static 로직 | `HeroSystem`, `CommandSystem` |
+| `View/` | 공통 표현 관심사. 애니메이션, VFX, SFX, 카메라, 보간 | `EnemyView`, `HeroView` |
+| `UI/View/` | UI 화면 표시 | `GoldView` |
+| `UI/Presenter/` | UI View와 World를 연결 | `GoldPresenter` |
+| `Core/` | DDOL Runner, 부트스트랩, App 기능 | `Runner`, `App` |
 
-- **제안 (확인 필요):** View와 Runner/App이 들어갈 위치. 후보는 `View/`, `App/`을 상위 폴더로 추가하는 것.
-- **제안 (확인 필요): Authoring → Component 변환(베이킹).** 게임 시작 시 ScriptableObject 데이터를 Component의 struct 테이블로 변환해 `App.Data`에 담는다. 그러면 System은 Component만 알면 되고 Authoring을 참조하지 않는다.
+- **미결정:** Authoring → Component 변환(베이킹) 채택 여부. 채택하면 System은 Component만 참조한다.
 
 ### 1.1 Assembly Definition
 폴더마다 Assembly Definition을 두어 참조 방향을 컴파일 단계에서 강제한다.
@@ -23,16 +26,30 @@
 | 어셈블리 | 참조 가능 |
 |---|---|
 | Component | (없음) |
-| System | Component |
+| System | Component (+ 베이킹 미채택 시 Authoring) |
 | Authoring | Component |
-| View (제안) | Component |
-| App (제안) | 전부 |
+| View | Component |
+| UI | Component |
+| Core | 전부 |
 
-- System이 View나 Authoring을 참조하면 컴파일 에러가 나야 한다.
+- System이 View나 UI를 참조하면 컴파일 에러가 나야 한다.
 
 ### 1.2 네임스페이스
-- 폴더 경로와 일치시킨다. 예: `Game.Component`, `Game.System`, `Game.Authoring`.
-- 주의: `Game.System` 네임스페이스 안에서는 .NET의 `System` 네임스페이스와 이름이 겹친다. .NET 타입은 `global::System.Random`처럼 `global::`로 접근한다.
+- `Project05.*` 형식으로, 폴더 경로와 일치시킨다.
+
+| 폴더 | 네임스페이스 |
+|---|---|
+| `Component/` | `Project05.Component` |
+| `Authoring/` | `Project05.Authoring` |
+| `System/` | `Project05.System` |
+| `View/` | `Project05.View` |
+| `UI/View/` | `Project05.UI.View` |
+| `UI/Presenter/` | `Project05.UI.Presenter` |
+| `Core/` | `Project05.Core` |
+
+- **주의: `Project05.System` 때문에 `Project05.*` 네임스페이스 안에서 `System.`으로 시작하는 정규화된 이름은 .NET이 아니라 `Project05.System`으로 해석된다.**
+  - .NET 네임스페이스는 파일 맨 위의 `using` 지시문으로 가져온다 (`using System;`, `using System.Collections.Generic;`). 파일 맨 위의 `using`은 이 문제의 영향을 받지 않는다.
+  - 코드 본문에서 `System.Random`처럼 정규화된 이름을 써야 하면 `global::System.Random`으로 쓴다.
 
 ---
 
@@ -50,23 +67,35 @@
 | `i`, `j` (반복 변수 포함) | `index`, `enemyIndex` |
 
 - 예외: Unity·.NET 등 외부 API의 이름(`Time.fixedDeltaTime`, `Vector3` 등)은 그대로 쓴다.
-- **확인 필요:** `Id`, `UI`, `Hp`, `Xp`처럼 널리 쓰이는 약어의 허용 여부.
 
-### 2.2 대소문자
+### 2.2 허용 약어
+다음 약어만 허용하며, **위치와 관계없이 항상 모두 대문자**로 쓴다.
+
+| 약어 | 올바름 | 틀림 |
+|---|---|---|
+| UI | `UIRoot`, `openUI` | `UiRoot`, `openUi` |
+| HP | `HP`, `currentHP`, `MAX_HP` | `Hp`, `currentHp` |
+| XP | `XP`, `requiredXP` | `Xp`, `requiredXp` |
+| ID | `ID`, `entityID`, `EntityID` | `Id`, `entityId` |
+
+### 2.3 대소문자
 | 대상 | 규칙 | 예시 |
 |---|---|---|
-| 타입, 메서드, 프로퍼티, 상수 | PascalCase | `HeroSystem`, `Tick()`, `MaximumEnemyCount` |
+| 타입, 메서드, 프로퍼티 | PascalCase | `HeroSystem`, `Tick()` |
 | public 필드 (Component struct) | camelCase | `currentPosition` |
 | private 필드 | `_camelCase` | `_runner` |
 | 지역 변수, 매개변수 | camelCase | `targetEnemy` |
+| **상수 (`const`)** | **UPPER_SNAKE_CASE** | `MAX_HP`, `MAX_ENEMY_COUNT` |
 
-### 2.3 접미사·접두사
+### 2.4 접미사·접두사
 | 대상 | 규칙 | 예시 |
 |---|---|---|
 | System | `~System` | `HeroSystem` |
 | 이벤트 struct | `~Event` | `EnemyDiedEvent` |
 | Authoring MonoBehaviour | `~Authoring` | `TowerSlotAuthoring` |
 | ScriptableObject 정의 | `~Definition` | `EnemyDefinition` |
+| View | `~View` | `EnemyView`, `GoldView` |
+| Presenter | `~Presenter` | `GoldPresenter` |
 | bool | `is`, `has`, `can` | `isBoarded` |
 | 시간 값 (틱) | `~Ticks` | `attackIntervalTicks` |
 
@@ -80,15 +109,15 @@
 ```csharp
 // 올바름
 ref Enemy enemy = ref world.enemies[enemyIndex];
-enemy.health -= damage;
+enemy.currentHP -= damage;
 
 // 금지: 복사본을 수정하므로 원본이 바뀌지 않는다
 Enemy enemyCopy = world.enemies[enemyIndex];
-enemyCopy.health -= damage;
+enemyCopy.currentHP -= damage;
 ```
 
 - struct를 매개변수로 넘길 때 수정이 필요하면 `ref`, 읽기만 하면 `in`을 쓴다.
-- 랜덤은 World가 보유한 시드 고정 `global::System.Random`을 쓴다. `UnityEngine.Random`은 Logic에서 쓰지 않는다.
+- 랜덤은 World가 보유한 시드 고정 `global::System.Random`을 쓴다. `UnityEngine.Random`은 System에서 쓰지 않는다.
 
 ---
 
@@ -99,35 +128,85 @@ enemyCopy.health -= damage;
 - **중첩 타입(nested type) 금지.** enum, struct, class 모두 최상위에 별도 파일로 둔다.
 - 중괄호는 다음 줄에 연다 (Allman).
 
+### 4.1 멤버 배치 순서
+타입 안에서 위에서부터 다음 순서로 배치한다.
+
+1. public 필드
+2. 직렬화 private 필드 (`[SerializeField] private`)
+3. private 필드
+4. 상수 (`const`)
+
+- **제안 (확인 필요):** 메서드는 필드 아래에 public → private 순으로 둔다.
+
 ---
 
 ## 5. 주석
 
-### 5.1 함수
-- **모든 함수**(public, private, 생성자, Unity 메시지 포함)에 **한국어 XML 문서 주석**을 단다.
+- 주석 의무는 **public 함수와 public 변수에만** 적용한다. private 멤버와 지역 변수는 필요할 때만 단다.
+
+### 5.1 public 함수
+- **한국어 XML 문서 주석**을 단다.
 - `<summary>`는 필수. 매개변수가 있으면 `<param>`, 반환값이 있으면 `<returns>`도 단다.
 
+### 5.2 public 변수
+- 선언 **바로 윗줄에 한 줄 주석**을 단다.
+
 ```csharp
-/// <summary>
-/// 히어로의 공격 타이머가 준비되면 상황에 맞는 공격을 실행한다.
-/// </summary>
-/// <param name="world">현재 판의 월드</param>
-public static void Tick(World world)
+public struct Hero
 {
-    // 근거리 공격 사거리의 제곱값
-    float meleeRangeSquared = world.hero.meleeRange * world.hero.meleeRange;
+    // 이전 틱의 위치 (View 보간용)
+    public Vector3 previousPosition;
+    // 현재 틱의 위치
+    public Vector3 currentPosition;
+    // 현재 체력
+    public int currentHP;
+    // 다음 공격까지 남은 틱
+    public int attackCooldownTicks;
 }
 ```
 
-### 5.2 변수
-- 변수 선언 **바로 윗줄에 한 줄 주석**을 단다.
-- **확인 필요:** 적용 범위가 필드만인지, 지역 변수까지인지.
+```csharp
+public static class HeroSystem
+{
+    /// <summary>
+    /// 히어로의 공격 타이머가 준비되면 상황에 맞는 공격을 실행한다.
+    /// </summary>
+    /// <param name="world">현재 판의 월드</param>
+    public static void Tick(World world)
+    {
+        ref Hero hero = ref world.hero;
+    }
+}
+```
 
 ---
 
-## 6. 미결정
-- [ ] View, App(Runner) 폴더 위치
+## 6. 커밋 메시지
+
+### 6.1 형식
+```
+<type>: <요약>
+
+<본문 (선택)>
+```
+
+### 6.2 type과 범위
+| type | 사용 범위 | 예시 |
+|---|---|---|
+| `feat` | 새 기능 추가. 게임 규칙, System, View, UI, 새 데이터 정의 | `feat: 히어로 근거리 광역 공격 추가` |
+| `fix` | 의도와 다르게 동작하는 버그 수정 | `fix: 탑승 중 드롭이 획득되는 문제 수정` |
+| `refactor` | 동작 변화 없는 코드 구조 변경. 이름 변경, 파일 이동, 함수 분리 | `refactor: EnemySystem 이동 로직 분리` |
+| `chore` | 게임 코드와 무관한 작업. 패키지, 프로젝트 설정, 빌드 설정, .gitignore, .meta 정리 | `chore: Cinemachine 패키지 추가` |
+| `docs` | 문서만 변경. DESIGN.md, CONVENTIONS.md, CLAUDE.md, README.md | `docs: 웨이브 설계 추가` |
+| `balance` | 코드 변경 없는 수치·데이터 조정 (ScriptableObject 값, 웨이브 구성) | `balance: 탱커 HP 상향` |
+| `asset` | 아트·사운드·프리팹·씬 등 에셋 추가 및 수정 | `asset: 적 사망 VFX 추가` |
+
+- 한 커밋에는 한 type만 담는다. 섞이면 커밋을 나눈다.
+- **확인 필요:** 요약·본문 언어 (한국어 / 영어).
+
+---
+
+## 7. 미결정
 - [ ] Authoring → Component 베이킹 방식 채택 여부
-- [ ] 허용 약어 목록 (`Id`, `UI`, `Hp`, `Xp` 등)
-- [ ] 변수 주석 적용 범위 (필드 / 지역 변수)
-- [ ] 커밋 메시지 언어와 접두사 규칙
+- [ ] 메서드 배치 순서 (제안: 필드 아래 public → private)
+- [ ] 커밋 메시지 언어
