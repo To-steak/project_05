@@ -160,6 +160,7 @@ namespace Project05.Core.Baking
                 stats.baseDropGold = enemyDefinition.baseDropGold;
                 stats.baseDropXP = enemyDefinition.baseDropXP;
                 stats.isBoss = enemyDefinition.isBoss;
+                stats.killScore = enemyDefinition.killScore;
             }
             return enemyStats;
         }

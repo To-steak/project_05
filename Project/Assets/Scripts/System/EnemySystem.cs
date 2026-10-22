@@ -91,7 +91,7 @@ namespace Project05.System
 
         /// <summary>
         /// 사망 기록을 남기고 처치 수를 올린 뒤 슬롯을 즉시 비운다. 사망 연출은 ViewSystem이 기록으로 재생한다.
-        /// 처치 수로 웨이브를 끝내는 판정, 보스 처치, 점수는 feat/core-siege, 드롭 생성 요청은 feat/drop-progress에서 붙인다.
+        /// 처치 점수를 더한다. 처치 수로 웨이브를 끝내는 판정과 보스 처치 판정은 GameFlowSystem이 한다. 드롭 생성 요청은 feat/drop-progress에서 붙인다.
         /// </summary>
         private static void Kill(World world, EntityID enemyID, ref Enemy enemy)
         {
@@ -102,6 +102,7 @@ namespace Project05.System
             world.enemyDiedRecords.Add(diedRecord);
 
             world.flow.killCount++;
+            world.progress.score += enemy.killScore;
             ReleaseSiegeSlot(world, ref enemy);
             world.enemies.Destroy(enemyID);
         }

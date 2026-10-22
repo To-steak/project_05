@@ -47,5 +47,7 @@ namespace Project05.Component.Entity
         public int dropXP;
         // 보스 여부
         public bool isBoss;
+        // 처치 점수 (스폰 시 EnemyStats에서 복사)
+        public int killScore;
     }
 }
