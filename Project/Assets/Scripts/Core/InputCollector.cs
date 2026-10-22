@@ -101,7 +101,7 @@ namespace Project05.Core
         /// Q/E 카메라 회전 입력을 읽는다. 카메라는 View라 World 입력 버퍼가 아니라 Runner가 ViewContext로 넘긴다.
         /// 누르고 있는 상태(IsPressed)를 읽으므로 연속 회전이 된다. 둘 다 누르면 0.
         /// </summary>
-        /// <returns>-1 = Q(왼쪽), 1 = E(오른쪽), 0 = 없음</returns>
+        /// <returns>-1 = Q(카메라가 자기 왼쪽으로 돈다), 1 = E(오른쪽으로 돈다), 0 = 없음</returns>
         public float ReadCameraRotateInput()
         {
             if (!_hasSearchedActions)

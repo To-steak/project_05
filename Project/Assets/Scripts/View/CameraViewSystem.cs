@@ -44,7 +44,7 @@ namespace Project05.View
         }
 
         /// <summary>
-        /// Q/E를 누르고 있는 동안 Follow 오프셋을 히어로 기준 Y축으로 돌린다. 높이·거리는 씬에서 정한 기준 오프셋 그대로다.
+        /// Q/E를 누르고 있는 동안 Follow 오프셋을 히어로 기준 Y축으로 돌린다. Q는 카메라가 히어로를 중심으로 자기 왼쪽으로, E는 오른쪽으로 돈다. 높이·거리는 씬에서 정한 기준 오프셋 그대로다.
         /// 게임 중(일시정지·패배 아님)에만 돈다. 감쇠는 씬의 Position Damping을 따른다.
         /// 카메라는 View라 World에 영향이 없다. 클릭 이동·화면 밖 화살표는 Camera.main을 쓰므로 회전을 그대로 따른다.
         /// </summary>
@@ -67,7 +67,9 @@ namespace Project05.View
                 return;
             }
 
-            viewContext.cameraYawDegrees += viewContext.cameraRotateInput * heroCameraView.RotationDegreesPerSecond * Time.deltaTime;
+            // Unity의 Y축 양의 각도는 위에서 볼 때 시계 방향이다. 히어로 뒤에 있는 카메라에서 이 방향은 카메라의 왼쪽으로 도는 것이므로
+            // Q(입력 -1, 왼쪽)일 때 각도를 늘린다. 카메라가 왼쪽으로 돌면 화면 속 맵은 오른쪽으로 돌아 보인다
+            viewContext.cameraYawDegrees -= viewContext.cameraRotateInput * heroCameraView.RotationDegreesPerSecond * Time.deltaTime;
             follow.FollowOffset = Quaternion.Euler(0f, viewContext.cameraYawDegrees, 0f) * viewContext.cameraBaseFollowOffset;
         }
     }
