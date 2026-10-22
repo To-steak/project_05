@@ -122,6 +122,10 @@
 ### 3.4 웨이브
 - 웨이브 데이터: 적 종류, 수, 스폰 간격, 스폰 갈래.
 - 웨이브 사이 준비 시간 (값 TBD).
+- **웨이브 이름: `스테이지-웨이브` 형식.** 1-1, 1-2, 1-3, …, 5-1, 5-2.
+- **웨이브마다 적 수가 정해져 있다.** 진행도는 `current`(처치 수) / `max`(이번 웨이브 적 수)로 표시한다.
+- **보스를 처치하면 웨이브 클리어.**
+- 미결정: 스테이지당 웨이브 수와 마지막 웨이브, 보스가 모든 웨이브에 있는지 여부, 보스 등장 시점, 코어에 도달한 적의 진행도 포함 여부.
 
 ### 3.5 코어
 - HP 보유.
@@ -138,7 +142,10 @@
 | 경험치 | 적 드롭 | 히어로 레벨업 |
 
 - 레벨업 시 3개 선택지 중 1개 선택 (히어로 강화 / 탑승 시 타워 강화 / 특수 능력).
-- **제안:** 선택하는 동안 세션 로직 틱 정지.
+- **레벨업 선택 중 일시정지 (확정).** 선택지가 열려 있는 동안 게임 진행이 멈추고, 플레이어는 강화할 내용을 고른다.
+  - `Time.timeScale`을 쓰지 않는다 (0이면 FixedUpdate 자체가 멈춰 선택 명령도 처리할 수 없다). World의 일시정지 상태로 처리한다.
+  - 일시정지 중에는 **CommandSystem만 실행**하고, `ChooseLevelUpOption` 외의 명령은 버린다. 나머지 System은 실행하지 않는다.
+  - 한 번에 여러 레벨이 오르면 대기 중인 레벨업 수만큼 선택을 연속으로 진행한다.
 
 ### 3.7 게임 흐름
 
@@ -220,7 +227,7 @@ public static class App {
     public static SettingsStore Settings; // PlayerPrefs 저장/로드
     public static SceneLoader Scene;      // 비동기 씬 로드
     public static AudioPlayer Audio;      // AudioSource 관리
-    public static ViewPool Pool;          // View GameObject 풀
+    public static ViewPool Pool;          // View GameObject 풀 (UnityEngine.Pool.ObjectPool 기반)
 }
 ```
 
@@ -332,6 +339,8 @@ Tick 없이 다른 System이 직접 호출하는 것:
 | 명령 | CommandRejectedEvent | 명령 종류, 사유 | 안내 문구, 실패 효과음 |
 
 ### 5.8 세션 수명주기
+- **View 풀:** Unity 내장 `UnityEngine.Pool.ObjectPool<T>`을 쓴다. **Game 씬 진입 시와 퇴장 시 모두 풀과 EntityID → View 매핑을 비운다.**
+  - 풀링된 오브젝트는 Game 씬에 속하므로 씬과 함께 파괴된다. 퇴장 시 비우는 것은 이미 파괴됐거나 파괴될 오브젝트의 참조를 남기지 않기 위함이다.
 - Game 씬 활성화 → `world = new World()` → System 실행 시작.
 - Game 씬을 떠남(재시작 포함) → `world = null`.
 - 서비스별 초기화 코드가 필요 없다.
@@ -393,7 +402,7 @@ Tick 없이 다른 System이 직접 호출하는 것:
 ## 7. 미결정 사항
 - [ ] 게임 제목, 테마/세계관
 - [x] 구조 → World + static System + App(DDOL Runner), 이벤트 큐, 엔티티 ID
-- [ ] 레벨업 선택 중 일시정지 여부
+- [x] 레벨업 선택 중 일시정지 → World 일시정지, CommandSystem만 실행
 - [x] 히어로 공격 방식 → 근거리·원거리 둘 다, 거리 x로 자동 전환
 - [x] 공격 타이머 1개, 근거리 광역, 탑승 중 자동 공격 꺼짐
 - [x] 카메라 투영 → Perspective
