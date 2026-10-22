@@ -24,12 +24,133 @@ namespace Project05.System
             // View 보간 기준점. 움직이지 않는 틱에도 갱신해야 이전 이동이 반복 보간되지 않는다
             hero.previousPosition = hero.currentPosition;
 
+            if (hero.state == HeroState.Dead)
+            {
+                TickRespawn(world);
+                return;
+            }
+
             if (hero.state == HeroState.Moving)
             {
                 MoveAlongPath(ref hero);
             }
 
+            if (hero.invincibilityRemainingTicks > 0)
+            {
+                hero.invincibilityRemainingTicks--;
+            }
+
+            TakeContactDamage(world);
+            if (world.hero.state == HeroState.Dead)
+            {
+                return;
+            }
+
             TickAutoAttack(world);
+        }
+
+        /// <summary>
+        /// 적과 닿았으면 접촉 피해를 받는다 (DESIGN 3.1). 닿음 = XZ 거리 ≤ 히어로 접촉 반경 + 적 반경. 적은 멈추지 않는다.
+        /// 피해를 받으면 invincibilityTicks 동안 추가 피해를 받지 않는다. 탑승 중에는 피해를 받지 않는다.
+        /// 한 틱에 여러 적과 닿아도 무적이 바로 걸리므로 첫 적의 피해만 받는다.
+        /// </summary>
+        private static void TakeContactDamage(World world)
+        {
+            ref Hero hero = ref world.hero;
+            if (hero.state == HeroState.Boarded || hero.invincibilityRemainingTicks > 0)
+            {
+                return;
+            }
+
+            EntityStore<Enemy> enemies = world.enemies;
+            int capacity = enemies.Capacity;
+            for (int enemyIndex = 0; enemyIndex < capacity; enemyIndex++)
+            {
+                if (!enemies.IsAliveAt(enemyIndex))
+                {
+                    continue;
+                }
+
+                ref Enemy enemy = ref enemies.GetAt(enemyIndex);
+                float contactDistance = hero.contactRadius + enemy.radius;
+                if (TargetingSystem.GetSqrDistanceXZ(hero.currentPosition, enemy.currentPosition) > contactDistance * contactDistance)
+                {
+                    continue;
+                }
+                if (enemy.contactDamage <= 0)
+                {
+                    continue;
+                }
+
+                ApplyDamage(world, enemy.contactDamage);
+                return;
+            }
+        }
+
+        /// <summary>
+        /// 히어로에 피해를 주고 무적을 건다. HP가 0이 되면 목숨 하나를 잃고 부활 대기(Dead)로 바뀐다.
+        /// 목숨이 0이 되면 부활하지 않으며, 패배 판정은 GameFlowSystem이 한다.
+        /// </summary>
+        private static void ApplyDamage(World world, int damage)
+        {
+            ref Hero hero = ref world.hero;
+            hero.currentHP = hero.currentHP > damage ? hero.currentHP - damage : 0;
+            hero.invincibilityRemainingTicks = hero.invincibilityTicks;
+
+            HeroDamagedRecord damagedRecord = new HeroDamagedRecord();
+            damagedRecord.position = hero.currentPosition;
+            damagedRecord.damage = damage;
+            world.heroDamagedRecords.Add(damagedRecord);
+
+            if (hero.currentHP > 0)
+            {
+                return;
+            }
+
+            hero.remainingLives = hero.remainingLives > 0 ? hero.remainingLives - 1 : 0;
+            hero.state = HeroState.Dead;
+            hero.respawnRemainingTicks = hero.respawnTicks;
+            hero.pathCornerCount = 0;
+            hero.nextPathCornerIndex = 0;
+            hero.invincibilityRemainingTicks = 0;
+
+            HeroDiedRecord diedRecord = new HeroDiedRecord();
+            diedRecord.position = hero.currentPosition;
+            diedRecord.remainingLives = hero.remainingLives;
+            world.heroDiedRecords.Add(diedRecord);
+        }
+
+        /// <summary>
+        /// 부활 대기 시간이 지나면 부활 지점에서 HP 가득 찬 상태로 부활한다. 목숨이 남아 있지 않으면 계속 대기한다.
+        /// 부활 지점으로 순간 이동하므로 이전 위치도 같이 옮겨 View가 보간하며 미끄러지지 않게 한다.
+        /// </summary>
+        private static void TickRespawn(World world)
+        {
+            ref Hero hero = ref world.hero;
+            if (hero.remainingLives <= 0)
+            {
+                return;
+            }
+
+            if (hero.respawnRemainingTicks > 0)
+            {
+                hero.respawnRemainingTicks--;
+                if (hero.respawnRemainingTicks > 0)
+                {
+                    return;
+                }
+            }
+
+            hero.state = HeroState.Idle;
+            hero.currentHP = hero.maxHP;
+            hero.previousPosition = world.heroSpawnPosition;
+            hero.currentPosition = world.heroSpawnPosition;
+            hero.attackCooldownTicks = 0;
+            hero.invincibilityRemainingTicks = 0;
+
+            HeroRespawnedRecord respawnedRecord = new HeroRespawnedRecord();
+            respawnedRecord.position = hero.currentPosition;
+            world.heroRespawnedRecords.Add(respawnedRecord);
         }
 
         /// <summary>

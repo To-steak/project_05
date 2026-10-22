@@ -7,7 +7,7 @@ namespace Project05.View
     /// <summary>
     /// 히어로 보간, 이동·공격 애니메이션, 무적 깜빡임, 사망·부활 연출.
     /// Runner가 LateUpdate에서 정해진 순서로 호출한다. World는 읽기만 한다.
-    /// 구현 브랜치: feat/hero-movement, feat/hero-combat
+    /// 구현 브랜치: feat/hero-movement, feat/hero-combat, feat/core-siege (무적 깜빡임, 사망 시 숨김)
     /// </summary>
     public static class HeroViewSystem
     {
@@ -44,6 +44,25 @@ namespace Project05.View
             {
                 heroTransform.position = position;
             }
+
+            heroView.SetVisible(IsHeroVisible(in hero, heroView.InvincibilityBlinkTicks));
+        }
+
+        /// <summary>
+        /// 부활 대기 중에는 숨기고, 피격 무적 중에는 남은 무적 틱으로 깜빡인다 (DESIGN 3.1: 깜빡임은 View가 표현).
+        /// 남은 틱으로 계산하므로 일시정지 중에는 깜빡임도 멈춘다.
+        /// </summary>
+        private static bool IsHeroVisible(in Hero hero, int blinkTicks)
+        {
+            if (hero.state == HeroState.Dead)
+            {
+                return false;
+            }
+            if (hero.invincibilityRemainingTicks <= 0)
+            {
+                return true;
+            }
+            return (hero.invincibilityRemainingTicks / Mathf.Max(1, blinkTicks)) % 2 == 0;
         }
     }
 }
