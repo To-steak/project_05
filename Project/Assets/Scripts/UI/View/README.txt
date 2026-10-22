@@ -10,7 +10,7 @@ UI 화면 표시만 담당. World와 App을 직접 참조하지 않고 Presenter
 - HUDView.cs (MonoBehaviour) : [Game] 골드, XP, 레벨, 스테이지-웨이브, 처치 수 current/max, 코어 HP, 히어로 HP, 목숨. (항목별 분리는 구현 시 결정)
 - LevelUpChoiceView.cs (MonoBehaviour) : [Game] 레벨업 3택 1.
 - CoreMenuView.cs (MonoBehaviour) : [Game] 코어 UI: 타워 해금, 타워별 업그레이드, 수리, 닫기.
-- ResultView.cs (MonoBehaviour) : [Game] 점수 텍스트, 재시작, 메인으로.
+- ResultView.cs (MonoBehaviour) : [Game] 점수·도달 웨이브 텍스트(TMP), 재시작, 메인으로. 항상 켜진 오브젝트에 두고 패널 루트를 켜고 끈다.
 - CommandRejectedView.cs (MonoBehaviour) : [Game] 명령 거절 안내 문구 (골드 부족 등).
 
 구현하면서 이 목록과 실제 파일을 맞춘다. 컨벤션은 저장소 루트의 CONVENTIONS.md를 따른다.
