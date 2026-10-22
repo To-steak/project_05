@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ba56ab4d1574ee7ba77907f636d2763, type: 3}
   m_Name: TowerSingle
   m_EditorClassIdentifier: 
-  displayName: "단일 공격"
+  displayName: "\uB2E8\uC77C \uACF5\uACA9"
   unlockCost: 0
   buildCost: 20
   repairCost: 10
@@ -35,5 +35,5 @@ MonoBehaviour:
     range: 8
     attackIntervalTicks: 25
     upgradeCost: 0
-  prefab: {fileID: 0}
+  prefab: {fileID: 3999345164518435478, guid: 64d641f38cdff664d8286985339e17f6, type: 3}
   icon: {fileID: 0}
