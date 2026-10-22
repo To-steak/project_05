@@ -60,6 +60,7 @@
 - 카메라는 View다. Cinemachine은 LateUpdate에서 갱신되므로 Logic/View 규칙과 맞는다.
 - **추적 대상은 히어로 View의 Transform(보간된 위치)**이다. Logic 위치를 직접 따라가면 50Hz 계단 움직임 때문에 화면이 떨린다.
 - 데드존과 감쇠(damping)를 둬서 작은 이동에는 카메라가 흔들리지 않게 한다.
+- **실행 순서:** Runner의 ViewSystem(히어로 View 보간)이 CinemachineBrain보다 먼저 LateUpdate를 돌아야 카메라가 이번 프레임 위치를 따라간다. CinemachineBrain의 기본 순서에 기대지 않고 **Runner에 `[DefaultExecutionOrder]`로 음수 값을 명시**한다. CinemachineBrain의 Update Method는 **Late Update**로 고정한다.
 - 제안: 탑승 시 타워용 가상 카메라로 전환 (우선순위 변경, 사거리가 보이도록 약간 줌아웃).
 - **투영: Perspective**, 히어로를 내려다보도록 기울인 탑다운.
 - **화면 밖 적 표시:** 화면 밖에서 코어(중심)로 다가오는 적은 화면 가장자리에 방향 화살표로 표시한다 (View).
