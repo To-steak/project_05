@@ -94,7 +94,10 @@
   - 거리 판정은 XZ 평면 기준, `sqrMagnitude`로 비교 (`거리² ≤ 사거리²`). "이내"는 **이하(≤)**.
   - 공격 후 타이머를 `attackIntervalTicks`로 재설정.
   - **탑승 중에는 히어로 자동 공격이 꺼진다.**
-- 사망: 코어 위치에서 N초 후 부활. 사망은 게임오버가 아니다.
+- 체력: `currentHP` / `maxHP`.
+- **피해: 적과의 접촉 피해.** 히어로와 적의 거리가 접촉 반경(히어로 반경 + 적 반경) 이하이면 적의 `contactDamage`만큼 피해를 받는다. 적은 멈추지 않고 지나간다.
+- **목숨: 3개.** HP가 0이 되면 목숨 1개를 잃고, `respawnTicks` 후 부활 지점에서 HP 가득 찬 상태로 부활한다.
+- 미결정: 연속 피해 방지 방식 (제안: 피격 후 `invincibilityTicks` 동안 무적), 탑승 중 피해 여부 (제안: 탑승 중 무적), 목숨이 0이 됐을 때의 결과 (패배 / 히어로 없이 계속).
 - 드롭 획득: 획득 반경(자석 반경) 안의 드롭을 자동 수집.
 
 ### 3.2 타워
@@ -294,6 +297,33 @@ Tick 없이 다른 System이 직접 호출하는 것:
 - Runner가 Update에서 큐를 비우며 View에 배달한다. 한 프레임에 FixedUpdate가 여러 번 돌아도 빠짐없이 전달된다.
 - 이벤트는 **struct**이고, 발생 시점의 **값을 복사**해 담는다 (EntityID, 위치, 종류, 수치). 객체 참조를 담지 않는다.
 - View는 구독 해제를 `OnDisable`에서 반드시 한다.
+- **기준: 순간은 이벤트, 계속 변하는 값은 World 읽기.** 골드, XP, HP 바, 웨이브 번호처럼 화면에 계속 떠 있는 값은 이벤트 없이 매 프레임 World에서 읽는다.
+
+#### 이벤트 목록 (초안)
+| 분류 | 이벤트 | 담을 값 | 받는 쪽 |
+|---|---|---|---|
+| 흐름 | WaveStartedEvent | 웨이브 번호 | 시작 배너, BGM |
+| 흐름 | WaveClearedEvent | 웨이브 번호 | 클리어 연출 |
+| 흐름 | GameEndedEvent | 승리 여부 | 결과 패널 |
+| 히어로 | HeroMeleeAttackedEvent | 위치, 반경 | 베기 애니메이션, 범위 VFX |
+| 히어로 | HeroRangedFiredEvent | 시작 위치, 대상 ID, 대상 위치 | 발사 애니메이션, 투사체 연출 |
+| 히어로 | HeroDamagedEvent | 위치, 피해량, 남은 HP | 피격 연출 |
+| 히어로 | HeroDiedEvent | 위치, 남은 목숨 | 사망 연출, 부활 카운트다운 |
+| 히어로 | HeroRespawnedEvent | 위치 | 부활 연출 |
+| 히어로 | HeroBoardedEvent / HeroUnboardedEvent | 타워 ID | 탑승 연출, 카메라 전환 |
+| 타워 | TowerBuiltEvent | 타워 ID, 종류, 위치 | 오브젝트 생성, 건설 연출 |
+| 타워 | TowerUpgradedEvent | 타워 ID, 단계 | 모델 교체, 강화 연출 |
+| 타워 | TowerFiredEvent | 타워 ID, 대상 위치, 탑승 사격 여부 | 사격 VFX·SFX |
+| 적 | EnemySpawnedEvent | 적 ID, 종류, 위치 | 오브젝트 생성 |
+| 적 | EnemyDamagedEvent | 적 ID, 위치, 피해량 | 피격 플래시, 데미지 숫자 |
+| 적 | EnemySlowedEvent | 적 ID | 감속 이펙트 |
+| 적 | EnemyDiedEvent | 적 ID, 종류, 위치 | 오브젝트 반환, 사망 VFX |
+| 적 | EnemyReachedCoreEvent | 적 ID, 위치 | 오브젝트 반환, 충돌 연출 |
+| 드롭 | DropSpawnedEvent | 드롭 ID, 종류, 위치 | 오브젝트 생성 |
+| 드롭 | DropCollectedEvent | 드롭 ID, 종류, 양 | 획득 연출, "+10G" 표시 |
+| 성장 | LevelUpEvent | 새 레벨, 선택지 3개 | 레벨업 연출, 선택 UI |
+| 코어 | CoreDamagedEvent | 피해량, 남은 HP | 피격 연출, 화면 경고 |
+| 명령 | CommandRejectedEvent | 명령 종류, 사유 | 안내 문구, 실패 효과음 |
 
 ### 5.8 세션 수명주기
 - Game 씬 활성화 → `world = new World()` → System 실행 시작.
