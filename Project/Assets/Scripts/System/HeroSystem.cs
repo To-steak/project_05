@@ -1,4 +1,6 @@
 using Project05.Component;
+using Project05.Component.Entity;
+using UnityEngine;
 
 namespace Project05.System
 {
@@ -14,6 +16,53 @@ namespace Project05.System
         /// <param name="world">현재 판의 월드</param>
         public static void Tick(World world)
         {
+            ref Hero hero = ref world.hero;
+
+            // View 보간 기준점. 움직이지 않는 틱에도 갱신해야 이전 이동이 반복 보간되지 않는다
+            hero.previousPosition = hero.currentPosition;
+
+            if (hero.state == HeroState.Moving)
+            {
+                MoveAlongPath(ref hero);
+            }
+        }
+
+        /// <summary>
+        /// 이번 틱의 이동 거리(moveSpeed)만큼 경로 코너를 따라간다. 한 틱에 코너를 여러 개 지날 수 있다.
+        /// 마지막 코너에 닿으면 Idle로 바꾼다.
+        /// </summary>
+        private static void MoveAlongPath(ref Hero hero)
+        {
+            float remainingDistance = hero.moveSpeed;
+            Vector3 position = hero.currentPosition;
+
+            while (remainingDistance > 0f && hero.nextPathCornerIndex < hero.pathCornerCount)
+            {
+                ref Vector3 corner = ref hero.pathCorners[hero.nextPathCornerIndex];
+                Vector3 toCorner = corner - position;
+                float sqrDistanceToCorner = toCorner.sqrMagnitude;
+
+                if (sqrDistanceToCorner <= remainingDistance * remainingDistance)
+                {
+                    position = corner;
+                    remainingDistance -= Mathf.Sqrt(sqrDistanceToCorner);
+                    hero.nextPathCornerIndex++;
+                }
+                else
+                {
+                    position += toCorner * (remainingDistance / Mathf.Sqrt(sqrDistanceToCorner));
+                    remainingDistance = 0f;
+                }
+            }
+
+            hero.currentPosition = position;
+
+            if (hero.nextPathCornerIndex >= hero.pathCornerCount)
+            {
+                hero.state = HeroState.Idle;
+                hero.pathCornerCount = 0;
+                hero.nextPathCornerIndex = 0;
+            }
         }
     }
 }

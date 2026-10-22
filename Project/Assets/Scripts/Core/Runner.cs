@@ -16,6 +16,7 @@ namespace Project05.Core
     /// </summary>
     public class Runner : MonoBehaviour
     {
+        private readonly InputCollector _inputCollector = new InputCollector();
         private World _world;
         private ViewContext _viewContext;
         private int _activeSceneHandle;
@@ -88,7 +89,7 @@ namespace Project05.Core
                 return;
             }
 
-            // 입력 수집 → world.input (InputCollector, feat/hero-movement)
+            _inputCollector.Collect(_world);
         }
 
         private void LateUpdate()
@@ -150,6 +151,9 @@ namespace Project05.Core
             SceneBaker.Bake(_world, scene);
             SessionSystem.Initialize(_world, App.Data);
             _viewContext = new ViewContext();
+            // 씬의 표현용 참조 수집 (판 시작 시 1회)
+            _viewContext.heroView = FindAnyObjectByType<HeroView>();
+            _viewContext.heroCameraView = FindAnyObjectByType<HeroCameraView>();
         }
 
         private void EndSession()
@@ -174,6 +178,7 @@ namespace Project05.Core
                 GUILayout.Label("Tick: " + _world.tickCount);
                 GUILayout.Label("Phase: " + _world.flow.phase + " (" + _world.flow.stageNumber + "-" + _world.flow.waveNumber + ")");
                 GUILayout.Label("Pause: " + _world.pauseReason);
+                GUILayout.Label("Hero: " + _world.hero.state + " " + _world.hero.currentPosition + " Path " + _world.hero.nextPathCornerIndex + "/" + _world.hero.pathCornerCount);
                 DrawBakingDebug();
             }
             GUILayout.EndArea();

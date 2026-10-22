@@ -12,6 +12,8 @@ namespace Project05.View
     {
         // 히어로 View (씬에 없으면 null)
         public HeroView heroView;
+        // 히어로 추적 Cinemachine 카메라 (씬에 없으면 null)
+        public HeroCameraView heroCameraView;
         // 코어 View (씬에 없으면 null)
         public CoreView coreView;
         // 살아있는 적 ID → 적 View
