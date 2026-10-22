@@ -12,7 +12,7 @@
 - [x] Scripts 폴더 구조와 폴더별 README.txt
 - [x] `chore/webgl-deploy` (PR #1) — WebGL Decompression Fallback 활성화 (병합됨)
 - [x] Actions 워크플로 제거 (로컬 빌드로 전환)
-- [ ] 빈 씬 WebGL 로컬 빌드 → itch.io 업로드 확인 (사용자 작업)
+- [x] 빈 씬 WebGL 로컬 빌드 → itch.io 업로드 확인 (사용자 작업)
 
 배포는 **로컬 빌드 후 itch.io에 직접 업로드**한다. GitHub Actions 자동 빌드는 쓰지 않는다.
 
@@ -22,7 +22,7 @@
 
 | 상태 | 브랜치 | 내용 | 확인 방법 |
 |---|---|---|---|
-| [ ] | `chore/assembly-setup` | 폴더별 Assembly Definition과 참조 방향 (DESIGN 5장, CONVENTIONS 1.1) | System에서 View를 참조하면 컴파일 에러 |
+| [x] | `chore/assembly-setup` | 폴더별 Assembly Definition과 참조 방향 (DESIGN 5장, CONVENTIONS 1.1) | System에서 View를 참조하면 컴파일 에러 |
 | [ ] | `feat/core-loop` | Bootstrap, Runner, App, World, ViewContext, EntityID, EntityStore, SessionSystem. Fixed Timestep 0.02 / Maximum Allowed Timestep 0.1 설정 | Game 씬 Play 시 Runner 생성, 틱 카운트 증가 (OnGUI 디버그) |
 | [ ] | `feat/hero-movement` | InputCollector, CommandSystem(이동), HeroSystem 이동, HeroViewSystem 보간, CameraViewSystem(Cinemachine 추적) | 클릭하면 히어로가 NavMesh 경로로 이동, 카메라가 따라옴 |
 
