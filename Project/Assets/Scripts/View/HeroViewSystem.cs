@@ -1,4 +1,6 @@
 using Project05.Component;
+using Project05.Component.Entity;
+using UnityEngine;
 
 namespace Project05.View
 {
@@ -9,6 +11,9 @@ namespace Project05.View
     /// </summary>
     public static class HeroViewSystem
     {
+        // 이보다 짧은 이동은 방향 전환에 쓰지 않는다 (제자리에서 방향이 튀는 것을 막음)
+        private const float MIN_FACING_SQR_DISTANCE = 0.000001f;
+
         /// <summary>
         /// 히어로 View를 World에 맞춰 갱신하고 히어로 기록을 연출한다.
         /// </summary>
@@ -16,6 +21,43 @@ namespace Project05.View
         /// <param name="viewContext">현재 판의 화면 상태</param>
         public static void Present(World world, ViewContext viewContext)
         {
+            HeroView heroView = viewContext.heroView;
+            if (heroView == null)
+            {
+                return;
+            }
+
+            ref readonly Hero hero = ref world.hero;
+            float alpha = GetInterpolationAlpha(world);
+            Vector3 position = Vector3.LerpUnclamped(hero.previousPosition, hero.currentPosition, alpha);
+
+            // 이번 틱의 이동 방향을 바라본다. 멈춰 있으면 마지막 방향을 유지한다
+            Vector3 movement = hero.currentPosition - hero.previousPosition;
+            movement.y = 0f;
+
+            Transform heroTransform = heroView.transform;
+            if (movement.sqrMagnitude > MIN_FACING_SQR_DISTANCE)
+            {
+                heroTransform.SetPositionAndRotation(position, Quaternion.LookRotation(movement));
+            }
+            else
+            {
+                heroTransform.position = position;
+            }
+        }
+
+        /// <summary>
+        /// 직전 틱과 이번 틱 사이 보간 비율 (DESIGN 5.11).
+        /// 시뮬레이션이 멈춘 동안(일시정지, 패배)에는 틱이 진행되지 않으므로 현재 위치(1)에 고정한다.
+        /// </summary>
+        private static float GetInterpolationAlpha(World world)
+        {
+            if (world.pauseReason != PauseReason.None || world.flow.phase == GamePhase.Defeat)
+            {
+                return 1f;
+            }
+
+            return Mathf.Clamp01((Time.time - Time.fixedTime) / Time.fixedDeltaTime);
         }
     }
 }

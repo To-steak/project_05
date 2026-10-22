@@ -1,10 +1,10 @@
 [View]
 네임스페이스: Project05.View
 
-공통 표현 관심사: 애니메이션, VFX, SFX, 카메라, 보간. Runner가 LateUpdate에서 static ~ViewSystem.Present(world, viewContext)를 정해진 순서로 호출한다. World는 읽기만. 이벤트 구독 없음. 어셈블리 참조: Component, Foundation(App).
+공통 표현 관심사: 애니메이션, VFX, SFX, 카메라, 보간. Runner가 LateUpdate에서 static ~ViewSystem.Present(world, viewContext)를 정해진 순서로 호출한다. World는 읽기만. 이벤트 구독 없음. 어셈블리 참조: Component, Foundation(App), Unity.Cinemachine.
 
 들어갈 파일:
-- ViewContext.cs (class) : View 쪽 상태: EntityID → View 매핑(히어로, 코어, 적, 드롭, 타워), 풀 참조, 카메라 참조. View 상태가 static 필드에 남지 않도록 인스턴스로 둔다. Game 씬 진입·퇴장 시 비운다.
+- ViewContext.cs (class) : View 쪽 상태: EntityID → View 매핑(히어로, 코어, 적, 드롭, 타워), 풀 참조, 카메라 참조(HeroCameraView). View 상태가 static 필드에 남지 않도록 인스턴스로 둔다. Game 씬 진입·퇴장 시 비운다.
 - HeroViewSystem.cs (static class) : 히어로 보간, 이동·공격 애니메이션, 무적 깜빡임, 사망·부활 연출.
 - EnemyViewSystem.cs (static class) : 적 동기화(새 ID는 풀에서 꺼내기, 사라진 ID는 반납), 보간, 피격 플래시, 사망 VFX.
 - TowerViewSystem.cs (static class) : 타워 동기화, 사격·피격·파괴·수리·업그레이드 연출, 탑승 연출.
@@ -18,6 +18,7 @@
 - TowerView.cs (MonoBehaviour) : 타워 프리팹 컴포넌트. 로직 없음.
 - DropView.cs (MonoBehaviour) : 드롭 프리팹 컴포넌트. 로직 없음.
 - CoreView.cs (MonoBehaviour) : 코어 오브젝트 컴포넌트. 로직 없음.
+- HeroCameraView.cs (MonoBehaviour) : 히어로 추적 CinemachineCamera 표시. 탑승 카메라와 구분용. 로직 없음.
 - InteractionPromptView.cs (MonoBehaviour) : Space 아이콘 오브젝트.
 - OffscreenIndicatorView.cs (MonoBehaviour) : 화살표 오브젝트.
 
