@@ -73,13 +73,16 @@ namespace Project05.UI.Presenter
             TowerStats[] towerStats = world.towerStats;
             bool[] isUnlockedByTowerType = world.towerUnlock.isUnlockedByTowerType;
             int gold = world.progress.gold;
+            bool hasBuildable = false;
             for (int towerTypeIndex = 0; towerTypeIndex < _entries.Length; towerTypeIndex++)
             {
                 ref TowerStats stats = ref towerStats[towerTypeIndex];
                 bool isBuildable = towerTypeIndex < isUnlockedByTowerType.Length && isUnlockedByTowerType[towerTypeIndex] && stats.levels.Length > 0;
                 _entries[towerTypeIndex].SetVisible(isBuildable);
+                hasBuildable |= isBuildable;
                 _entries[towerTypeIndex].SetBuildInteractable(gold >= stats.buildCost);
             }
+            _view.SetNoUnlockedMessageVisible(!hasBuildable);
         }
 
         private static Sprite GetIcon(int towerTypeIndex)

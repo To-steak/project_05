@@ -15,6 +15,8 @@ namespace Project05.Core
         private InputAction _clickAction;
         private InputAction _pointAction;
         private InputAction _interactAction;
+        // ESC: 일시정지 메뉴 (없어도 나머지 입력은 동작한다)
+        private InputAction _pauseAction;
         // 레벨업 선택지 1 / 2 / 3 키 (인덱스 = 제시 칸 번호)
         private readonly InputAction[] _chooseOptionActions = new InputAction[ProgressState.OFFERED_OPTION_COUNT];
         private bool _hasSearchedActions;
@@ -22,6 +24,7 @@ namespace Project05.Core
         private const string CLICK_ACTION_PATH = "Game/Click";
         private const string POINT_ACTION_PATH = "Game/Point";
         private const string INTERACT_ACTION_PATH = "Game/Interact";
+        private const string PAUSE_ACTION_PATH = "Game/Pause";
         // 레벨업 선택지 키 액션 경로 앞부분. 뒤에 1부터 붙는다 (Game/ChooseOption1 ~ 3)
         private const string CHOOSE_OPTION_ACTION_PATH_PREFIX = "Game/ChooseOption";
         // 클릭 레이캐스트 최대 거리 (카메라에서 지면까지 충분히 먼 값)
@@ -29,7 +32,7 @@ namespace Project05.Core
 
         /// <summary>
         /// 이번 프레임에 눌린 입력을 명령으로 바꿔 입력 버퍼에 넣는다.
-        /// 좌클릭은 누르고 있는 상태·커서 지면 좌표를 갱신하고(연속 입력), 누른 순간 지상이면 MoveTo. Space는 Interact. 레벨업 선택 중 1 / 2 / 3은 ChooseLevelUpOption.
+        /// 좌클릭은 누르고 있는 상태·커서 지면 좌표를 갱신하고(연속 입력), 누른 순간 지상이면 MoveTo. Space는 Interact, ESC는 TogglePauseMenu. 레벨업 선택 중 1 / 2 / 3은 ChooseLevelUpOption.
         /// </summary>
         /// <param name="world">현재 판의 월드</param>
         public void Collect(World world)
@@ -44,6 +47,13 @@ namespace Project05.Core
                 Command interactCommand = new Command();
                 interactCommand.kind = CommandKind.Interact;
                 world.input.commands.Enqueue(interactCommand);
+            }
+
+            if (_pauseAction != null && _pauseAction.WasPressedThisFrame())
+            {
+                Command pauseCommand = new Command();
+                pauseCommand.kind = CommandKind.TogglePauseMenu;
+                world.input.commands.Enqueue(pauseCommand);
             }
 
             CollectLevelUpChoice(world);
@@ -126,6 +136,7 @@ namespace Project05.Core
                 _clickAction = actions.FindAction(CLICK_ACTION_PATH);
                 _pointAction = actions.FindAction(POINT_ACTION_PATH);
                 _interactAction = actions.FindAction(INTERACT_ACTION_PATH);
+                _pauseAction = actions.FindAction(PAUSE_ACTION_PATH);
                 // 선택지 키는 없어도 클릭으로 고를 수 있으므로 필수가 아니다 (액션 찾기는 1회라 문자열 결합은 문제없다)
                 for (int offeredSlot = 0; offeredSlot < _chooseOptionActions.Length; offeredSlot++)
                 {

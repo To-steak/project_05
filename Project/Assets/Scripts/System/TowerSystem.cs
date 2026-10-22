@@ -13,6 +13,7 @@ namespace Project05.System
     /// feat/tower ①: 미탑승 자동 공격. 공격 타이머가 준비되면 사거리 안 최근접 적에게 직선 투사체를 쏜다 (히어로 원거리와 같은 ProjectileSystem).
     /// feat/tower ②: 탑승 중에는 자동 공격 대신, 좌클릭을 누르고 있는 동안 공격 타이머가 준비될 때마다 커서 방향으로 쏜다 (공격력 = 히어로 공격력).
     /// 타워 피해와 파괴(공터 비움, 탑승 중이면 강제 하차, 공격하던 적은 경로로 복귀).
+    /// feat/core-menu: 업그레이드(TryUpgrade)·수리(TryRepair).
     /// 구현 브랜치: feat/tower (자동 공격 → 탑승 사격·HP·파괴), feat/core-menu (업그레이드·수리)
     /// </summary>
     public static class TowerSystem
@@ -70,6 +71,90 @@ namespace Project05.System
             tower.attackDamage = levelStats.attackDamage;
             tower.range = levelStats.range;
             tower.attackIntervalTicks = levelStats.attackIntervalTicks;
+        }
+
+        /// <summary>
+        /// 공터의 타워를 골드를 내고 다음 단계로 올린다 (DESIGN 3.2). 최대 HP와 공격력이 오르고 현재 HP는 최대로 회복한다.
+        /// </summary>
+        /// <param name="world">현재 판의 월드</param>
+        /// <param name="slotIndex">대상 공터 (코어 UI 타워 탭의 칸 번호)</param>
+        /// <param name="rejectReason">실패 사유 (성공하면 의미 없음)</param>
+        /// <returns>업그레이드했으면 true</returns>
+        public static bool TryUpgrade(World world, int slotIndex, out CommandRejectReason rejectReason)
+        {
+            rejectReason = CommandRejectReason.NoTower;
+            if (!TryGetTowerAt(world, slotIndex, out EntityID towerID))
+            {
+                return false;
+            }
+
+            ref Tower tower = ref world.towers.Get(towerID);
+            TowerLevelStats[] levels = world.towerStats[tower.towerTypeIndex].levels;
+            if (tower.level >= levels.Length - 1)
+            {
+                rejectReason = CommandRejectReason.MaxLevel;
+                return false;
+            }
+            if (!EconomySystem.TrySpendGold(world, levels[tower.level].upgradeCost))
+            {
+                rejectReason = CommandRejectReason.NotEnoughGold;
+                return false;
+            }
+
+            ApplyLevel(world, ref tower, tower.level + 1);
+            tower.currentHP = tower.maxHP;
+
+            TowerUpgradedRecord upgradedRecord = new TowerUpgradedRecord();
+            upgradedRecord.towerID = towerID;
+            upgradedRecord.level = tower.level;
+            world.towerUpgradedRecords.Add(upgradedRecord);
+            return true;
+        }
+
+        /// <summary>
+        /// 공터의 타워를 고정 비용(repairCost)을 내고 최대 HP까지 회복한다. HP가 가득 차 있으면 거절한다.
+        /// </summary>
+        /// <param name="world">현재 판의 월드</param>
+        /// <param name="slotIndex">대상 공터 (코어 UI 타워 탭의 칸 번호)</param>
+        /// <param name="rejectReason">실패 사유 (성공하면 의미 없음)</param>
+        /// <returns>수리했으면 true</returns>
+        public static bool TryRepair(World world, int slotIndex, out CommandRejectReason rejectReason)
+        {
+            rejectReason = CommandRejectReason.NoTower;
+            if (!TryGetTowerAt(world, slotIndex, out EntityID towerID))
+            {
+                return false;
+            }
+
+            ref Tower tower = ref world.towers.Get(towerID);
+            if (tower.currentHP >= tower.maxHP)
+            {
+                rejectReason = CommandRejectReason.AlreadyFullHP;
+                return false;
+            }
+            if (!EconomySystem.TrySpendGold(world, world.towerStats[tower.towerTypeIndex].repairCost))
+            {
+                rejectReason = CommandRejectReason.NotEnoughGold;
+                return false;
+            }
+
+            tower.currentHP = tower.maxHP;
+
+            TowerRepairedRecord repairedRecord = new TowerRepairedRecord();
+            repairedRecord.towerID = towerID;
+            world.towerRepairedRecords.Add(repairedRecord);
+            return true;
+        }
+
+        private static bool TryGetTowerAt(World world, int slotIndex, out EntityID towerID)
+        {
+            towerID = default(EntityID);
+            if (slotIndex < 0 || slotIndex >= world.towerSlots.Length)
+            {
+                return false;
+            }
+            towerID = world.towerSlots[slotIndex].towerID;
+            return world.towers.IsAlive(towerID);
         }
 
         /// <summary>

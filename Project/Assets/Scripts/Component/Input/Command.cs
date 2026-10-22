@@ -11,7 +11,7 @@ namespace Project05.Component.Input
         public CommandKind kind;
         // 클릭한 지면 좌표 (MoveTo)
         public Vector3 groundPosition;
-        // 대상 공터 인덱스 (UpgradeTower, RepairTower)
+        // 대상 공터 인덱스 (UpgradeTower, RepairTower — 코어 UI 타워 탭의 칸 번호)
         public int slotIndex;
         // 대상 타워 종류 (UnlockTowerType, BuildTower)
         public int towerTypeIndex;
