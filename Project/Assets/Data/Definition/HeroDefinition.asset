@@ -19,9 +19,12 @@ MonoBehaviour:
   attackIntervalTicks: 25
   meleeRange: 2
   rangedRange: 8
+  projectileSpeed: 0.4
+  projectileRadius: 0.2
   contactRadius: 0.5
   invincibilityTicks: 50
   respawnTicks: 150
   pickupRadius: 2.5
   interactionRadius: 2
-  prefab: {fileID: 0}
+  prefab: {fileID: 5650481211667183865, guid: a80ca79f092b25847ac449112af31625, type: 3}
+  projectilePrefab: {fileID: 1684731799131702298, guid: 64d901d86ef66d24f873d8476b20a687, type: 3}
