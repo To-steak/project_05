@@ -35,6 +35,10 @@ Unity 프로젝트 루트는 `Project/`다.
 - 적 사망 시 Logic 객체는 즉시 풀에 반환하고, 사망 연출은 별도로 재생한다.
 - AudioService는 View 쪽에서만 호출한다.
 
+### 카메라
+- Cinemachine(3.x, 네임스페이스 `Unity.Cinemachine`)을 쓴다. 카메라는 View다.
+- 추적 대상은 히어로 **View Transform**이다. Logic 위치를 추적 대상으로 쓰지 않는다.
+
 ### UI
 - View-Presenter 구조. Presenter가 서비스 이벤트를 구독하고 View를 갱신한다.
 - View는 서비스를 직접 참조하지 않는다.
