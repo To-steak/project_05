@@ -21,6 +21,8 @@ MonoBehaviour:
   waveRule: {fileID: 11400000, guid: 0e861e4a6d3441d6b01c4a0d588b4b56, type: 2}
   difficulty: {fileID: 11400000, guid: 41526376c2d34d7c84cd046526408483, type: 2}
   progression: {fileID: 11400000, guid: 0da9eeeed63949c9bc841a032e1859ea, type: 2}
+  towers:
+  - {fileID: 11400000, guid: 77abcc0b0f474fc48406c316fda110e1, type: 2}
   levelUpOptions:
   - {fileID: 11400000, guid: edeeb024ae38449a934dd7a51bbfdc20, type: 2}
   - {fileID: 11400000, guid: a0d9738c7d5a466cb8f899bc7b6ad24c, type: 2}
