@@ -21,6 +21,10 @@ namespace Project05.Component.Input
         RepairTower,
         // 코어 UI 닫기
         CloseCoreMenu,
+        // 건설 목록: 열린 공터에 타워 건설 (towerTypeIndex)
+        BuildTower,
+        // 건설 목록 닫기
+        CloseBuildMenu,
         // [디버그] 현재 웨이브를 즉시 클리어 (처치 판정이 생기기 전 웨이브 전환 확인용, Runner 디버그 패널에서만 넣는다)
         DebugClearWave,
     }

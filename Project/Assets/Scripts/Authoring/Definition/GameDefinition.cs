@@ -5,7 +5,6 @@ namespace Project05.Authoring.Definition
     /// <summary>
     /// 모든 Definition을 가진 루트. Resources 폴더의 RESOURCE_PATH에 하나만 두고,
     /// 게임 시작 시 Bootstrap이 불러와 DefinitionBaker로 App.Data에 베이킹한다.
-    /// 타워 정의는 해당 기능 브랜치에서 추가한다.
     /// </summary>
     [CreateAssetMenu(fileName = "GameDefinition", menuName = "Project05/Definition/Game")]
     public class GameDefinition : ScriptableObject
@@ -20,6 +19,8 @@ namespace Project05.Authoring.Definition
         public DifficultyDefinition difficulty;
         // 레벨 진행
         public ProgressionDefinition progression;
+        // 타워 종류별 정의 (인덱스 = 타워 종류)
+        public TowerDefinition[] towers = new TowerDefinition[0];
         // 레벨업 선택지 목록 (레벨업마다 이 중 3개를 중복 없이 뽑아 제시)
         public LevelUpOptionDefinition[] levelUpOptions = new LevelUpOptionDefinition[0];
         // 골드 드롭 View 프리팹 (View 테이블로 베이킹, 없으면 보이지 않는다)

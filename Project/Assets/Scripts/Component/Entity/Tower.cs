@@ -25,6 +25,10 @@ namespace Project05.Component.Entity
         public float range;
         // 공격 주기 (틱)
         public int attackIntervalTicks;
+        // 투사체 이동 속도 (유닛 / 틱, 건설 시 TowerStats에서 복사)
+        public float projectileSpeed;
+        // 투사체 명중 판정 반경
+        public float projectileRadius;
         // 다음 공격까지 남은 틱 (0이면 준비됨)
         public int attackCooldownTicks;
         // 적이 경로를 멈추고 이 타워를 공격하기 시작하는 거리

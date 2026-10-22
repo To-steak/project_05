@@ -56,6 +56,7 @@ namespace Project05.Core.Baking
             data.difficulty = BakeDifficulty(definition.difficulty, definition);
             data.progression = BakeProgression(definition.progression, definition);
             data.levelUpOptions = BakeLevelUpOptions(definition.levelUpOptions, definition);
+            data.towerStats = BakeTowers(definition.towers, definition);
             return data;
         }
 
@@ -96,6 +97,28 @@ namespace Project05.Core.Baking
             {
                 LevelUpOptionDefinition optionDefinition = optionDefinitions[optionIndex];
                 viewData.levelUpOptionNames[optionIndex] = optionDefinition == null ? string.Empty : optionDefinition.displayName;
+            }
+
+            TowerDefinition[] towerDefinitions = definition.towers;
+            int towerCount = towerDefinitions == null ? 0 : towerDefinitions.Length;
+            viewData.towerPrefabs = new GameObject[towerCount];
+            viewData.towerIcons = new Sprite[towerCount];
+            viewData.towerNames = new string[towerCount];
+            for (int towerTypeIndex = 0; towerTypeIndex < towerCount; towerTypeIndex++)
+            {
+                TowerDefinition towerDefinition = towerDefinitions[towerTypeIndex];
+                if (towerDefinition == null)
+                {
+                    viewData.towerNames[towerTypeIndex] = string.Empty;
+                    continue;
+                }
+                if (towerDefinition.prefab == null)
+                {
+                    Debug.LogWarning("[DefinitionBaker] " + towerDefinition.name + ".prefab 이(가) 비어 있다. 이 타워는 화면에 보이지 않는다.", towerDefinition);
+                }
+                viewData.towerPrefabs[towerTypeIndex] = towerDefinition.prefab;
+                viewData.towerIcons[towerTypeIndex] = towerDefinition.icon;
+                viewData.towerNames[towerTypeIndex] = towerDefinition.displayName;
             }
 
             if (definition.enemies == null)
@@ -214,6 +237,62 @@ namespace Project05.Core.Baking
             difficulty.bossGoldMultiplier = difficultyDefinition.bossGoldMultiplier;
             difficulty.bossXPMultiplier = difficultyDefinition.bossXPMultiplier;
             return difficulty;
+        }
+
+        private static TowerStats[] BakeTowers(TowerDefinition[] towerDefinitions, GameDefinition owner)
+        {
+            if (towerDefinitions == null)
+            {
+                WarnMissing(owner, "towers");
+                return new TowerStats[0];
+            }
+
+            // 인덱스가 타워 종류이므로 빠진 칸도 자리를 유지한다 (빠진 칸은 단계 0개라 건설할 수 없다)
+            TowerStats[] towerStats = new TowerStats[towerDefinitions.Length];
+            for (int towerTypeIndex = 0; towerTypeIndex < towerDefinitions.Length; towerTypeIndex++)
+            {
+                ref TowerStats stats = ref towerStats[towerTypeIndex];
+                stats.levels = new TowerLevelStats[0];
+
+                TowerDefinition towerDefinition = towerDefinitions[towerTypeIndex];
+                if (towerDefinition == null)
+                {
+                    WarnMissing(owner, "towers[" + towerTypeIndex + "]");
+                    continue;
+                }
+
+                stats.unlockCost = towerDefinition.unlockCost;
+                stats.buildCost = towerDefinition.buildCost;
+                stats.repairCost = towerDefinition.repairCost;
+                stats.aggroRange = towerDefinition.aggroRange;
+                stats.projectileSpeed = towerDefinition.projectileSpeed;
+                stats.projectileRadius = towerDefinition.projectileRadius;
+
+                TowerLevelDefinition[] levelDefinitions = towerDefinition.levels;
+                if (levelDefinitions == null || levelDefinitions.Length == 0)
+                {
+                    Debug.LogWarning("[DefinitionBaker] " + towerDefinition.name + ".levels 이(가) 비어 있다. 이 타워는 건설할 수 없다.", towerDefinition);
+                    continue;
+                }
+
+                stats.levels = new TowerLevelStats[levelDefinitions.Length];
+                for (int levelIndex = 0; levelIndex < levelDefinitions.Length; levelIndex++)
+                {
+                    TowerLevelDefinition levelDefinition = levelDefinitions[levelIndex];
+                    if (levelDefinition == null)
+                    {
+                        continue;
+                    }
+
+                    ref TowerLevelStats levelStats = ref stats.levels[levelIndex];
+                    levelStats.maxHP = levelDefinition.maxHP;
+                    levelStats.attackDamage = levelDefinition.attackDamage;
+                    levelStats.range = levelDefinition.range;
+                    levelStats.attackIntervalTicks = levelDefinition.attackIntervalTicks;
+                    levelStats.upgradeCost = levelDefinition.upgradeCost;
+                }
+            }
+            return towerStats;
         }
 
         private static LevelUpOptionStats[] BakeLevelUpOptions(LevelUpOptionDefinition[] optionDefinitions, GameDefinition owner)

@@ -13,7 +13,7 @@ namespace Project05.Component.Input
         public Vector3 groundPosition;
         // 대상 공터 인덱스 (UpgradeTower, RepairTower)
         public int slotIndex;
-        // 대상 타워 종류 (UnlockTowerType)
+        // 대상 타워 종류 (UnlockTowerType, BuildTower)
         public int towerTypeIndex;
         // 고른 선택지 번호 0 ~ 2 (ChooseLevelUpOption)
         public int optionIndex;
