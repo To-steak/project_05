@@ -334,7 +334,7 @@ Authoring의 원본 데이터를 Component의 struct로 변환한다. System은 
 |---|---|
 | FixedUpdate | World가 있으면 System들을 5.5 순서로 호출 |
 | Update | 입력을 수집해 `world.Input`에 적재 |
-| LateUpdate | ① `~ViewSystem.Present(world)`를 정해진 순서로 호출 (동기화, 보간, 기록 연출) ② Presenter 호출 ③ 프레임 기록 목록 비우기 |
+| LateUpdate | ① `~ViewSystem.Present(world, viewContext)`를 정해진 순서로 호출 (동기화, 보간, 기록 연출) ② Presenter 호출 ③ 프레임 기록 목록 비우기 |
 
 ### 5.4 System
 - `~System` 이름의 **static 클래스**. **static 필드에 상태를 두지 않는다.**
@@ -433,6 +433,13 @@ Tick 없이 다른 System이 직접 호출하는 것:
 | 명령 | CommandRejectedRecord | 명령 종류, 사유 | 안내 문구, 실패 효과음 |
 
 - 상태로 읽는 것 (기록 없음): 엔티티 생성·소멸, 탑승/하차, 감속, 코어 포위 도착, 레벨업 선택 대기, 게임 종료.
+
+#### ViewContext (확정)
+- World가 "한 판의 게임 상태"라면, **ViewContext는 "한 판의 화면 상태"**다. 실행 중 World와 GameObject를 이어주는 인스턴스.
+- 담는 것: EntityID → View 오브젝트 매핑(종류별), View 풀 참조, 씬의 표현용 참조(Cinemachine 카메라, 코어 View 등).
+- ViewSystem은 **static 필드 없이** `Present(World world, ViewContext viewContext)`로 받은 것만 처리한다. Logic System과 같은 규칙이다.
+- Runner가 보관한다. Game 씬 진입 시 새로 만들고(씬의 표현용 참조 수집 포함), 퇴장 시 버린다. 풀과 매핑 비우기가 이것으로 처리된다.
+- Authoring과 다르다: Authoring은 베이킹용 원본(실행 중 불변), ViewContext는 실행 중 계속 바뀌는 상태.
 
 ### 5.8 세션 수명주기
 - **View 풀:** Unity 내장 `UnityEngine.Pool.ObjectPool<T>`을 쓴다. **Game 씬 진입 시와 퇴장 시 모두 풀과 EntityID → View 매핑을 비운다.**
