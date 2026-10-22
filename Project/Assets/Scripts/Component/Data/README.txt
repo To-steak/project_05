@@ -1,17 +1,17 @@
 [Component/Data]
 네임스페이스: Project05.Component.Data
 
-ScriptableObject에서 베이킹된 읽기 전용 테이블 struct.
+ScriptableObject(~Definition)에서 베이킹된 읽기 전용 테이블 struct. 생성 시점에만 조회한다.
 
 들어갈 파일:
-- GameData.cs (class) : 베이킹된 테이블 모음 (App.Data의 타입).
-- HeroStats.cs (struct) : HP, 이동 속도, 근거리·원거리 사거리, 공격 주기, 공격력, 획득 반경, 탑승 반경, 부활 틱.
-- EnemyStats.cs (struct) : HP, 이동 속도, 코어 피해량, 드롭 골드·XP.
-- TowerStats.cs (struct) : 건설·강화 비용, 단계별 공격력·사거리·공격 주기, 탑승 배율.
-- WaveEntry.cs (struct) : 적 종류, 수, 스폰 간격 틱, 스폰 지점 인덱스.
-- WaveStats.cs (struct) : 웨이브별 WaveEntry 범위, 준비 시간 틱.
-- LevelUpOptionStats.cs (struct) : 선택지 종류와 효과 수치.
-- LevelUpEffectKind.cs (enum) : 히어로 강화, 탑승 타워 강화, 특수 능력 등.
+- GameData.cs (class) : 베이킹된 테이블 모음 (App.Data의 타입). 판 시작 시 World가 참조를 받는다.
+- HeroStats.cs (struct) : 최대 HP, 목숨 수, 이동 속도, 공격력, 공격 주기 틱, 근거리 사거리, 원거리 사거리, 접촉 반경, 무적 틱, 부활 틱, 획득 반경, 상호작용 반경.
+- EnemyStats.cs (struct) : 기본 HP, 이동 속도, 접촉 피해, 코어·타워 공격력, 공격 주기 틱, 기본 드롭 골드·XP, 보스 여부.
+- TowerStats.cs (struct) : 해금 비용, 건설 비용, 단계별 업그레이드 비용, 수리 비용, 단계별 최대 HP·공격력·사거리·공격 주기 틱, aggroRange.
+- WaveRuleStats.cs (struct) : 웨이브 적 수 계수 (임시: x × 10), 스폰 간격 틱, 준비 시간 틱, 보스 웨이브 번호 (10). 적 구성 생성 규칙은 미정.
+- DifficultyStats.cs (struct) : hpGrowth (지수), goldGrowth·xpGrowth (선형), 보스 HP·골드·XP 배율.
+- LevelUpOptionStats.cs (struct) : 효과 종류와 증가량 (HP·공격력은 고정값, 획득량은 퍼센트).
+- LevelUpEffectKind.cs (enum) : HeroMaxHP, CoreMaxHP, HeroAttackDamage, GoldGainPercent, XPGainPercent
 - ProgressionStats.cs (struct) : 레벨별 필요 XP.
 
 구현하면서 이 목록과 실제 파일을 맞춘다. 컨벤션은 저장소 루트의 CONVENTIONS.md를 따른다.
