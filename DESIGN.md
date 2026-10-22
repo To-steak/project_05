@@ -334,6 +334,8 @@ Tick 없이 다른 System이 직접 호출하는 것:
 
 ### 5.7 Logic → View 전달 (이벤트 사용 금지)
 - **이벤트를 쓰지 않는다.** C# `event`, delegate 구독, 이벤트 버스, 이벤트 큐 모두 금지.
+- **예외: UI.** UI는 World가 제어하는 구조가 아니므로, `Button.onClick` 등 UnityEvent와 UI Presenter가 발행하는 이벤트는 허용한다.
+  - 단, UI 이벤트 핸들러는 World를 직접 바꾸지 않는다. Game 씬에서는 `world.Input`에 명령을 넣는 것까지만 한다.
 - View는 **Runner가 정해진 순서로 호출하는 `~ViewSystem`**이 World를 읽어 표현한다. 구독이 없으므로 구독 해제 누락 버그도 없다.
 - 전달 방식은 두 가지뿐이다.
 
@@ -434,7 +436,7 @@ Tick 없이 다른 System이 직접 호출하는 것:
 ## 7. 미결정 사항
 - [ ] 게임 제목, 테마/세계관
 - [x] 구조 → World + static System + App(DDOL Runner), 프레임 기록 + ViewSystem 루프 (이벤트 금지), 엔티티 ID
-- [ ] UI 버튼 입력 처리 (Button.onClick은 UnityEvent → 허용 여부 확인)
+- [x] UI 이벤트 → 예외로 허용 (UnityEvent, UI Presenter 발행 이벤트). World는 `world.Input` 경유로만 변경
 - [x] 레벨업 선택 중 일시정지 → World 일시정지, CommandSystem만 실행
 - [x] 히어로 공격 방식 → 근거리·원거리 둘 다, 거리 x로 자동 전환
 - [x] 공격 타이머 1개, 근거리 광역, 탑승 중 자동 공격 꺼짐

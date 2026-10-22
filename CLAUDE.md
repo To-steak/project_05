@@ -30,6 +30,7 @@ ECS 패키지(DOTS)는 쓰지 않는다. "System은 함수, 상태는 데이터"
 ### 엔티티와 프레임 기록
 - 엔티티는 객체 참조 대신 `EntityID { index, generation }`로 가리킨다. World는 종류별 배열 + 빈 슬롯 목록으로 보관하고, 슬롯 재사용 시 generation을 올린다.
 - **이벤트 사용 금지.** C# `event`, delegate 구독, 이벤트 버스, 이벤트 큐를 만들지 않는다.
+- **예외: UI.** `Button.onClick` 등 UnityEvent와 UI Presenter가 발행하는 이벤트는 허용한다. 단 핸들러는 World를 직접 바꾸지 않고 `world.Input`에 명령을 넣는 것까지만 한다.
 - View는 Runner가 LateUpdate에서 정해진 순서로 호출하는 `~ViewSystem.Present(world)`가 처리한다.
 - 지속 상태는 매 프레임 World를 읽고, 그 순간의 일은 프레임 기록(struct, 값 복사, 객체 참조 금지)을 읽는다. 기록 목록은 Runner가 LateUpdate 마지막에 비운다.
 - View 오브젝트 생성·반납은 World의 살아있는 엔티티와 비교하는 동기화 방식으로 한다.
