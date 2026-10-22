@@ -1,4 +1,5 @@
 using Project05.Core.Baking;
+using Project05.Foundation;
 using UnityEngine;
 
 namespace Project05.Core
@@ -27,7 +28,7 @@ namespace Project05.Core
         {
             GameObject runnerObject = new GameObject(RUNNER_OBJECT_NAME);
             Object.DontDestroyOnLoad(runnerObject);
-            App.Runner = runnerObject.AddComponent<Runner>();
+            runnerObject.AddComponent<Runner>();
             App.Data = DefinitionBaker.Bake(DefinitionBaker.Load());
         }
     }

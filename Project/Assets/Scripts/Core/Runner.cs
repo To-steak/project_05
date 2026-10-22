@@ -1,6 +1,7 @@
 using Project05.Component;
 using Project05.Component.Data;
 using Project05.Core.Baking;
+using Project05.Foundation;
 using Project05.System;
 using Project05.View;
 using UnityEngine;

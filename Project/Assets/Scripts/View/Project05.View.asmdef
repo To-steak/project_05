@@ -2,7 +2,8 @@
     "name": "Project05.View",
     "rootNamespace": "Project05.View",
     "references": [
-        "GUID:0e0aa7e1db364ea8aac915ce1b315d6f"
+        "GUID:0e0aa7e1db364ea8aac915ce1b315d6f",
+        "GUID:03b2e181843d49fdae576fbb6cbf3a1a"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
