@@ -1,0 +1,20 @@
+{
+    "name": "Project05.Core",
+    "rootNamespace": "Project05.Core",
+    "references": [
+        "GUID:0e0aa7e1db364ea8aac915ce1b315d6f",
+        "GUID:74c007cc0e2a403d983a8d956e7e4bf9",
+        "GUID:a5fe4553404648f5811a059951e11cec",
+        "GUID:a2384873147d421d9abe1d881951840e",
+        "GUID:4291e2b9e11141cf87daa20cbf8c8a1c"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

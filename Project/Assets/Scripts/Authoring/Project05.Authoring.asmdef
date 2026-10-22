@@ -1,0 +1,16 @@
+{
+    "name": "Project05.Authoring",
+    "rootNamespace": "Project05.Authoring",
+    "references": [
+        "GUID:0e0aa7e1db364ea8aac915ce1b315d6f"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
