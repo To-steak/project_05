@@ -1,5 +1,6 @@
 using Project05.Component;
 using Project05.Component.Data;
+using Project05.Component.Entity;
 using Project05.Component.Input;
 using Project05.Core.Baking;
 using Project05.Foundation;
@@ -26,7 +27,7 @@ namespace Project05.Core
         private const string GAME_SCENE_NAME = "Game";
         private const float DEBUG_PANEL_MARGIN = 10f;
         private const float DEBUG_PANEL_WIDTH = 420f;
-        private const float DEBUG_PANEL_HEIGHT = 680f;
+        private const float DEBUG_PANEL_HEIGHT = 760f;
         // 레인별 테스트 씬 폴더 (CONVENTIONS 7.5). Build Settings에 넣지 않으므로 에디터에서만 판이 시작된다
         private const string TEST_SCENE_FOLDER = "Assets/Scenes/Test/";
 
@@ -196,10 +197,32 @@ namespace Project05.Core
                 GUILayout.Label("Phase: " + _world.flow.phase + " (" + _world.flow.stageNumber + "-" + _world.flow.waveNumber + ")");
                 GUILayout.Label("Pause: " + _world.pauseReason);
                 GUILayout.Label("Hero: " + _world.hero.state + " " + _world.hero.currentPosition + " Path " + _world.hero.nextPathCornerIndex + "/" + _world.hero.pathCornerCount);
+                DrawSiegeDebug();
                 DrawWaveDebug();
                 DrawBakingDebug();
             }
             GUILayout.EndArea();
+        }
+
+        /// <summary>
+        /// 코어 HP·포위 수와 히어로 HP·목숨·무적·부활 상태를 보여준다 (feat/core-siege 확인용).
+        /// </summary>
+        private void DrawSiegeDebug()
+        {
+            Hero hero = _world.hero;
+            int occupiedSlotCount = 0;
+            bool[] isSiegeSlotOccupied = _world.core.isSiegeSlotOccupied;
+            for (int slotIndex = 0; slotIndex < isSiegeSlotOccupied.Length; slotIndex++)
+            {
+                if (isSiegeSlotOccupied[slotIndex])
+                {
+                    occupiedSlotCount++;
+                }
+            }
+
+            GUILayout.Label("── Siege ──");
+            GUILayout.Label("Core HP " + _world.core.currentHP + "/" + _world.core.maxHP + " / Siege slots used " + occupiedSlotCount);
+            GUILayout.Label("Hero HP " + hero.currentHP + "/" + hero.maxHP + " Lives " + hero.remainingLives + " Invincible " + hero.invincibilityRemainingTicks + "t Respawn " + hero.respawnRemainingTicks + "t");
         }
 
         /// <summary>

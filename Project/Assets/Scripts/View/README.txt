@@ -15,7 +15,7 @@
 - OffscreenIndicatorViewSystem.cs (static class) : 화면 밖에서 코어로 다가오는 적 방향 화살표.
 - CameraViewSystem.cs (static class) : Cinemachine 추적 대상(히어로 View Transform) 연결, 탑승 시 카메라 전환.
 - ViewInterpolation.cs (static class) : ViewSystem 공용 보간 비율 계산 (일시정지·패배 중 1 고정). 상태 없음.
-- HeroView.cs (MonoBehaviour) : 히어로 프리팹 컴포넌트 (Animator 등 참조 보관). 로직 없음.
+- HeroView.cs (MonoBehaviour) : 히어로 프리팹 컴포넌트 (Renderer 참조, 무적 깜빡임 틱). 보이기·숨기기만 한다. 로직 없음.
 - EnemyView.cs (MonoBehaviour) : 적 프리팹 컴포넌트. Renderer 참조와 피격 플래시 색·시간 설정, 색 바꾸기만 한다. 로직 없음.
 - ProjectileView.cs (MonoBehaviour) : 투사체 프리팹 컴포넌트. 로직 없음.
 - TowerView.cs (MonoBehaviour) : 타워 프리팹 컴포넌트. 로직 없음.

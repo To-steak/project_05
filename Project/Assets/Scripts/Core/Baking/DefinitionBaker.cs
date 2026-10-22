@@ -47,6 +47,9 @@ namespace Project05.Core.Baking
             }
 
             data.coreMaxHP = definition.coreMaxHP;
+            data.siegeFirstRingRadius = definition.siegeFirstRingRadius;
+            data.siegeRingSpacing = definition.siegeRingSpacing;
+            data.siegeSlotSpacing = definition.siegeSlotSpacing;
             data.heroStats = BakeHero(definition.hero, definition);
             data.enemyStats = BakeEnemies(definition.enemies, definition);
             data.waveRule = BakeWaveRule(definition.waveRule, definition);

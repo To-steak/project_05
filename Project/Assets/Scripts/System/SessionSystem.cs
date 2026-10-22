@@ -14,6 +14,8 @@ namespace Project05.System
     {
         private const int STARTING_LEVEL = 1;
         private const int BASE_GAIN_PERCENT = 100;
+        // 포위 고리·자리 간격의 하한 (데이터가 0이어도 자리 계산이 끝나도록)
+        private const float MIN_SIEGE_SPACING = 0.1f;
 
         /// <summary>
         /// 막 만든 World를 판 시작 상태(1-1 준비 단계)로 초기화한다.
@@ -65,7 +67,7 @@ namespace Project05.System
             ref CoreState core = ref world.core;
             core.maxHP = data.coreMaxHP;
             core.currentHP = core.maxHP;
-            core.siegeSlotAssignedCount = 0;
+            InitializeSiegeSlots(world, data);
 
             ref ProgressState progress = ref world.progress;
             progress.level = STARTING_LEVEL;
@@ -134,6 +136,39 @@ namespace Project05.System
             world.dropCollectedRecords.Clear();
             world.coreDamagedRecords.Clear();
             world.commandRejectedRecords.Clear();
+        }
+
+        /// <summary>
+        /// 코어 중심 동심원 위에 포위 자리를 미리 계산한다. 안쪽 고리부터 번호를 매기며, 고리별 자리 수는 둘레 ÷ 자리 간격(최소 1)이다.
+        /// 자리는 적 저장소 용량만큼 만든다 (적이 모두 코어를 포위해도 자리가 모자라지 않는다).
+        /// </summary>
+        private static void InitializeSiegeSlots(World world, GameData data)
+        {
+            ref CoreState core = ref world.core;
+            int slotCount = World.MAX_ENEMY_COUNT;
+            core.siegeSlotPositions = new Vector3[slotCount];
+            core.siegeSlotRingIndices = new int[slotCount];
+            core.isSiegeSlotOccupied = new bool[slotCount];
+
+            // 0으로 베이킹돼도 무한 루프·0 나누기가 생기지 않도록 하한을 둔다
+            float slotSpacing = Mathf.Max(MIN_SIEGE_SPACING, data.siegeSlotSpacing);
+            float ringSpacing = Mathf.Max(MIN_SIEGE_SPACING, data.siegeRingSpacing);
+
+            int slotIndex = 0;
+            int ringIndex = 0;
+            while (slotIndex < slotCount)
+            {
+                float ringRadius = data.siegeFirstRingRadius + ringSpacing * ringIndex;
+                int ringSlotCount = Mathf.Max(1, Mathf.FloorToInt(2f * Mathf.PI * ringRadius / slotSpacing));
+                for (int ringSlotIndex = 0; ringSlotIndex < ringSlotCount && slotIndex < slotCount; ringSlotIndex++)
+                {
+                    float angle = 2f * Mathf.PI * ringSlotIndex / ringSlotCount;
+                    core.siegeSlotPositions[slotIndex] = core.position + new Vector3(Mathf.Cos(angle) * ringRadius, 0f, Mathf.Sin(angle) * ringRadius);
+                    core.siegeSlotRingIndices[slotIndex] = ringIndex;
+                    slotIndex++;
+                }
+                ringIndex++;
+            }
         }
 
         /// <summary>

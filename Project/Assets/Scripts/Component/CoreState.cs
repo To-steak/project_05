@@ -4,6 +4,7 @@ namespace Project05.Component
 {
     /// <summary>
     /// 코어 상태. 하나뿐이므로 World 필드로 둔다. (Project05.Core 네임스페이스와 충돌하므로 Core라는 이름은 쓰지 않는다)
+    /// 포위 자리는 판 시작 시 SessionSystem이 코어 중심 동심원 위에 미리 계산해 둔다 (안쪽 고리부터 번호를 매긴다).
     /// </summary>
     public struct CoreState
     {
@@ -13,7 +14,11 @@ namespace Project05.Component
         public int maxHP;
         // 현재 체력
         public int currentHP;
-        // 포위 자리 사용 현황: 지금까지 배정한 자리 수 (다음 배정 자리 번호)
-        public int siegeSlotAssignedCount;
+        // 포위 자리 위치 (인덱스 = 자리 번호, 안쪽 고리부터 순서대로)
+        public Vector3[] siegeSlotPositions;
+        // 자리마다 속한 고리 번호 (0이 가장 안쪽)
+        public int[] siegeSlotRingIndices;
+        // 자리마다 적이 배정돼 있는지. 배정된 적이 죽으면 비워 재사용한다
+        public bool[] isSiegeSlotOccupied;
     }
 }

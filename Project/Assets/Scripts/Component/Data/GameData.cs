@@ -7,6 +7,12 @@ namespace Project05.Component.Data
     {
         // 코어 최대 체력
         public int coreMaxHP;
+        // 코어 포위: 가장 안쪽 고리 반지름
+        public float siegeFirstRingRadius;
+        // 코어 포위: 고리 사이 간격
+        public float siegeRingSpacing;
+        // 코어 포위: 한 고리 위 자리 사이 간격 (고리별 자리 수 = 둘레 ÷ 이 값)
+        public float siegeSlotSpacing;
         // 히어로 수치
         public HeroStats heroStats;
         // 적 종류별 수치 (인덱스 = 적 종류)
