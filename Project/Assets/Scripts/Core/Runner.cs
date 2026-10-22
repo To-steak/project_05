@@ -15,7 +15,8 @@ namespace Project05.Core
 {
     /// <summary>
     /// DDOL에 올라가는 유일한 오브젝트. 현재 판의 World와 ViewContext를 보관하고 루프를 돌린다.
-    /// FixedUpdate: System Tick / Update: 입력 수집 / LateUpdate: ViewSystem → Presenter → 프레임 기록 비우기.
+    /// FixedUpdate: System Tick / Update: 입력 수집 / LateUpdate: 패배 시 기록 저장 → ViewSystem → Presenter → 프레임 기록 비우기.
+    /// Main 씬에서는 World 없이 메인 메뉴·설정·로딩 Presenter만 둔다.
     /// 실행 순서는 기본값(0)으로 두어 CinemachineBrain(100)보다 먼저 LateUpdate를 돈다.
     /// </summary>
     public class Runner : MonoBehaviour
@@ -27,6 +28,12 @@ namespace Project05.Core
         private ResultPresenter _resultPresenter;
         // 레벨업 선택지 Presenter (씬에 LevelUpChoiceView가 없으면 null)
         private LevelUpChoicePresenter _levelUpChoicePresenter;
+        // 이번 판의 기록을 저장했는지 (패배 감지 시 한 번만 저장)
+        private bool _hasSavedRecord;
+        // [Main] 메인 메뉴 Presenter (Main 씬 밖이거나 View가 없으면 null)
+        private MainMenuPresenter _mainMenuPresenter;
+        // [Main] 로딩 패널 Presenter (매 프레임 진행률 갱신, 없으면 null)
+        private LoadingPresenter _loadingPresenter;
         private int _activeSceneHandle;
         private bool _hasActiveScene;
 
@@ -105,8 +112,15 @@ namespace Project05.Core
             SynchronizeSession();
             if (_world == null)
             {
+                // Main 씬: 로딩 진행률만 매 프레임 갱신한다
+                if (_loadingPresenter != null)
+                {
+                    _loadingPresenter.Present();
+                }
                 return;
             }
+
+            SaveRecordOnDefeat();
 
             // ① ViewSystem: 엔티티 동기화·보간 → 연출. 카메라는 히어로 보간 이후
             HeroViewSystem.Present(_world, _viewContext);
@@ -154,6 +168,38 @@ namespace Project05.Core
             {
                 BeginSession(activeScene);
             }
+            else if (activeScene.name == SceneLoader.MAIN_SCENE_NAME)
+            {
+                BeginMainMenu();
+            }
+        }
+
+        /// <summary>
+        /// Main 씬 진입 시 씬의 View로 Presenter를 만든다. View가 없으면 그 UI 없이 진행한다.
+        /// </summary>
+        private void BeginMainMenu()
+        {
+            SettingsView settingsView = FindAnyObjectByType<SettingsView>();
+            SettingsPresenter settingsPresenter = settingsView != null ? new SettingsPresenter(settingsView) : null;
+            LoadingView loadingView = FindAnyObjectByType<LoadingView>();
+            _loadingPresenter = loadingView != null ? new LoadingPresenter(loadingView) : null;
+            MainMenuView mainMenuView = FindAnyObjectByType<MainMenuView>();
+            _mainMenuPresenter = mainMenuView != null ? new MainMenuPresenter(mainMenuView, settingsPresenter, _loadingPresenter) : null;
+        }
+
+        /// <summary>
+        /// 게임 단계가 Defeat가 된 것을 감지하면 점수와 도달 웨이브를 기존 기록과 비교해 갱신한다 (DESIGN 3.4.2). 판마다 한 번.
+        /// 결과 패널보다 먼저 호출한다.
+        /// </summary>
+        private void SaveRecordOnDefeat()
+        {
+            if (_hasSavedRecord || _world.flow.phase != GamePhase.Defeat || App.Records == null)
+            {
+                return;
+            }
+
+            _hasSavedRecord = true;
+            App.Records.TryUpdate(_world.progress.score, GameFlowSystem.GetCumulativeWaveNumber(_world));
         }
 
         private static bool IsGameplayScene(Scene scene)
@@ -193,6 +239,9 @@ namespace Project05.Core
             _viewContext = null;
             _resultPresenter = null;
             _levelUpChoicePresenter = null;
+            _hasSavedRecord = false;
+            _mainMenuPresenter = null;
+            _loadingPresenter = null;
         }
 
         private static void ClearViewPool()
