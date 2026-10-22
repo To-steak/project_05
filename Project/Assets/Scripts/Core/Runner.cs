@@ -69,11 +69,12 @@ namespace Project05.Core
                 return;
             }
 
-            // [Tick 2 ~ 9] DESIGN 5.5 순서. SpawnSystem은 반드시 마지막
+            // [Tick 2 ~ 9] DESIGN 5.5 순서 (ProjectileSystem은 TowerSystem과 EnemySystem 사이). SpawnSystem은 반드시 마지막
             GameFlowSystem.Tick(_world);
             WaveSystem.Tick(_world);
             HeroSystem.Tick(_world);
             TowerSystem.Tick(_world);
+            ProjectileSystem.Tick(_world);
             EnemySystem.Tick(_world);
             DropSystem.Tick(_world);
             CoreSystem.Tick(_world);
@@ -105,6 +106,7 @@ namespace Project05.Core
             HeroViewSystem.Present(_world, _viewContext);
             TowerViewSystem.Present(_world, _viewContext);
             EnemyViewSystem.Present(_world, _viewContext);
+            ProjectileViewSystem.Present(_world, _viewContext);
             DropViewSystem.Present(_world, _viewContext);
             CoreViewSystem.Present(_world, _viewContext);
             InteractionPromptViewSystem.Present(_world, _viewContext);
@@ -210,6 +212,7 @@ namespace Project05.Core
             GUILayout.Label("── Wave ──");
             GUILayout.Label("Spawned " + flow.spawnedEnemyCount + "/" + flow.waveEnemyCount + " Kill " + flow.killCount + " Next spawn " + flow.spawnCooldownTicks + "t Prep " + flow.phaseRemainingTicks + "t");
             GUILayout.Label("Enemies alive " + _world.enemies.Count + "/" + _world.enemies.Capacity + " Queue " + _world.enemySpawnRequests.Count);
+            GUILayout.Label("Hero attack cooldown " + _world.hero.attackCooldownTicks + "t / Projectiles " + _world.projectiles.Count + "/" + _world.projectiles.Capacity);
             if (GUILayout.Button("[Debug] 웨이브 클리어"))
             {
                 Command clearWaveCommand = new Command();
