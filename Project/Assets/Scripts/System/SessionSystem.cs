@@ -1,4 +1,5 @@
 using Project05.Component;
+using Project05.Component.Data;
 using Project05.Component.Entity;
 using Project05.Component.Path;
 using UnityEngine;
@@ -15,12 +16,21 @@ namespace Project05.System
         private const int BASE_GAIN_PERCENT = 100;
 
         /// <summary>
-        /// 막 만든 World를 판 시작 상태(1-1 준비 단계)로 초기화한다.
-        /// 베이킹 테이블·씬 데이터 연결과 히어로·코어 수치 복사는 feat/baking에서 추가한다.
+        /// 막 만든 World를 판 시작 상태(1-1 준비 단계)로 초기화하고 베이킹 테이블 참조를 받는다.
+        /// 이후 SceneBaker가 씬 데이터를 쓰고, SessionSystem.Begin이 엔티티를 시작 위치에 놓는다.
         /// </summary>
         /// <param name="world">new World()로 만든 월드</param>
-        public static void Initialize(World world)
+        /// <param name="gameData">베이킹된 테이블 모음 (App.Data)</param>
+        public static void Initialize(World world, GameData gameData)
         {
+            world.heroStats = gameData.heroStats;
+            world.enemyStats = gameData.enemyStats;
+            world.towerStats = gameData.towerStats;
+            world.waveRule = gameData.waveRule;
+            world.difficulty = gameData.difficulty;
+            world.levelUpOptions = gameData.levelUpOptions;
+            world.progression = gameData.progression;
+
             world.tickCount = 0;
             world.pauseReason = PauseReason.None;
 
@@ -48,6 +58,40 @@ namespace Project05.System
             progress.xpGainPercent = BASE_GAIN_PERCENT;
 
             world.towerUnlock.isUnlockedByTowerType = new bool[0];
+        }
+
+        /// <summary>
+        /// 씬 베이킹이 끝난 World에서 판을 시작한다. 히어로에 수치를 복사하고 시작 위치에 놓는다.
+        /// Runner가 SceneBaker.Bake 직후 호출한다. 코어 설정은 feat/baking·feat/core-siege에서 추가한다.
+        /// </summary>
+        /// <param name="world">초기화와 씬 베이킹이 끝난 월드</param>
+        public static void Begin(World world)
+        {
+            ref HeroStats heroStats = ref world.heroStats;
+            ref Hero hero = ref world.hero;
+
+            hero.moveSpeed = heroStats.moveSpeed;
+            hero.maxHP = heroStats.maxHP;
+            hero.currentHP = heroStats.maxHP;
+            hero.remainingLives = heroStats.lifeCount;
+            hero.attackDamage = heroStats.attackDamage;
+            hero.attackIntervalTicks = heroStats.attackIntervalTicks;
+            hero.attackCooldownTicks = 0;
+            hero.meleeRange = heroStats.meleeRange;
+            hero.rangedRange = heroStats.rangedRange;
+            hero.contactRadius = heroStats.contactRadius;
+            hero.invincibilityTicks = heroStats.invincibilityTicks;
+            hero.invincibilityRemainingTicks = 0;
+            hero.respawnTicks = heroStats.respawnTicks;
+            hero.respawnRemainingTicks = 0;
+            hero.pickupRadius = heroStats.pickupRadius;
+            hero.interactionRadius = heroStats.interactionRadius;
+
+            hero.state = HeroState.Idle;
+            hero.previousPosition = world.heroSpawnPosition;
+            hero.currentPosition = world.heroSpawnPosition;
+            hero.pathCornerCount = 0;
+            hero.nextPathCornerIndex = 0;
         }
 
         /// <summary>

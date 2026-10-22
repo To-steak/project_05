@@ -4,7 +4,7 @@
 ScriptableObject 정의. 로직 값과 View 값(프리팹, VFX, 사운드, 아이콘)을 함께 가지며 베이킹 시 나뉜다. 수치는 모두 여기에 둔다 (하드코딩 금지).
 
 들어갈 파일:
-- GameDefinition.cs (ScriptableObject) : 모든 Definition을 가진 루트.
+- GameDefinition.cs (ScriptableObject) : 모든 Definition을 가진 루트. 에셋은 Assets/Resources/GameDefinition.asset (DefinitionBaker가 Resources.Load). 개별 Definition 에셋은 Assets/Data/Definition/.
 - HeroDefinition.cs (ScriptableObject) : 히어로 수치 + 프리팹.
 - EnemyDefinition.cs (ScriptableObject) : 적 수치 + 프리팹, 사망 VFX. 보스도 이 정의를 쓴다.
 - TowerDefinition.cs (ScriptableObject) : 타워 종류별 비용, 단계별 수치 + 단계별 프리팹, 아이콘.
