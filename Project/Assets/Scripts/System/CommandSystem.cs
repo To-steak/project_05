@@ -91,6 +91,8 @@ namespace Project05.System
             {
                 FollowHeldPointer(world);
             }
+
+            UpdateInteractionTarget(world);
         }
 
         /// <summary>
@@ -155,44 +157,90 @@ namespace Project05.System
                 return;
             }
 
-            if (world.hero.state == HeroState.Boarded)
+            int slotIndex;
+            Vector3 targetPosition;
+            ref Hero hero = ref world.hero;
+            switch (FindInteractionTarget(world, out slotIndex, out targetPosition))
             {
-                HeroSystem.Dismount(world);
+                case InteractionTargetKind.BoardedTower:
+                    HeroSystem.Dismount(world);
+                    break;
+                case InteractionTargetKind.Tower:
+                    HeroSystem.Board(world, world.towerSlots[slotIndex].towerID);
+                    break;
+                case InteractionTargetKind.EmptySlot:
+                    // 목록을 여는 순간 히어로를 세운다 (닫은 뒤 공터에서 멀어지지 않도록)
+                    StopHero(ref hero);
+                    world.buildMenuSlotIndex = slotIndex;
+                    world.pauseReason = PauseReason.BuildMenu;
+                    break;
+                case InteractionTargetKind.Core:
+                    StopHero(ref hero);
+                    world.pauseReason = PauseReason.CoreMenu;
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// 지금 Space를 누르면 반응할 대상을 World에 기록한다 (View의 Space 아이콘이 읽는다). Interact와 같은 판정을 쓴다.
+        /// 일시정지 중에는 대상을 비운다.
+        /// </summary>
+        private static void UpdateInteractionTarget(World world)
+        {
+            if (world.pauseReason != PauseReason.None)
+            {
+                world.interactionTargetKind = InteractionTargetKind.None;
                 return;
             }
 
+            int slotIndex;
+            Vector3 targetPosition;
+            world.interactionTargetKind = FindInteractionTarget(world, out slotIndex, out targetPosition);
+            world.interactionTargetPosition = targetPosition;
+        }
+
+        /// <summary>
+        /// Space 대상 판정. 탑승 중이면 그 타워(하차). 지상(Idle, Moving)이면 상호작용 반경 안의 가장 가까운 공터
+        /// (타워 있음: 탑승, 비어 있음: 건설 목록, 건설 대기 중: 없음), 공터가 없고 코어가 반경 안이면 코어.
+        /// </summary>
+        private static InteractionTargetKind FindInteractionTarget(World world, out int slotIndex, out Vector3 targetPosition)
+        {
+            slotIndex = World.NO_SLOT;
+            targetPosition = Vector3.zero;
             ref Hero hero = ref world.hero;
+
+            if (hero.state == HeroState.Boarded)
+            {
+                if (!world.towers.IsAlive(hero.boardedTowerID))
+                {
+                    return InteractionTargetKind.None;
+                }
+                targetPosition = world.towers.Get(hero.boardedTowerID).position;
+                return InteractionTargetKind.BoardedTower;
+            }
             if (hero.state != HeroState.Idle && hero.state != HeroState.Moving)
             {
-                return;
+                return InteractionTargetKind.None;
             }
 
-            int slotIndex = FindNearestSlotInReach(world, hero.currentPosition, hero.interactionRadius);
+            slotIndex = FindNearestSlotInReach(world, hero.currentPosition, hero.interactionRadius);
             if (slotIndex == World.NO_SLOT)
             {
                 if (TargetingSystem.GetSqrDistanceXZ(hero.currentPosition, world.core.position) <= hero.interactionRadius * hero.interactionRadius)
                 {
-                    StopHero(ref hero);
-                    world.pauseReason = PauseReason.CoreMenu;
+                    targetPosition = world.core.position;
+                    return InteractionTargetKind.Core;
                 }
-                return;
+                return InteractionTargetKind.None;
             }
 
             ref TowerSlot slot = ref world.towerSlots[slotIndex];
+            targetPosition = slot.position;
             if (world.towers.IsAlive(slot.towerID))
             {
-                HeroSystem.Board(world, slot.towerID);
-                return;
+                return InteractionTargetKind.Tower;
             }
-            if (slot.isBuildPending)
-            {
-                return;
-            }
-
-            // 목록을 여는 순간 히어로를 세운다 (닫은 뒤 공터에서 멀어지지 않도록)
-            StopHero(ref hero);
-            world.buildMenuSlotIndex = slotIndex;
-            world.pauseReason = PauseReason.BuildMenu;
+            return slot.isBuildPending ? InteractionTargetKind.None : InteractionTargetKind.EmptySlot;
         }
 
         /// <summary>

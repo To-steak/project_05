@@ -11,8 +11,8 @@
 - TowerViewSystem.cs (static class) : 타워 동기화, 사격·피격·파괴·수리·업그레이드 연출, 탑승 연출.
 - DropViewSystem.cs (static class) : 드롭 동기화, 획득 연출.
 - CoreViewSystem.cs (static class) : 코어 피격 연출, 화면 경고.
-- InteractionPromptViewSystem.cs (static class) : 히어로 상호작용 범위 안의 대상(공터 / 타워 / 코어)에 Space 아이콘 표시.
-- OffscreenIndicatorViewSystem.cs (static class) : 화면 밖에서 코어로 다가오는 적 방향 화살표.
+- InteractionPromptViewSystem.cs (static class) : 지금 Space를 누르면 반응할 대상(World.interactionTargetKind) 위에 Space 아이콘 하나.
+- OffscreenIndicatorViewSystem.cs (static class) : 화면 밖 적 중 코어에 가까운 순 최대 N개를 화면 가장자리 방향 화살표로.
 - CameraViewSystem.cs (static class) : Cinemachine 추적 대상(히어로 View Transform) 연결, 탑승 시 카메라 전환.
 - ViewInterpolation.cs (static class) : ViewSystem 공용 보간 비율 계산 (일시정지·패배 중 1 고정). 상태 없음.
 - HeroView.cs (MonoBehaviour) : 히어로 프리팹 컴포넌트 (Renderer 참조, 무적 깜빡임 틱). 보이기·숨기기만 한다. 로직 없음.
@@ -22,7 +22,7 @@
 - DropView.cs (MonoBehaviour) : 드롭 프리팹 컴포넌트. 로직 없음.
 - CoreView.cs (MonoBehaviour) : 코어 오브젝트 컴포넌트. 로직 없음.
 - HeroCameraView.cs (MonoBehaviour) : 히어로 추적 CinemachineCamera 표시. 탑승 카메라와 구분용. 로직 없음.
-- InteractionPromptView.cs (MonoBehaviour) : Space 아이콘 오브젝트.
-- OffscreenIndicatorView.cs (MonoBehaviour) : 화살표 오브젝트.
+- InteractionPromptView.cs (MonoBehaviour) : Space 아이콘 오브젝트 (높이 오프셋, 카메라 바라보기).
+- OffscreenIndicatorView.cs (MonoBehaviour) : 화면 밖 화살표 묶음 (Overlay Canvas 아래, 화살표 템플릿·최대 수·가장자리 여백). 판 시작 시 화살표를 복제한다.
 
 구현하면서 이 목록과 실제 파일을 맞춘다. 컨벤션은 저장소 루트의 CONVENTIONS.md를 따른다.

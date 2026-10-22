@@ -22,6 +22,14 @@ namespace Project05.Core
     public class Runner : MonoBehaviour
     {
         private readonly InputCollector _inputCollector = new InputCollector();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // 디버그 패널 스크롤 위치
+        private Vector2 _debugScrollPosition;
+        // 디버그 패널을 펼쳤는지
+        private bool _isDebugPanelExpanded = true;
+        // 베이킹 확인 항목(길다)을 보일지
+        private bool _isBakingDebugVisible;
+#endif
         private World _world;
         private ViewContext _viewContext;
         // 결과 패널 Presenter (씬에 ResultView가 없으면 null)
@@ -45,7 +53,8 @@ namespace Project05.Core
 
         private const float DEBUG_PANEL_MARGIN = 10f;
         private const float DEBUG_PANEL_WIDTH = 420f;
-        private const float DEBUG_PANEL_HEIGHT = 820f;
+        // 접었을 때 패널 높이 (제목 줄과 버튼만)
+        private const float DEBUG_PANEL_COLLAPSED_HEIGHT = 56f;
         // 레인별 테스트 씬 폴더 (CONVENTIONS 7.5). Build Settings에 넣지 않으므로 에디터에서만 판이 시작된다
         private const string TEST_SCENE_FOLDER = "Assets/Scenes/Test/";
 
@@ -238,6 +247,15 @@ namespace Project05.Core
             // 씬의 표현용 참조 수집 (판 시작 시 1회)
             _viewContext.heroView = FindAnyObjectByType<HeroView>();
             _viewContext.heroCameraView = FindAnyObjectByType<HeroCameraView>();
+            _viewContext.mainCamera = Camera.main;
+            _viewContext.interactionPromptView = FindAnyObjectByType<InteractionPromptView>();
+            _viewContext.offscreenIndicatorView = FindAnyObjectByType<OffscreenIndicatorView>();
+            if (_viewContext.offscreenIndicatorView != null)
+            {
+                _viewContext.offscreenArrows = _viewContext.offscreenIndicatorView.CreateArrows();
+                _viewContext.offscreenScreenPoints = new Vector3[_viewContext.offscreenArrows.Length];
+                _viewContext.offscreenSqrDistances = new float[_viewContext.offscreenArrows.Length];
+            }
 
             // UI Presenter (판 시작 시 1회). View가 씬에 없으면 그 UI 없이 진행한다
             ResultView resultView = FindAnyObjectByType<ResultView>();
@@ -284,8 +302,27 @@ namespace Project05.Core
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         private void OnGUI()
         {
-            GUILayout.BeginArea(new Rect(DEBUG_PANEL_MARGIN, DEBUG_PANEL_MARGIN, DEBUG_PANEL_WIDTH, DEBUG_PANEL_HEIGHT), GUI.skin.box);
+            // 화면 높이에 맞추고 넘치면 스크롤한다. 접으면 제목 줄만 남긴다
+            float panelHeight = _isDebugPanelExpanded ? Screen.height - DEBUG_PANEL_MARGIN * 2f : DEBUG_PANEL_COLLAPSED_HEIGHT;
+            GUILayout.BeginArea(new Rect(DEBUG_PANEL_MARGIN, DEBUG_PANEL_MARGIN, DEBUG_PANEL_WIDTH, panelHeight), GUI.skin.box);
+            GUILayout.BeginHorizontal();
             GUILayout.Label("[Runner Debug]");
+            if (GUILayout.Button(_isDebugPanelExpanded ? "접기" : "펼치기"))
+            {
+                _isDebugPanelExpanded = !_isDebugPanelExpanded;
+            }
+            if (GUILayout.Button(_isBakingDebugVisible ? "Baked 숨김" : "Baked 보기"))
+            {
+                _isBakingDebugVisible = !_isBakingDebugVisible;
+            }
+            GUILayout.EndHorizontal();
+            if (!_isDebugPanelExpanded)
+            {
+                GUILayout.EndArea();
+                return;
+            }
+
+            _debugScrollPosition = GUILayout.BeginScrollView(_debugScrollPosition);
             GUILayout.Label("Scene: " + SceneManager.GetActiveScene().name);
             GUILayout.Label("Fixed Timestep: " + Time.fixedDeltaTime + " / Max Allowed: " + Time.maximumDeltaTime);
             if (_world == null)
@@ -298,12 +335,34 @@ namespace Project05.Core
                 GUILayout.Label("Phase: " + _world.flow.phase + " (" + _world.flow.stageNumber + "-" + _world.flow.waveNumber + ")");
                 GUILayout.Label("Pause: " + _world.pauseReason);
                 GUILayout.Label("Hero: " + _world.hero.state + " " + _world.hero.currentPosition + " Path " + _world.hero.nextPathCornerIndex + "/" + _world.hero.pathCornerCount);
+                DrawIndicatorDebug();
                 DrawProgressDebug();
                 DrawSiegeDebug();
                 DrawWaveDebug();
-                DrawBakingDebug();
+                if (_isBakingDebugVisible)
+                {
+                    DrawBakingDebug();
+                }
             }
+            GUILayout.EndScrollView();
             GUILayout.EndArea();
+        }
+
+        /// <summary>
+        /// 화면 밖 화살표가 어디서 막혔는지 보여준다: View를 찾았는지, 화살표를 몇 개 만들었는지, 카메라가 있는지, 지금 켜진 화살표 수.
+        /// </summary>
+        private void DrawIndicatorDebug()
+        {
+            RectTransform[] arrows = _viewContext.offscreenArrows;
+            int activeArrowCount = 0;
+            for (int arrowIndex = 0; arrowIndex < arrows.Length; arrowIndex++)
+            {
+                if (arrows[arrowIndex] != null && arrows[arrowIndex].gameObject.activeSelf)
+                {
+                    activeArrowCount++;
+                }
+            }
+            GUILayout.Label("Offscreen view " + (_viewContext.offscreenIndicatorView != null ? "O" : "X") + " / arrows " + activeArrowCount + "/" + arrows.Length + " / camera " + (_viewContext.mainCamera != null ? _viewContext.mainCamera.name : "X") + " / prompt " + _world.interactionTargetKind);
         }
 
         /// <summary>
