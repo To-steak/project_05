@@ -280,6 +280,8 @@ Tick 없이 다른 System이 직접 호출하는 것:
 |---|---|
 | EconomySystem | 골드 증감, 건설·강화 비용 지불 |
 | ProgressSystem | 경험치 증가, 레벨업, 선택지 생성·적용 |
+| TargetingSystem | 반경 내 최근접 적, 반경 내 모든 적 조회 (히어로·타워 공용) |
+| SessionSystem | 베이킹된 데이터로 새 World 초기화 |
 
 ### 5.6 엔티티 ID
 - 엔티티는 객체 참조 대신 **`EntityID { int index; int generation; }`**로 가리킨다.
