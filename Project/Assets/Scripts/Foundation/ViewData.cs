@@ -10,5 +10,7 @@ namespace Project05.Foundation
     {
         // 적 종류별 View 프리팹 (인덱스 = 적 종류, GameData.enemyStats와 같음. 비어 있으면 null)
         public GameObject[] enemyPrefabs = new GameObject[0];
+        // 히어로 원거리 투사체 View 프리팹 (비어 있으면 null)
+        public GameObject heroProjectilePrefab;
     }
 }

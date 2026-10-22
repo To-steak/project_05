@@ -23,6 +23,10 @@ namespace Project05.Authoring.Definition
         [Min(0f)] public float meleeRange;
         // 원거리 사거리 R (카메라 가시 영역보다 작게 둔다)
         [Min(0f)] public float rangedRange;
+        // 원거리 투사체 이동 속도 (유닛 / 틱). 0이면 투사체가 날아가지 않는다
+        [Min(0.01f)] public float projectileSpeed = 0.4f;
+        // 원거리 투사체 명중 판정 반경 (적 반경과 더해 판정)
+        [Min(0f)] public float projectileRadius = 0.2f;
         // 접촉 판정 반경 (적 반경과 더해 판정)
         [Min(0f)] public float contactRadius;
         // 피격 후 무적 시간 (틱)
@@ -35,5 +39,7 @@ namespace Project05.Authoring.Definition
         [Min(0f)] public float interactionRadius;
         // 히어로 View 프리팹 (View 테이블로 베이킹)
         public GameObject prefab;
+        // 원거리 투사체 View 프리팹 (View 테이블로 베이킹, 없으면 투사체가 보이지 않는다)
+        public GameObject projectilePrefab;
     }
 }

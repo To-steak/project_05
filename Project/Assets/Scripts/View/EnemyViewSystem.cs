@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Project05.Component;
 using Project05.Component.Entity;
+using Project05.Component.Record;
 using Project05.Foundation;
 using UnityEngine;
 
@@ -10,6 +11,7 @@ namespace Project05.View
     /// 적 동기화(새 ID는 풀에서 꺼내고 사라진 ID는 반납), 보간, 피격 플래시, 사망 VFX.
     /// Runner가 LateUpdate에서 정해진 순서로 호출한다. World는 읽기만 한다.
     /// feat/enemy-wave: 동기화, 위치 보간, 이동 방향 바라보기.
+    /// feat/hero-combat: 피격 플래시 (EnemyDamagedRecord). 사망 VFX는 4단계 연출에서.
     /// 구현 브랜치: feat/enemy-wave, feat/hero-combat
     /// </summary>
     public static class EnemyViewSystem
@@ -26,6 +28,60 @@ namespace Project05.View
         {
             ReleaseRemovedViews(world, viewContext);
             SynchronizeAliveEnemies(world, viewContext);
+            StartHitFlashes(world, viewContext);
+            EndHitFlashes(viewContext);
+        }
+
+        /// <summary>
+        /// 이번 프레임의 피격 기록마다 그 적의 플래시를 켜고 끝나는 시각을 기록한다. 같은 적이 다시 맞으면 시간을 연장한다.
+        /// 맞은 틱에 죽은 적은 View가 이미 반납됐으므로 건너뛴다.
+        /// </summary>
+        private static void StartHitFlashes(World world, ViewContext viewContext)
+        {
+            List<EnemyDamagedRecord> damagedRecords = world.enemyDamagedRecords;
+            for (int recordIndex = 0; recordIndex < damagedRecords.Count; recordIndex++)
+            {
+                EntityID enemyID = damagedRecords[recordIndex].enemyID;
+                EnemyView enemyView;
+                if (!viewContext.enemyViews.TryGetValue(enemyID, out enemyView))
+                {
+                    continue;
+                }
+
+                enemyView.SetHitFlash(true);
+                viewContext.enemyHitFlashEndTimes[enemyID] = Time.time + enemyView.HitFlashTicks * Time.fixedDeltaTime;
+            }
+        }
+
+        /// <summary>
+        /// 유지 시간이 지난 플래시를 끈다.
+        /// </summary>
+        private static void EndHitFlashes(ViewContext viewContext)
+        {
+            Dictionary<EntityID, float> flashEndTimes = viewContext.enemyHitFlashEndTimes;
+            List<EntityID> endedEntityIDs = viewContext.removedEntityIDs;
+            endedEntityIDs.Clear();
+
+            float now = Time.time;
+            foreach (KeyValuePair<EntityID, float> flashEntry in flashEndTimes)
+            {
+                if (now >= flashEntry.Value)
+                {
+                    endedEntityIDs.Add(flashEntry.Key);
+                }
+            }
+
+            for (int endedIndex = 0; endedIndex < endedEntityIDs.Count; endedIndex++)
+            {
+                EntityID enemyID = endedEntityIDs[endedIndex];
+                EnemyView enemyView;
+                if (viewContext.enemyViews.TryGetValue(enemyID, out enemyView))
+                {
+                    enemyView.SetHitFlash(false);
+                }
+                flashEndTimes.Remove(enemyID);
+            }
+            endedEntityIDs.Clear();
         }
 
         /// <summary>
@@ -51,9 +107,12 @@ namespace Project05.View
                 EnemyView enemyView = enemyViews[enemyID];
                 if (enemyView != null)
                 {
+                    // 풀에서 다시 꺼낸 적이 플래시 색으로 나오지 않게 끄고 반납한다
+                    enemyView.SetHitFlash(false);
                     App.Pool.Release(enemyView.gameObject);
                 }
                 enemyViews.Remove(enemyID);
+                viewContext.enemyHitFlashEndTimes.Remove(enemyID);
             }
             removedEntityIDs.Clear();
         }

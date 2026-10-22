@@ -35,8 +35,12 @@ namespace Project05.Component.Entity
         public int attackCooldownTicks;
         // 근거리 광역 사거리 x
         public float meleeRange;
-        // 원거리 사거리 R
+        // 원거리 사거리 R (투사체 최대 비행 거리)
         public float rangedRange;
+        // 원거리 투사체 이동 속도 (유닛 / 틱)
+        public float projectileSpeed;
+        // 원거리 투사체 명중 판정 반경
+        public float projectileRadius;
         // 접촉 판정 반경
         public float contactRadius;
         // 피격 후 무적 시간 (틱)

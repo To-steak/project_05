@@ -158,6 +158,8 @@ namespace Project05.System
             hero.attackCooldownTicks = 0;
             hero.meleeRange = heroStats.meleeRange;
             hero.rangedRange = heroStats.rangedRange;
+            hero.projectileSpeed = heroStats.projectileSpeed;
+            hero.projectileRadius = heroStats.projectileRadius;
             hero.contactRadius = heroStats.contactRadius;
             hero.invincibilityTicks = heroStats.invincibilityTicks;
             hero.invincibilityRemainingTicks = 0;

@@ -20,6 +20,10 @@ namespace Project05.View
         public readonly Dictionary<EntityID, EnemyView> enemyViews = new Dictionary<EntityID, EnemyView>(World.MAX_ENEMY_COUNT);
         // 살아있는 드롭 ID → 드롭 View
         public readonly Dictionary<EntityID, DropView> dropViews = new Dictionary<EntityID, DropView>(World.MAX_DROP_COUNT);
+        // 살아있는 투사체 ID → 투사체 View
+        public readonly Dictionary<EntityID, ProjectileView> projectileViews = new Dictionary<EntityID, ProjectileView>(World.MAX_PROJECTILE_COUNT);
+        // 피격 플래시 중인 적 ID → 플래시가 끝나는 Time.time
+        public readonly Dictionary<EntityID, float> enemyHitFlashEndTimes = new Dictionary<EntityID, float>(World.MAX_ENEMY_COUNT);
         // 살아있는 타워 ID → 타워 View
         public readonly Dictionary<EntityID, TowerView> towerViews = new Dictionary<EntityID, TowerView>();
         // 동기화 중 사라진 ID를 모으는 재사용 목록 (Dictionary 순회 중 삭제를 피하고 매 프레임 할당을 막는다)

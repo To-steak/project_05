@@ -64,7 +64,21 @@ namespace Project05.Core.Baking
         public static ViewData BakeView(GameDefinition definition)
         {
             ViewData viewData = new ViewData();
-            if (definition == null || definition.enemies == null)
+            if (definition == null)
+            {
+                return viewData;
+            }
+
+            if (definition.hero != null)
+            {
+                if (definition.hero.projectilePrefab == null)
+                {
+                    Debug.LogWarning("[DefinitionBaker] " + definition.hero.name + ".projectilePrefab 이(가) 비어 있다. 원거리 투사체가 화면에 보이지 않는다.", definition.hero);
+                }
+                viewData.heroProjectilePrefab = definition.hero.projectilePrefab;
+            }
+
+            if (definition.enemies == null)
             {
                 return viewData;
             }
@@ -103,6 +117,8 @@ namespace Project05.Core.Baking
             heroStats.attackIntervalTicks = heroDefinition.attackIntervalTicks;
             heroStats.meleeRange = heroDefinition.meleeRange;
             heroStats.rangedRange = heroDefinition.rangedRange;
+            heroStats.projectileSpeed = heroDefinition.projectileSpeed;
+            heroStats.projectileRadius = heroDefinition.projectileRadius;
             heroStats.contactRadius = heroDefinition.contactRadius;
             heroStats.invincibilityTicks = heroDefinition.invincibilityTicks;
             heroStats.respawnTicks = heroDefinition.respawnTicks;
