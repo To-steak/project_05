@@ -1,5 +1,8 @@
+using System.Collections.Generic;
 using Project05.Component;
 using Project05.Component.Entity;
+using Project05.Component.Record;
+using Project05.Component.Request;
 using UnityEngine;
 
 namespace Project05.System
@@ -25,6 +28,98 @@ namespace Project05.System
             {
                 MoveAlongPath(ref hero);
             }
+
+            TickAutoAttack(world);
+        }
+
+        /// <summary>
+        /// 공격 타이머 하나로 자동 공격한다 (DESIGN 3.1). 타이머가 준비된 틱에 상황을 보고 공격을 하나 고른다.
+        /// 근거리 x 이내에 적이 있으면 x 이내 모든 적에게 근거리 광역, 없고 R 이내에 적이 있으면 최근접 적에게 원거리 투사체.
+        /// R 이내에도 적이 없으면 타이머를 준비 상태로 둔 채 기다린다. 탑승 중·사망 중에는 자동 공격하지 않는다.
+        /// </summary>
+        private static void TickAutoAttack(World world)
+        {
+            ref Hero hero = ref world.hero;
+            if (hero.attackCooldownTicks > 0)
+            {
+                hero.attackCooldownTicks--;
+            }
+
+            if (hero.state == HeroState.Boarded || hero.state == HeroState.Dead)
+            {
+                return;
+            }
+            if (hero.attackCooldownTicks > 0)
+            {
+                return;
+            }
+
+            if (TryMeleeAttack(world) || TryRangedAttack(world))
+            {
+                world.hero.attackCooldownTicks = world.hero.attackIntervalTicks;
+            }
+        }
+
+        /// <summary>
+        /// 근거리 사거리 안의 모든 적에게 피해를 준다. 피해 도중 적이 죽어 슬롯이 비어도 ID로 조회하므로 안전하다.
+        /// </summary>
+        private static bool TryMeleeAttack(World world)
+        {
+            ref Hero hero = ref world.hero;
+            List<EntityID> targetEnemyIDs = world.targetEnemyIDs;
+            if (TargetingSystem.CollectEnemiesInRadius(world, hero.currentPosition, hero.meleeRange, targetEnemyIDs) == 0)
+            {
+                return false;
+            }
+
+            HeroMeleeAttackRecord meleeRecord = new HeroMeleeAttackRecord();
+            meleeRecord.position = hero.currentPosition;
+            meleeRecord.radius = hero.meleeRange;
+            world.heroMeleeAttackRecords.Add(meleeRecord);
+
+            for (int targetIndex = 0; targetIndex < targetEnemyIDs.Count; targetIndex++)
+            {
+                EnemySystem.ApplyDamage(world, targetEnemyIDs[targetIndex], hero.attackDamage);
+            }
+            targetEnemyIDs.Clear();
+            return true;
+        }
+
+        /// <summary>
+        /// 원거리 사거리 안의 최근접 적을 향해 직선 투사체 생성을 요청한다. 피해는 투사체가 명중할 때 ProjectileSystem이 준다.
+        /// 투사체는 SpawnSystem이 틱 마지막에 만들므로 다음 틱부터 날아간다. 최대 비행 거리는 원거리 사거리 R이다.
+        /// </summary>
+        private static bool TryRangedAttack(World world)
+        {
+            ref Hero hero = ref world.hero;
+            EntityID targetID;
+            if (!TargetingSystem.TryFindNearestEnemy(world, hero.currentPosition, hero.rangedRange, out targetID))
+            {
+                return false;
+            }
+
+            Vector3 targetPosition = world.enemies.Get(targetID).currentPosition;
+            Vector3 direction = targetPosition - hero.currentPosition;
+            direction.y = 0f;
+            float sqrDistance = direction.sqrMagnitude;
+            // 적과 겹쳐 있어 방향이 없으면 히어로가 바라볼 방향을 알 수 없으므로 +Z로 쏜다 (발사 지점에서 바로 명중한다)
+            direction = sqrDistance > 0f ? direction / Mathf.Sqrt(sqrDistance) : Vector3.forward;
+
+            ProjectileSpawnRequest request = new ProjectileSpawnRequest();
+            request.startPosition = hero.currentPosition;
+            request.direction = direction;
+            request.speed = hero.projectileSpeed;
+            request.radius = hero.projectileRadius;
+            request.maxDistance = hero.rangedRange;
+            request.damage = hero.attackDamage;
+            world.projectileSpawnRequests.Enqueue(request);
+
+            HeroRangedShotRecord shotRecord = new HeroRangedShotRecord();
+            shotRecord.startPosition = hero.currentPosition;
+            shotRecord.targetID = targetID;
+            shotRecord.targetPosition = targetPosition;
+            world.heroRangedShotRecords.Add(shotRecord);
+            return true;
         }
 
         /// <summary>

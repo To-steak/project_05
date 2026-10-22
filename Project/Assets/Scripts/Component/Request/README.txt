@@ -7,5 +7,6 @@
 - EnemySpawnRequest.cs (struct) : 적 종류, 스폰 지점 인덱스, 누적 웨이브 번호, 보스 여부.
 - DropSpawnRequest.cs (struct) : 종류(골드/XP), 양, 위치.
 - TowerBuildRequest.cs (struct) : 공터 인덱스, 타워 종류.
+- ProjectileSpawnRequest.cs (struct) : 발사 위치, 방향, 속도, 명중 반경, 최대 비행 거리, 피해량.
 
 구현하면서 이 목록과 실제 파일을 맞춘다. 컨벤션은 저장소 루트의 CONVENTIONS.md를 따른다.

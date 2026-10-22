@@ -74,6 +74,13 @@ namespace Project05.Component
         public readonly EntityStore<Drop> drops = new EntityStore<Drop>(MAX_DROP_COUNT);
         // 타워 저장소. 용량 = 공터 수이므로 공터를 받은 뒤 SessionSystem이 만든다
         public EntityStore<Tower> towers;
+        // 투사체 저장소 (히어로 원거리, 이후 타워 공용)
+        public readonly EntityStore<Projectile> projectiles = new EntityStore<Projectile>(MAX_PROJECTILE_COUNT);
+
+        // ───── 조회 버퍼 ─────
+
+        // TargetingSystem 반경 조회 결과를 받는 재사용 목록 (매 틱 할당을 막는다. 받은 System이 다 쓰고 나면 다른 System이 다시 쓴다)
+        public readonly List<EntityID> targetEnemyIDs = new List<EntityID>(MAX_ENEMY_COUNT);
 
         // ───── 입력 ─────
 
@@ -86,6 +93,8 @@ namespace Project05.Component
         public readonly Queue<EnemySpawnRequest> enemySpawnRequests = new Queue<EnemySpawnRequest>(MAX_ENEMY_COUNT);
         // 드롭 생성 요청
         public readonly Queue<DropSpawnRequest> dropSpawnRequests = new Queue<DropSpawnRequest>(MAX_DROP_COUNT);
+        // 투사체 생성 요청
+        public readonly Queue<ProjectileSpawnRequest> projectileSpawnRequests = new Queue<ProjectileSpawnRequest>(MAX_PROJECTILE_COUNT);
         // 타워 건설 요청
         public readonly Queue<TowerBuildRequest> towerBuildRequests = new Queue<TowerBuildRequest>(INITIAL_RECORD_CAPACITY);
 
@@ -140,6 +149,8 @@ namespace Project05.Component
         public const int MAX_ENEMY_COUNT = 256;
         // 드롭 저장소 용량 (바닥에 동시에 깔릴 양, DESIGN 5.6)
         public const int MAX_DROP_COUNT = 256;
+        // 투사체 저장소 용량 (공격 주기와 비행 시간으로 보아 동시에 날아가는 투사체 상한)
+        public const int MAX_PROJECTILE_COUNT = 128;
         // 기록 목록·작은 큐의 초기 용량 (넘치면 List가 늘어나므로 상한이 아니다)
         public const int INITIAL_RECORD_CAPACITY = 16;
     }

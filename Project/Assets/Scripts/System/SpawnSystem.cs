@@ -10,8 +10,8 @@ using UnityEngine;
 namespace Project05.System
 {
     /// <summary>
-    /// [Tick 9] 생성 요청 큐를 처리해 적·보스·드롭·타워를 실제로 만든다. 테이블 조회, 난이도 수식 계산, 엔티티 값 복사를 여기서 한다. 용량이 차서 실패한 요청은 다음 틱에 다시 시도한다.
-    /// 구현 브랜치: feat/enemy-wave (적·보스), feat/drop-progress (드롭), feat/tower (타워)
+    /// [Tick 9] 생성 요청 큐를 처리해 적·보스·투사체·드롭·타워를 실제로 만든다. 테이블 조회, 난이도 수식 계산, 엔티티 값 복사를 여기서 한다. 용량이 차서 실패한 요청은 다음 틱에 다시 시도한다.
+    /// 구현 브랜치: feat/enemy-wave (적·보스), feat/hero-combat (투사체), feat/drop-progress (드롭), feat/tower (타워)
     /// </summary>
     public static class SpawnSystem
     {
@@ -25,6 +25,34 @@ namespace Project05.System
         public static void Tick(World world)
         {
             SpawnEnemies(world);
+            SpawnProjectiles(world);
+        }
+
+        /// <summary>
+        /// 투사체 생성 요청을 처리한다. 발사한 System이 채운 값을 그대로 복사한다.
+        /// 저장소가 가득 차면 남은 요청은 큐에 둔 채 다음 틱에 다시 시도한다.
+        /// </summary>
+        private static void SpawnProjectiles(World world)
+        {
+            Queue<ProjectileSpawnRequest> requests = world.projectileSpawnRequests;
+            while (requests.Count > 0)
+            {
+                EntityID projectileID;
+                if (!world.projectiles.TryCreate(out projectileID))
+                {
+                    return;
+                }
+
+                ProjectileSpawnRequest request = requests.Dequeue();
+                ref Projectile projectile = ref world.projectiles.Get(projectileID);
+                projectile.previousPosition = request.startPosition;
+                projectile.currentPosition = request.startPosition;
+                projectile.direction = request.direction;
+                projectile.speed = request.speed;
+                projectile.radius = request.radius;
+                projectile.remainingDistance = request.maxDistance;
+                projectile.damage = request.damage;
+            }
         }
 
         /// <summary>
