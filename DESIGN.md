@@ -240,7 +240,8 @@
 
 - **로딩 패널:** `LoadSceneAsync` + `allowSceneActivation = false`로 로드. 진행률이 0.9에 도달하면 로드 완료로 보고 시작 버튼을 활성화. 클릭 시 `allowSceneActivation = true`.
 - 로딩 패널의 시작 버튼 클릭은 WebGL 오디오 잠금 해제용 사용자 입력도 겸한다.
-- **설정:** BGM/SFX 볼륨 (항목 TBD). `PlayerPrefs`로 저장 (WebGL에서는 IndexedDB에 저장됨).
+- **설정:** BGM/SFX 볼륨(0 ~ 1 슬라이더) 두 항목 (확정). `PlayerPrefs`로 저장 (WebGL에서는 IndexedDB에 저장됨). 슬라이더를 움직이면 값만 바꾸고 디스크 기록은 설정 패널을 닫을 때 한 번 한다. 실제 소리 적용은 AudioPlayer가 생기면 이 값을 읽는다.
+- **최고 기록 표시:** 기록이 없으면 `-`. 도달 웨이브는 누적 번호로 저장하고 Main 화면에서 `n-x`로 바꿔 보여준다.
 
 ---
 
