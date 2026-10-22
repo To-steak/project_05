@@ -1,0 +1,19 @@
+namespace Project05.Component.Data
+{
+    /// <summary>
+    /// 타워 종류별 수치 테이블. TowerDefinition에서 베이킹되며, 건설·업그레이드 시 타워에 복사한다.
+    /// </summary>
+    public struct TowerStats
+    {
+        // 종류 해금 비용 (골드)
+        public int unlockCost;
+        // 건설 비용 (골드)
+        public int buildCost;
+        // 수리 비용 (골드)
+        public int repairCost;
+        // 적이 경로를 멈추고 이 타워를 공격하기 시작하는 거리
+        public float aggroRange;
+        // 단계별 수치 (0번이 건설 직후 단계)
+        public TowerLevelStats[] levels;
+    }
+}

@@ -6,7 +6,7 @@
 들어갈 파일:
 - Hero.cs (struct) : previousPosition, currentPosition, 이동 경로 코너, 현재·최대 HP, 목숨, 공격력, 공격 타이머, 근거리·원거리 사거리, 무적 남은 틱, 부활 남은 틱, 탑승 중인 타워 EntityID.
 - HeroState.cs (enum) : Moving 또는 Idle, Boarded, Dead (부활 대기).
-- Enemy.cs (struct) : previousPosition, currentPosition, 경로 인덱스, 다음 웨이포인트 인덱스, 현재·최대 HP, 이동 속도, 접촉 피해, 코어·타워 공격력과 공격 주기 틱, 공격 타이머, 상태, 공격 대상 타워 EntityID, 포위 자리, 드롭 골드·XP, 보스 여부.
+- Enemy.cs (struct) : previousPosition, currentPosition, 경로 인덱스, 다음 웨이포인트 인덱스, 현재·최대 HP, 이동 속도, 접촉 반경, 접촉 피해, 코어·타워 공격력과 공격 주기 틱, 공격 타이머, 상태, 공격 대상 타워 EntityID, 포위 자리, 드롭 골드·XP, 보스 여부.
 - EnemyState.cs (enum) : FollowingPath, AttackingTower, AttackingCore.
 - Tower.cs (struct) : 위치, 공터 인덱스, 타워 종류, 업그레이드 단계, 현재·최대 HP, 공격력, 사거리, 공격 주기 틱, 공격 타이머, aggroRange, 포위 자리 사용 현황, 탑승 여부.
 - TowerSlot.cs (struct) : 공터 위치, 건설된 타워 EntityID (비어 있으면 무효 ID), 건설 요청 대기 여부.

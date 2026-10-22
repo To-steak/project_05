@@ -16,6 +16,6 @@
 - EconomySystem.cs (static class) : [Tick 없음] 골드 증감, 해금·건설·업그레이드·수리 비용 지불.
 - ProgressSystem.cs (static class) : [Tick 없음] XP 증가, 레벨업(일시정지), 선택지 3개 뽑기, 효과 적용 (HP 선택 시 전부 회복).
 - TargetingSystem.cs (static class) : [Tick 없음] 반경 내 최근접 적, 반경 내 모든 적 조회 (히어로·타워 공용).
-- SessionSystem.cs (static class) : [Tick 없음] 새 World 초기화 (저장소 생성, 히어로·코어 설정, 스테이지 1-1). 실행 여부 판단(패배·일시정지), 틱 수 증가.
+- SessionSystem.cs (static class) : [Tick 없음] 새 World 초기화 (저장소 생성, 히어로·코어 설정, 스테이지 1-1). 실행 여부 판단(패배·일시정지), 틱 수 증가, 프레임 기록 비우기(Runner가 LateUpdate 마지막에 호출).
 
 구현하면서 이 목록과 실제 파일을 맞춘다. 컨벤션은 저장소 루트의 CONVENTIONS.md를 따른다.
