@@ -8,7 +8,7 @@ Runner가 순서대로 호출. World를 읽어 UI View 갱신. 버튼 입력은 
 - SettingsPresenter.cs (class) : [Main] App.Settings 읽기/저장.
 - LoadingPresenter.cs (class) : [Main] App.Scene 진행률, 시작 시 씬 활성화.
 - HUDPresenter.cs (class) : [Game]
-- LevelUpChoicePresenter.cs (class) : [Game] PauseReason이 LevelUpChoice일 때 표시. ChooseLevelUpOption Command 적재.
+- LevelUpChoicePresenter.cs (class) : [Game] PauseReason이 LevelUpChoice일 때 표시. 선택지가 바뀐 프레임에만 문구 갱신. 버튼은 ChooseLevelUpOption Command 적재.
 - CoreMenuPresenter.cs (class) : [Game] PauseReason이 CoreMenu일 때 표시. UnlockTowerType, UpgradeTower, RepairTower, CloseCoreMenu Command 적재.
 - ResultPresenter.cs (class) : [Game] GamePhase가 Defeat일 때 한 번 표시. 재시작·메인으로는 App.Scene 호출. Runner가 판 시작 시 씬의 ResultView로 만들고 LateUpdate에서 호출.
 - CommandRejectedPresenter.cs (class) : [Game] CommandRejectedRecord를 읽어 안내 문구 표시.

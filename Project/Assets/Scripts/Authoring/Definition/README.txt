@@ -10,7 +10,7 @@ ScriptableObject 정의. 에셋은 Assets/Data/Definition/에 둔다 (루트만 
 - TowerDefinition.cs (ScriptableObject) : 타워 종류별 비용, 단계별 수치 + 단계별 프리팹, 아이콘. (feat/tower에서 추가)
 - WaveRuleDefinition.cs (ScriptableObject) : 웨이브 적 수 규칙, 스폰 간격, 준비 시간, 보스 웨이브.
 - DifficultyDefinition.cs (ScriptableObject) : 난이도 증가 계수, 보스 배율.
-- LevelUpOptionDefinition.cs (ScriptableObject) : 레벨업 선택지 효과와 증가량 + 아이콘, 설명. (feat/drop-progress에서 추가)
+- LevelUpOptionDefinition.cs (ScriptableObject) : 레벨업 선택지 효과 종류, 증가량, 표시 이름. 에셋은 Data/Definition/LevelUpOption/.
 - ProgressionDefinition.cs (ScriptableObject) : 레벨별 필요 XP.
 
 구현하면서 이 목록과 실제 파일을 맞춘다. 컨벤션은 저장소 루트의 CONVENTIONS.md를 따른다.

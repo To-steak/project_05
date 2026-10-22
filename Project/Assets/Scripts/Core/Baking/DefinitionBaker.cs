@@ -55,6 +55,7 @@ namespace Project05.Core.Baking
             data.waveRule = BakeWaveRule(definition.waveRule, definition);
             data.difficulty = BakeDifficulty(definition.difficulty, definition);
             data.progression = BakeProgression(definition.progression, definition);
+            data.levelUpOptions = BakeLevelUpOptions(definition.levelUpOptions, definition);
             return data;
         }
 
@@ -79,6 +80,22 @@ namespace Project05.Core.Baking
                     Debug.LogWarning("[DefinitionBaker] " + definition.hero.name + ".projectilePrefab 이(가) 비어 있다. 원거리 투사체가 화면에 보이지 않는다.", definition.hero);
                 }
                 viewData.heroProjectilePrefab = definition.hero.projectilePrefab;
+            }
+
+            viewData.goldDropPrefab = definition.goldDropPrefab;
+            viewData.xpDropPrefab = definition.xpDropPrefab;
+            if (definition.goldDropPrefab == null || definition.xpDropPrefab == null)
+            {
+                Debug.LogWarning("[DefinitionBaker] " + definition.name + "의 goldDropPrefab 또는 xpDropPrefab이 비어 있다. 그 드롭은 화면에 보이지 않는다.", definition);
+            }
+
+            LevelUpOptionDefinition[] optionDefinitions = definition.levelUpOptions;
+            int optionCount = optionDefinitions == null ? 0 : optionDefinitions.Length;
+            viewData.levelUpOptionNames = new string[optionCount];
+            for (int optionIndex = 0; optionIndex < optionCount; optionIndex++)
+            {
+                LevelUpOptionDefinition optionDefinition = optionDefinitions[optionIndex];
+                viewData.levelUpOptionNames[optionIndex] = optionDefinition == null ? string.Empty : optionDefinition.displayName;
             }
 
             if (definition.enemies == null)
@@ -197,6 +214,32 @@ namespace Project05.Core.Baking
             difficulty.bossGoldMultiplier = difficultyDefinition.bossGoldMultiplier;
             difficulty.bossXPMultiplier = difficultyDefinition.bossXPMultiplier;
             return difficulty;
+        }
+
+        private static LevelUpOptionStats[] BakeLevelUpOptions(LevelUpOptionDefinition[] optionDefinitions, GameDefinition owner)
+        {
+            if (optionDefinitions == null || optionDefinitions.Length == 0)
+            {
+                WarnMissing(owner, "levelUpOptions");
+                return new LevelUpOptionStats[0];
+            }
+
+            // 인덱스가 선택지 번호이므로 빠진 칸도 자리를 유지한다 (빠진 칸은 증가량 0)
+            LevelUpOptionStats[] options = new LevelUpOptionStats[optionDefinitions.Length];
+            for (int optionIndex = 0; optionIndex < optionDefinitions.Length; optionIndex++)
+            {
+                LevelUpOptionDefinition optionDefinition = optionDefinitions[optionIndex];
+                if (optionDefinition == null)
+                {
+                    WarnMissing(owner, "levelUpOptions[" + optionIndex + "]");
+                    continue;
+                }
+
+                ref LevelUpOptionStats option = ref options[optionIndex];
+                option.effectKind = optionDefinition.effectKind;
+                option.amount = optionDefinition.amount;
+            }
+            return options;
         }
 
         private static ProgressionStats BakeProgression(ProgressionDefinition progressionDefinition, GameDefinition owner)

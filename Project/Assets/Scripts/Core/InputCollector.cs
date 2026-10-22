@@ -15,17 +15,21 @@ namespace Project05.Core
         private InputAction _clickAction;
         private InputAction _pointAction;
         private InputAction _interactAction;
+        // 레벨업 선택지 1 / 2 / 3 키 (인덱스 = 제시 칸 번호)
+        private readonly InputAction[] _chooseOptionActions = new InputAction[ProgressState.OFFERED_OPTION_COUNT];
         private bool _hasSearchedActions;
 
         private const string CLICK_ACTION_PATH = "Game/Click";
         private const string POINT_ACTION_PATH = "Game/Point";
         private const string INTERACT_ACTION_PATH = "Game/Interact";
+        // 레벨업 선택지 키 액션 경로 앞부분. 뒤에 1부터 붙는다 (Game/ChooseOption1 ~ 3)
+        private const string CHOOSE_OPTION_ACTION_PATH_PREFIX = "Game/ChooseOption";
         // 클릭 레이캐스트 최대 거리 (카메라에서 지면까지 충분히 먼 값)
         private const float MAX_CLICK_RAY_DISTANCE = 1000f;
 
         /// <summary>
         /// 이번 프레임에 눌린 입력을 명령으로 바꿔 입력 버퍼에 넣는다.
-        /// 좌클릭은 지면 레이캐스트 후 지상이면 MoveTo, 탑승 중이면 Fire. Space는 Interact.
+        /// 좌클릭은 지면 레이캐스트 후 지상이면 MoveTo, 탑승 중이면 Fire. Space는 Interact. 레벨업 선택 중 1 / 2 / 3은 ChooseLevelUpOption.
         /// </summary>
         /// <param name="world">현재 판의 월드</param>
         public void Collect(World world)
@@ -42,6 +46,8 @@ namespace Project05.Core
                 world.input.commands.Enqueue(interactCommand);
             }
 
+            CollectLevelUpChoice(world);
+
             if (_clickAction.WasPressedThisFrame())
             {
                 Vector3 groundPosition;
@@ -52,6 +58,32 @@ namespace Project05.Core
                     clickCommand.groundPosition = groundPosition;
                     world.input.commands.Enqueue(clickCommand);
                 }
+            }
+        }
+
+        /// <summary>
+        /// 레벨업 선택 중에 1 / 2 / 3 키가 눌리면 그 칸을 고르는 명령을 넣는다 (DESIGN 2장, 임시 키).
+        /// 선택 중이 아니면 읽지 않는다. 같은 프레임에 여러 키가 눌려도 CommandSystem이 한 틱에 하나만 받는다.
+        /// </summary>
+        private void CollectLevelUpChoice(World world)
+        {
+            if (world.pauseReason != PauseReason.LevelUpChoice)
+            {
+                return;
+            }
+
+            for (int offeredSlot = 0; offeredSlot < _chooseOptionActions.Length; offeredSlot++)
+            {
+                InputAction chooseAction = _chooseOptionActions[offeredSlot];
+                if (chooseAction == null || !chooseAction.WasPressedThisFrame())
+                {
+                    continue;
+                }
+
+                Command chooseCommand = new Command();
+                chooseCommand.kind = CommandKind.ChooseLevelUpOption;
+                chooseCommand.optionIndex = offeredSlot;
+                world.input.commands.Enqueue(chooseCommand);
             }
         }
 
@@ -73,6 +105,11 @@ namespace Project05.Core
                 _clickAction = actions.FindAction(CLICK_ACTION_PATH);
                 _pointAction = actions.FindAction(POINT_ACTION_PATH);
                 _interactAction = actions.FindAction(INTERACT_ACTION_PATH);
+                // 선택지 키는 없어도 클릭으로 고를 수 있으므로 필수가 아니다 (액션 찾기는 1회라 문자열 결합은 문제없다)
+                for (int offeredSlot = 0; offeredSlot < _chooseOptionActions.Length; offeredSlot++)
+                {
+                    _chooseOptionActions[offeredSlot] = actions.FindAction(CHOOSE_OPTION_ACTION_PATH_PREFIX + (offeredSlot + 1));
+                }
                 if (_clickAction == null || _pointAction == null || _interactAction == null)
                 {
                     Debug.LogError("[InputCollector] InputSystem_Actions에 Game 맵의 Click / Point / Interact 액션이 없습니다.");
