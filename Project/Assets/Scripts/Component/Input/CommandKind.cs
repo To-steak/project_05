@@ -23,6 +23,10 @@ namespace Project05.Component.Input
         BuildTower,
         // 건설 목록 닫기
         CloseBuildMenu,
+        // ESC: 일시정지 메뉴 열기 (일시정지가 아닐 때) / 닫기 (일시정지 메뉴가 열려 있을 때)
+        TogglePauseMenu,
+        // 일시정지 메뉴 닫기 (계속 버튼)
+        ClosePauseMenu,
         // [디버그] 현재 웨이브를 즉시 클리어 (처치 판정이 생기기 전 웨이브 전환 확인용, Runner 디버그 패널에서만 넣는다)
         DebugClearWave,
     }

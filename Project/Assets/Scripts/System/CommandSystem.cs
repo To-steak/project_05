@@ -11,7 +11,7 @@ namespace Project05.System
 {
     /// <summary>
     /// [Tick 1] 입력 버퍼를 소비해 이동·탑승·하차·사격·건설·코어 UI 명령으로 해석한다. 일시정지 중에도 실행되며, 이때는 열린 UI의 명령만 처리하고 나머지는 버린다.
-    /// 구현 브랜치: feat/hero-movement (이동), feat/enemy-wave (디버그 웨이브 클리어), feat/tower (Interact 건설 목록·건설, Fire), feat/drop-progress (레벨업 선택), feat/core-menu (코어 UI 명령)
+    /// 구현 브랜치: feat/hero-movement (이동), feat/enemy-wave (디버그 웨이브 클리어), feat/tower (Interact 건설 목록·건설·탑승), feat/drop-progress (레벨업 선택), feat/core-menu (코어 UI 해금·업그레이드·수리, 일시정지 메뉴)
     /// </summary>
     public static class CommandSystem
     {
@@ -59,13 +59,30 @@ namespace Project05.System
                         BuildTower(world, command.towerTypeIndex);
                         break;
                     case CommandKind.CloseBuildMenu:
-                        CloseBuildMenu(world);
+                        ClosePause(world, PauseReason.BuildMenu);
+                        break;
+                    case CommandKind.UnlockTowerType:
+                        UnlockTowerType(world, command.towerTypeIndex);
+                        break;
+                    case CommandKind.UpgradeTower:
+                        UpgradeTower(world, command.slotIndex);
+                        break;
+                    case CommandKind.RepairTower:
+                        RepairTower(world, command.slotIndex);
+                        break;
+                    case CommandKind.CloseCoreMenu:
+                        ClosePause(world, PauseReason.CoreMenu);
+                        break;
+                    case CommandKind.TogglePauseMenu:
+                        TogglePauseMenu(world);
+                        break;
+                    case CommandKind.ClosePauseMenu:
+                        ClosePause(world, PauseReason.PauseMenu);
                         break;
                     case CommandKind.DebugClearWave:
                         GameFlowSystem.ClearWave(world);
                         break;
                     default:
-                        // 코어 UI 명령은 feat/core-menu에서 구현한다
                         break;
                 }
             }
@@ -102,7 +119,7 @@ namespace Project05.System
         }
 
         /// <summary>
-        /// 일시정지 사유(열린 UI)마다 받는 명령만 통과시킨다. 건설 목록에서는 Space(Interact)가 닫기다.
+        /// 일시정지 사유(열린 UI)마다 받는 명령만 통과시킨다. 건설 목록·코어 UI에서는 Space(Interact)가 닫기다.
         /// </summary>
         private static bool IsAllowedWhilePaused(PauseReason pauseReason, CommandKind kind)
         {
@@ -116,22 +133,25 @@ namespace Project05.System
                     return kind == CommandKind.UnlockTowerType
                         || kind == CommandKind.UpgradeTower
                         || kind == CommandKind.RepairTower
-                        || kind == CommandKind.CloseCoreMenu;
+                        || kind == CommandKind.CloseCoreMenu
+                        || kind == CommandKind.Interact;
+                case PauseReason.PauseMenu:
+                    return kind == CommandKind.TogglePauseMenu || kind == CommandKind.ClosePauseMenu;
                 default:
                     return false;
             }
         }
 
         /// <summary>
-        /// Space 상호작용. 건설 목록이 열려 있으면 닫고, 탑승 중이면 하차한다.
-        /// 지상(Idle, Moving)에서 상호작용 반경 안의 가장 가까운 공터에 타워가 있으면 탑승, 비어 있으면 건설 목록을 열고 일시정지한다.
-        /// 코어 UI(feat/core-menu)는 담당 브랜치에서 붙인다.
+        /// Space 상호작용. 건설 목록·코어 UI가 열려 있으면 닫고, 탑승 중이면 하차한다.
+        /// 지상(Idle, Moving)에서 상호작용 반경 안의 가장 가까운 공터에 타워가 있으면 탑승, 비어 있으면 건설 목록을 연다.
+        /// 공터가 없고 코어가 반경 안이면 코어 UI를 연다 (레벨 디자인으로 공터와 코어 범위는 겹치지 않는다, DESIGN 3.2).
         /// </summary>
         private static void Interact(World world)
         {
-            if (world.pauseReason == PauseReason.BuildMenu)
+            if (world.pauseReason == PauseReason.BuildMenu || world.pauseReason == PauseReason.CoreMenu)
             {
-                CloseBuildMenu(world);
+                ClosePause(world, world.pauseReason);
                 return;
             }
 
@@ -150,6 +170,11 @@ namespace Project05.System
             int slotIndex = FindNearestSlotInReach(world, hero.currentPosition, hero.interactionRadius);
             if (slotIndex == World.NO_SLOT)
             {
+                if (TargetingSystem.GetSqrDistanceXZ(hero.currentPosition, world.core.position) <= hero.interactionRadius * hero.interactionRadius)
+                {
+                    StopHero(ref hero);
+                    world.pauseReason = PauseReason.CoreMenu;
+                }
                 return;
             }
 
@@ -209,15 +234,76 @@ namespace Project05.System
             world.towerBuildRequests.Enqueue(request);
             slot.isBuildPending = true;
 
-            CloseBuildMenu(world);
+            ClosePause(world, PauseReason.BuildMenu);
         }
 
         /// <summary>
-        /// 건설 목록을 닫고 일시정지를 푼다. 목록 때문에 미뤄진 레벨업 선택이 있으면 바로 연다.
+        /// 코어 UI: 타워 종류를 골드로 해금한다. 해금되면 건설 목록에 보인다. 해금은 타워가 파괴돼도 유지된다.
         /// </summary>
-        private static void CloseBuildMenu(World world)
+        private static void UnlockTowerType(World world, int towerTypeIndex)
         {
-            if (world.pauseReason != PauseReason.BuildMenu)
+            bool[] isUnlockedByTowerType = world.towerUnlock.isUnlockedByTowerType;
+            if (towerTypeIndex < 0 || towerTypeIndex >= isUnlockedByTowerType.Length)
+            {
+                return;
+            }
+            if (isUnlockedByTowerType[towerTypeIndex])
+            {
+                Reject(world, CommandKind.UnlockTowerType, CommandRejectReason.AlreadyUnlocked);
+                return;
+            }
+            if (!EconomySystem.TrySpendGold(world, world.towerStats[towerTypeIndex].unlockCost))
+            {
+                Reject(world, CommandKind.UnlockTowerType, CommandRejectReason.NotEnoughGold);
+                return;
+            }
+
+            isUnlockedByTowerType[towerTypeIndex] = true;
+        }
+
+        /// <summary>
+        /// 코어 UI: 공터의 타워를 다음 단계로 올린다 (TowerSystem.TryUpgrade). 거절되면 사유를 기록한다.
+        /// </summary>
+        private static void UpgradeTower(World world, int slotIndex)
+        {
+            CommandRejectReason reason;
+            if (!TowerSystem.TryUpgrade(world, slotIndex, out reason))
+            {
+                Reject(world, CommandKind.UpgradeTower, reason);
+            }
+        }
+
+        /// <summary>
+        /// 코어 UI: 공터의 타워 HP를 전부 회복한다 (TowerSystem.TryRepair). 거절되면 사유를 기록한다.
+        /// </summary>
+        private static void RepairTower(World world, int slotIndex)
+        {
+            CommandRejectReason reason;
+            if (!TowerSystem.TryRepair(world, slotIndex, out reason))
+            {
+                Reject(world, CommandKind.RepairTower, reason);
+            }
+        }
+
+        /// <summary>
+        /// ESC: 일시정지가 아니면 일시정지 메뉴를 열고, 일시정지 메뉴가 열려 있으면 닫는다. 다른 UI가 열려 있으면 무시한다.
+        /// </summary>
+        private static void TogglePauseMenu(World world)
+        {
+            if (world.pauseReason == PauseReason.None)
+            {
+                world.pauseReason = PauseReason.PauseMenu;
+                return;
+            }
+            ClosePause(world, PauseReason.PauseMenu);
+        }
+
+        /// <summary>
+        /// 열려 있는 UI가 reason이면 닫고 일시정지를 푼다. 그 UI 때문에 미뤄진 레벨업 선택이 있으면 바로 연다.
+        /// </summary>
+        private static void ClosePause(World world, PauseReason reason)
+        {
+            if (world.pauseReason != reason)
             {
                 return;
             }

@@ -13,5 +13,7 @@ namespace Project05.Component
         CoreMenu,
         // 공터 건설 목록 열림 (world.buildMenuSlotIndex 공터에 건설)
         BuildMenu,
+        // 일시정지 메뉴 열림 (ESC)
+        PauseMenu,
     }
 }
