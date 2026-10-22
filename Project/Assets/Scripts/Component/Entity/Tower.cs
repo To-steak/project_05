@@ -33,8 +33,6 @@ namespace Project05.Component.Entity
         public int attackCooldownTicks;
         // 적이 경로를 멈추고 이 타워를 공격하기 시작하는 거리
         public float aggroRange;
-        // 포위 자리 사용 현황: 지금까지 배정한 자리 수 (다음 배정 자리 번호)
-        public int siegeSlotAssignedCount;
         // 히어로 탑승 여부
         public bool isBoarded;
     }

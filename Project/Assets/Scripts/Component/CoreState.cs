@@ -14,6 +14,10 @@ namespace Project05.Component
         public int maxHP;
         // 현재 체력
         public int currentHP;
+        // 포위 고리 사이 간격 (타워 포위도 같은 값을 쓴다)
+        public float siegeRingSpacing;
+        // 포위 한 고리 위 자리 사이 간격 (타워 포위도 같은 값을 쓴다)
+        public float siegeSlotSpacing;
         // 포위 자리 위치 (인덱스 = 자리 번호, 안쪽 고리부터 순서대로)
         public Vector3[] siegeSlotPositions;
         // 자리마다 속한 고리 번호 (0이 가장 안쪽)

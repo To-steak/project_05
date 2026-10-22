@@ -16,8 +16,6 @@ namespace Project05.System
         private const int BASE_GAIN_PERCENT = 100;
         // Runner가 시드를 정하기 전의 기본 시드
         private const int DEFAULT_RANDOM_SEED = 0;
-        // 포위 고리·자리 간격의 하한 (데이터가 0이어도 자리 계산이 끝나도록)
-        private const float MIN_SIEGE_SPACING = 0.1f;
 
         /// <summary>
         /// 막 만든 World를 판 시작 상태(1-1 준비 단계)로 초기화한다.
@@ -166,35 +164,26 @@ namespace Project05.System
         }
 
         /// <summary>
-        /// 코어 중심 동심원 위에 포위 자리를 미리 계산한다. 안쪽 고리부터 번호를 매기며, 고리별 자리 수는 둘레 ÷ 자리 간격(최소 1)이다.
+        /// 코어 중심 동심원 위에 포위 자리를 미리 계산하고(SiegeSlotSystem.Layout), 공터마다 타워 포위 자리 배열을 할당한다.
         /// 자리는 적 저장소 용량만큼 만든다 (적이 모두 코어를 포위해도 자리가 모자라지 않는다).
         /// </summary>
         private static void InitializeSiegeSlots(World world, GameData data)
         {
             ref CoreState core = ref world.core;
-            int slotCount = World.MAX_ENEMY_COUNT;
-            core.siegeSlotPositions = new Vector3[slotCount];
-            core.siegeSlotRingIndices = new int[slotCount];
-            core.isSiegeSlotOccupied = new bool[slotCount];
+            core.siegeRingSpacing = data.siegeRingSpacing;
+            core.siegeSlotSpacing = data.siegeSlotSpacing;
+            core.siegeSlotPositions = new Vector3[World.MAX_ENEMY_COUNT];
+            core.siegeSlotRingIndices = new int[World.MAX_ENEMY_COUNT];
+            core.isSiegeSlotOccupied = new bool[World.MAX_ENEMY_COUNT];
+            SiegeSlotSystem.Layout(core.position, data.siegeFirstRingRadius, core.siegeRingSpacing, core.siegeSlotSpacing, core.siegeSlotPositions, core.siegeSlotRingIndices);
 
-            // 0으로 베이킹돼도 무한 루프·0 나누기가 생기지 않도록 하한을 둔다
-            float slotSpacing = Mathf.Max(MIN_SIEGE_SPACING, data.siegeSlotSpacing);
-            float ringSpacing = Mathf.Max(MIN_SIEGE_SPACING, data.siegeRingSpacing);
-
-            int slotIndex = 0;
-            int ringIndex = 0;
-            while (slotIndex < slotCount)
+            // 타워 포위 자리 배열은 공터마다 미리 할당한다. 위치는 건설 시 타워 종류의 반지름으로 계산한다
+            for (int slotIndex = 0; slotIndex < world.towerSlots.Length; slotIndex++)
             {
-                float ringRadius = data.siegeFirstRingRadius + ringSpacing * ringIndex;
-                int ringSlotCount = Mathf.Max(1, Mathf.FloorToInt(2f * Mathf.PI * ringRadius / slotSpacing));
-                for (int ringSlotIndex = 0; ringSlotIndex < ringSlotCount && slotIndex < slotCount; ringSlotIndex++)
-                {
-                    float angle = 2f * Mathf.PI * ringSlotIndex / ringSlotCount;
-                    core.siegeSlotPositions[slotIndex] = core.position + new Vector3(Mathf.Cos(angle) * ringRadius, 0f, Mathf.Sin(angle) * ringRadius);
-                    core.siegeSlotRingIndices[slotIndex] = ringIndex;
-                    slotIndex++;
-                }
-                ringIndex++;
+                ref TowerSlot towerSlot = ref world.towerSlots[slotIndex];
+                towerSlot.siegeSlotPositions = new Vector3[World.TOWER_SIEGE_SLOT_COUNT];
+                towerSlot.siegeSlotRingIndices = new int[World.TOWER_SIEGE_SLOT_COUNT];
+                towerSlot.isSiegeSlotOccupied = new bool[World.TOWER_SIEGE_SLOT_COUNT];
             }
         }
 
@@ -212,6 +201,8 @@ namespace Project05.System
             hero.pathCornerCount = 0;
             hero.nextPathCornerIndex = 0;
             hero.moveSpeed = heroStats.moveSpeed;
+            hero.moveRepathDistance = heroStats.moveRepathDistance;
+            hero.moveTargetPosition = world.heroSpawnPosition;
             hero.maxHP = heroStats.maxHP;
             hero.currentHP = heroStats.maxHP;
             hero.remainingLives = heroStats.lifeCount;

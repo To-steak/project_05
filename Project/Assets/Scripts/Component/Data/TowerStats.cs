@@ -13,6 +13,8 @@ namespace Project05.Component.Data
         public int repairCost;
         // 적이 경로를 멈추고 이 타워를 공격하기 시작하는 거리
         public float aggroRange;
+        // 타워 포위: 가장 안쪽 고리 반지름 (고리·자리 간격은 코어와 같다)
+        public float siegeFirstRingRadius;
         // 투사체 이동 속도 (유닛 / 틱)
         public float projectileSpeed;
         // 투사체 명중 판정 반경

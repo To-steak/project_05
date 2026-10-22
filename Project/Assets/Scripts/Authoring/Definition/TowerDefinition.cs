@@ -19,6 +19,8 @@ namespace Project05.Authoring.Definition
         [Min(0)] public int repairCost;
         // 적이 경로를 멈추고 이 타워를 공격하기 시작하는 거리
         [Min(0f)] public float aggroRange;
+        // 적이 이 타워를 둘러쌀 때 가장 안쪽 고리 반지름 (고리·자리 간격은 GameDefinition의 코어 포위 값과 같다)
+        [Min(0f)] public float siegeFirstRingRadius = 1.5f;
         // 투사체 이동 속도 (유닛 / 틱)
         [Min(0.01f)] public float projectileSpeed = 0.5f;
         // 투사체 명중 판정 반경 (적 반경과 더해 판정)

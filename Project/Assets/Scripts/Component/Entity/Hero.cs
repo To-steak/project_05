@@ -21,6 +21,10 @@ namespace Project05.Component.Entity
         public int nextPathCornerIndex;
         // 이동 속도 (유닛 / 틱)
         public float moveSpeed;
+        // 마지막으로 경로를 계산한 이동 목표 (누르고 있는 동안 목표가 이만큼 바뀌어야 다시 계산)
+        public Vector3 moveTargetPosition;
+        // 누르고 이동할 때 경로를 다시 계산하는 목표 변화 거리
+        public float moveRepathDistance;
         // 현재 체력
         public int currentHP;
         // 최대 체력

@@ -15,9 +15,6 @@ namespace Project05.System
     /// </summary>
     public static class SpawnSystem
     {
-        // 포위 자리를 아직 배정받지 않은 값
-        private const int NO_SIEGE_SLOT = -1;
-
         /// <summary>
         /// 생성 요청 큐를 처리한다. 틱의 마지막에 실행된다.
         /// </summary>
@@ -66,13 +63,19 @@ namespace Project05.System
                 tower.projectileSpeed = stats.projectileSpeed;
                 tower.projectileRadius = stats.projectileRadius;
                 tower.attackCooldownTicks = 0;
-                tower.siegeSlotAssignedCount = 0;
                 tower.isBoarded = false;
                 TowerSystem.ApplyLevel(world, ref tower, 0);
                 tower.currentHP = tower.maxHP;
 
                 slot.towerID = towerID;
                 slot.isBuildPending = false;
+
+                // 포위 자리: 이 종류의 반지름으로 다시 계산하고, 이전 타워 때 남은 사용 표시를 비운다
+                SiegeSlotSystem.Layout(tower.position, stats.siegeFirstRingRadius, world.core.siegeRingSpacing, world.core.siegeSlotSpacing, slot.siegeSlotPositions, slot.siegeSlotRingIndices);
+                for (int siegeSlotIndex = 0; siegeSlotIndex < slot.isSiegeSlotOccupied.Length; siegeSlotIndex++)
+                {
+                    slot.isSiegeSlotOccupied[siegeSlotIndex] = false;
+                }
 
                 TowerBuiltRecord builtRecord = new TowerBuiltRecord();
                 builtRecord.towerID = towerID;
@@ -217,7 +220,7 @@ namespace Project05.System
             enemy.attackIntervalTicks = stats.attackIntervalTicks;
             enemy.attackCooldownTicks = 0;
             enemy.targetTowerID = default(EntityID);
-            enemy.siegeSlotIndex = NO_SIEGE_SLOT;
+            enemy.siegeSlotIndex = SiegeSlotSystem.NO_SIEGE_SLOT;
             enemy.dropGold = Mathf.RoundToInt(stats.baseDropGold * goldScale);
             enemy.dropXP = Mathf.RoundToInt(stats.baseDropXP * xpScale);
             enemy.isBoss = request.isBoss;

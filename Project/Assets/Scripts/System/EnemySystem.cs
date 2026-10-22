@@ -11,13 +11,11 @@ namespace Project05.System
     /// feat/enemy-wave: 웨이포인트 경로 이동. 경로 끝에 닿은 적은 마지막 웨이포인트에 멈춰 있다 (코어 포위는 feat/core-siege).
     /// feat/hero-combat: 피해와 사망(즉시 소멸, 처치 수 증가). feat/drop-progress: 사망 시 드롭 생성 요청.
     /// feat/core-siege: 경로 끝에 닿으면 코어 포위 자리를 배정받아 걸어가고, 도착하면 공격 주기마다 코어를 때린다. 죽으면 자리를 비운다.
+    /// feat/tower: 경로 위에서 타워 aggroRange에 들어오면 타워 포위 자리로 가서 타워를 때린다. 타워가 파괴되면 경로로 돌아간다.
     /// 구현 브랜치: feat/enemy-wave, feat/hero-combat, feat/core-siege, feat/tower
     /// </summary>
     public static class EnemySystem
     {
-        // 포위 자리를 배정받지 않은 값 (SpawnSystem과 같은 값)
-        private const int NO_SIEGE_SLOT = -1;
-
         /// <summary>
         /// 모든 적을 한 틱 진행한다.
         /// </summary>
@@ -41,9 +39,13 @@ namespace Project05.System
                 switch (enemy.state)
                 {
                     case EnemyState.FollowingPath:
+                        if (TryBeginTowerSiege(world, ref enemy))
+                        {
+                            break;
+                        }
                         if (MoveAlongPath(world.waypointPaths, ref enemy))
                         {
-                            BeginSiege(world, ref enemy);
+                            BeginCoreSiege(world, ref enemy);
                         }
                         break;
                     case EnemyState.MovingToSiegeSlot:
@@ -52,8 +54,24 @@ namespace Project05.System
                     case EnemyState.AttackingCore:
                         AttackCore(world, enemies.GetIDAt(enemyIndex), ref enemy);
                         break;
+                    case EnemyState.AttackingTower:
+                        AttackTower(world, enemies.GetIDAt(enemyIndex), ref enemy);
+                        break;
                 }
             }
+        }
+
+        /// <summary>
+        /// 타워를 공격하던(또는 타워 자리로 가던) 적을 경로 추종으로 되돌린다. 타워가 파괴될 때 TowerSystem이 호출한다.
+        /// 타워 포위 자리는 타워와 함께 사라지므로 비우지 않는다 (다시 건설할 때 공터의 자리를 모두 비운다).
+        /// 경로는 멈췄던 웨이포인트부터 이어서 따라간다.
+        /// </summary>
+        /// <param name="enemy">되돌릴 적</param>
+        public static void ReturnToPath(ref Enemy enemy)
+        {
+            enemy.state = EnemyState.FollowingPath;
+            enemy.targetTowerID = default(EntityID);
+            enemy.siegeSlotIndex = SiegeSlotSystem.NO_SIEGE_SLOT;
         }
 
         /// <summary>
@@ -147,55 +165,75 @@ namespace Project05.System
         }
 
         /// <summary>
-        /// 경로 끝에 닿은 적에게 코어 포위 자리를 배정한다. 빈 자리가 있는 가장 안쪽 고리에서, 적 위치에 가장 가까운 자리를 고른다.
-        /// 자리 수는 적 저장소 용량과 같아 항상 빈 자리가 있지만, 없으면 경로 끝에 머물며 다음 틱에 다시 시도한다.
+        /// 경로를 따라가던 적이 타워의 aggroRange 안에 들어오면 그 타워 주변 포위 자리를 배정받고 경로를 멈춘다 (DESIGN 3.2).
+        /// 적은 경로를 벗어나 타워를 찾아가지 않는다 (경로 위에서 범위 안에 들어온 타워만 본다). 자리가 차 있으면 그 타워를 지나친다.
         /// </summary>
-        private static void BeginSiege(World world, ref Enemy enemy)
+        /// <returns>타워 포위를 시작했으면 true</returns>
+        private static bool TryBeginTowerSiege(World world, ref Enemy enemy)
         {
-            ref CoreState core = ref world.core;
-            int bestSlotIndex = NO_SIEGE_SLOT;
-            int bestRingIndex = int.MaxValue;
-            float bestSqrDistance = float.MaxValue;
-
-            for (int slotIndex = 0; slotIndex < core.isSiegeSlotOccupied.Length; slotIndex++)
+            EntityStore<Tower> towers = world.towers;
+            int capacity = towers.Capacity;
+            for (int towerIndex = 0; towerIndex < capacity; towerIndex++)
             {
-                if (core.isSiegeSlotOccupied[slotIndex])
+                if (!towers.IsAliveAt(towerIndex))
                 {
                     continue;
                 }
 
-                int ringIndex = core.siegeSlotRingIndices[slotIndex];
-                if (ringIndex > bestRingIndex)
+                ref Tower tower = ref towers.GetAt(towerIndex);
+                if (TargetingSystem.GetSqrDistanceXZ(enemy.currentPosition, tower.position) > tower.aggroRange * tower.aggroRange)
                 {
-                    // 자리는 안쪽 고리부터 번호가 매겨져 있으므로 더 바깥 고리는 볼 필요가 없다
-                    break;
+                    continue;
                 }
 
-                float sqrDistance = TargetingSystem.GetSqrDistanceXZ(enemy.currentPosition, core.siegeSlotPositions[slotIndex]);
-                if (ringIndex < bestRingIndex || sqrDistance < bestSqrDistance)
+                ref TowerSlot towerSlot = ref world.towerSlots[tower.slotIndex];
+                int siegeSlotIndex = SiegeSlotSystem.TryAssign(towerSlot.siegeSlotPositions, towerSlot.siegeSlotRingIndices, towerSlot.isSiegeSlotOccupied, enemy.currentPosition);
+                if (siegeSlotIndex == SiegeSlotSystem.NO_SIEGE_SLOT)
                 {
-                    bestRingIndex = ringIndex;
-                    bestSqrDistance = sqrDistance;
-                    bestSlotIndex = slotIndex;
+                    continue;
                 }
+
+                enemy.targetTowerID = towers.GetIDAt(towerIndex);
+                enemy.siegeSlotIndex = siegeSlotIndex;
+                enemy.state = EnemyState.MovingToSiegeSlot;
+                return true;
             }
+            return false;
+        }
 
-            if (bestSlotIndex == NO_SIEGE_SLOT)
+        /// <summary>
+        /// 경로 끝에 닿은 적에게 코어 포위 자리를 배정한다 (SiegeSlotSystem.TryAssign).
+        /// 자리 수는 적 저장소 용량과 같아 항상 빈 자리가 있지만, 없으면 경로 끝에 머물며 다음 틱에 다시 시도한다.
+        /// </summary>
+        private static void BeginCoreSiege(World world, ref Enemy enemy)
+        {
+            ref CoreState core = ref world.core;
+            int siegeSlotIndex = SiegeSlotSystem.TryAssign(core.siegeSlotPositions, core.siegeSlotRingIndices, core.isSiegeSlotOccupied, enemy.currentPosition);
+            if (siegeSlotIndex == SiegeSlotSystem.NO_SIEGE_SLOT)
             {
                 return;
             }
 
-            core.isSiegeSlotOccupied[bestSlotIndex] = true;
-            enemy.siegeSlotIndex = bestSlotIndex;
+            enemy.targetTowerID = default(EntityID);
+            enemy.siegeSlotIndex = siegeSlotIndex;
             enemy.state = EnemyState.MovingToSiegeSlot;
         }
 
         /// <summary>
-        /// 배정받은 포위 자리로 직선 이동한다. 도착하면 코어 공격 상태가 되고, 공격 주기 뒤 첫 공격을 한다.
+        /// 배정받은 포위 자리로 직선 이동한다. 도착하면 코어(또는 타워) 공격 상태가 되고, 공격 주기 뒤 첫 공격을 한다.
         /// </summary>
         private static void MoveToSiegeSlot(World world, ref Enemy enemy)
         {
-            Vector3 slotPosition = world.core.siegeSlotPositions[enemy.siegeSlotIndex];
+            bool isTowerSiege = enemy.targetTowerID.IsValid;
+            if (isTowerSiege && !world.towers.IsAlive(enemy.targetTowerID))
+            {
+                ReturnToPath(ref enemy);
+                return;
+            }
+
+            Vector3 slotPosition = isTowerSiege
+                ? world.towerSlots[world.towers.Get(enemy.targetTowerID).slotIndex].siegeSlotPositions[enemy.siegeSlotIndex]
+                : world.core.siegeSlotPositions[enemy.siegeSlotIndex];
             Vector3 toSlot = slotPosition - enemy.currentPosition;
             float sqrDistanceToSlot = toSlot.sqrMagnitude;
 
@@ -206,7 +244,7 @@ namespace Project05.System
             }
 
             enemy.currentPosition = slotPosition;
-            enemy.state = EnemyState.AttackingCore;
+            enemy.state = isTowerSiege ? EnemyState.AttackingTower : EnemyState.AttackingCore;
             enemy.attackCooldownTicks = enemy.attackIntervalTicks;
         }
 
@@ -234,17 +272,56 @@ namespace Project05.System
         }
 
         /// <summary>
-        /// 적이 쓰던 코어 포위 자리를 비워 다른 적이 다시 쓰게 한다.
+        /// 공격 주기마다 대상 타워에 towerDamage만큼 피해를 준다. 타워가 이미 없으면 경로로 돌아간다.
+        /// </summary>
+        private static void AttackTower(World world, EntityID enemyID, ref Enemy enemy)
+        {
+            if (!world.towers.IsAlive(enemy.targetTowerID))
+            {
+                ReturnToPath(ref enemy);
+                return;
+            }
+
+            if (enemy.attackCooldownTicks > 0)
+            {
+                enemy.attackCooldownTicks--;
+                if (enemy.attackCooldownTicks > 0)
+                {
+                    return;
+                }
+            }
+
+            EnemyTowerAttackRecord attackRecord = new EnemyTowerAttackRecord();
+            attackRecord.enemyID = enemyID;
+            attackRecord.towerID = enemy.targetTowerID;
+            attackRecord.position = enemy.currentPosition;
+            world.enemyTowerAttackRecords.Add(attackRecord);
+
+            enemy.attackCooldownTicks = enemy.attackIntervalTicks;
+            // 이 피해로 타워가 파괴되면 TowerSystem이 이 적을 포함해 공격하던 적들을 경로로 되돌린다
+            TowerSystem.ApplyDamage(world, enemy.targetTowerID, enemy.towerDamage);
+        }
+
+        /// <summary>
+        /// 적이 쓰던 포위 자리(코어 또는 살아있는 대상 타워)를 비워 다른 적이 다시 쓰게 한다.
         /// </summary>
         private static void ReleaseSiegeSlot(World world, ref Enemy enemy)
         {
-            if (enemy.siegeSlotIndex == NO_SIEGE_SLOT)
+            if (enemy.siegeSlotIndex == SiegeSlotSystem.NO_SIEGE_SLOT)
             {
                 return;
             }
 
-            world.core.isSiegeSlotOccupied[enemy.siegeSlotIndex] = false;
-            enemy.siegeSlotIndex = NO_SIEGE_SLOT;
+            if (!enemy.targetTowerID.IsValid)
+            {
+                world.core.isSiegeSlotOccupied[enemy.siegeSlotIndex] = false;
+            }
+            else if (world.towers.IsAlive(enemy.targetTowerID))
+            {
+                int slotIndex = world.towers.Get(enemy.targetTowerID).slotIndex;
+                world.towerSlots[slotIndex].isSiegeSlotOccupied[enemy.siegeSlotIndex] = false;
+            }
+            enemy.siegeSlotIndex = SiegeSlotSystem.NO_SIEGE_SLOT;
         }
     }
 }

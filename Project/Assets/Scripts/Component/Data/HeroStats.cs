@@ -11,6 +11,8 @@ namespace Project05.Component.Data
         public int lifeCount;
         // 이동 속도 (유닛 / 틱)
         public float moveSpeed;
+        // 누르고 이동할 때 경로를 다시 계산하는 목표 변화 거리
+        public float moveRepathDistance;
         // 공격력 (근거리·원거리 공용, 탑승 시 타워 공격력)
         public int attackDamage;
         // 공격 주기 (틱)

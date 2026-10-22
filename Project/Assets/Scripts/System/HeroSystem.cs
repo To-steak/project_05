@@ -50,6 +50,54 @@ namespace Project05.System
         }
 
         /// <summary>
+        /// 지상의 히어로를 타워에 태운다 (DESIGN 3.2). 히어로는 타워 위치에 고정되고, 자동 공격·접촉 피해·드롭 획득이 꺼진다.
+        /// 이동 경로는 버리고, 타워 위치로 순간 이동하므로 이전 위치도 같이 옮긴다.
+        /// </summary>
+        /// <param name="world">현재 판의 월드</param>
+        /// <param name="towerID">탈 타워 (살아있어야 한다)</param>
+        /// <returns>탑승했으면 true</returns>
+        public static bool Board(World world, EntityID towerID)
+        {
+            ref Hero hero = ref world.hero;
+            if ((hero.state != HeroState.Idle && hero.state != HeroState.Moving) || !world.towers.IsAlive(towerID))
+            {
+                return false;
+            }
+
+            ref Tower tower = ref world.towers.Get(towerID);
+            tower.isBoarded = true;
+            hero.state = HeroState.Boarded;
+            hero.boardedTowerID = towerID;
+            hero.pathCornerCount = 0;
+            hero.nextPathCornerIndex = 0;
+            hero.previousPosition = tower.position;
+            hero.currentPosition = tower.position;
+            hero.moveTargetPosition = tower.position;
+            return true;
+        }
+
+        /// <summary>
+        /// 탑승 중인 히어로를 내린다. 히어로는 타워 자리에 선 채로 지상(Idle) 상태가 된다.
+        /// Space로 하차할 때와 타워가 파괴돼 강제 하차할 때 쓴다. 탑승 중이 아니면 아무것도 하지 않는다.
+        /// </summary>
+        /// <param name="world">현재 판의 월드</param>
+        public static void Dismount(World world)
+        {
+            ref Hero hero = ref world.hero;
+            if (hero.state != HeroState.Boarded)
+            {
+                return;
+            }
+
+            if (world.towers.IsAlive(hero.boardedTowerID))
+            {
+                world.towers.Get(hero.boardedTowerID).isBoarded = false;
+            }
+            hero.state = HeroState.Idle;
+            hero.boardedTowerID = default(EntityID);
+        }
+
+        /// <summary>
         /// 적과 닿았으면 접촉 피해를 받는다 (DESIGN 3.1). 닿음 = XZ 거리 ≤ 히어로 접촉 반경 + 적 반경. 적은 멈추지 않는다.
         /// 피해를 받으면 invincibilityTicks 동안 추가 피해를 받지 않는다. 탑승 중에는 피해를 받지 않는다.
         /// 한 틱에 여러 적과 닿아도 무적이 바로 걸리므로 첫 적의 피해만 받는다.
