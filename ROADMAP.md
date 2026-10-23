@@ -15,7 +15,7 @@
 - [x] 빈 씬 WebGL 로컬 빌드 → itch.io 업로드 확인 (사용자 작업)
 
 배포는 **로컬 빌드 후 개인 사이트(To-steak.github.io)에 올린다.** GitHub Actions로 Unity 빌드는 하지 않는다.
-- Unity에서 WebGL을 `Project/Builds/WebGL`(gitignore 대상)에 빌드한 뒤 `Tools/deploy-pages.cmd`를 실행한다 (또는 `powershell -ExecutionPolicy Bypass -File Tools\deploy-pages.ps1`).
+- Unity에서 WebGL을 원하는 폴더에 빌드한 뒤 `Tools\deploy-pages.cmd "빌드 폴더"`를 실행한다 (빌드 폴더를 cmd 파일 위로 끌어다 놓아도 된다).
 - 스크립트가 사이트 저장소의 `docs/public/project05/`에 빌드를 넣고 push 한다. 사이트의 VitePress 배포 Actions가 돌고 나면 https://to-steak.github.io/project05/ 로 열린다.
 - GitHub Pages는 압축 응답 헤더를 설정할 수 없으므로 Player Settings의 **Decompression Fallback은 켜 둔다** (chore/webgl-deploy에서 켬).
 

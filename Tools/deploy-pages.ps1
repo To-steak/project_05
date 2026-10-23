@@ -13,12 +13,14 @@
     Player Settings의 Decompression Fallback이 켜져 있어야(지금 켜져 있음) 압축 빌드가 브라우저에서 풀린다.
 
 .EXAMPLE
-    powershell -ExecutionPolicy Bypass -File Tools\deploy-pages.ps1
-    powershell -ExecutionPolicy Bypass -File Tools\deploy-pages.ps1 -BuildPath D:\Builds\WebGL -SiteFolder project05
+    Tools\deploy-pages.cmd "D:\Builds\project05\WebGL"
+    powershell -ExecutionPolicy Bypass -File Tools\deploy-pages.ps1 "D:\Builds\project05\WebGL"
+    powershell -ExecutionPolicy Bypass -File Tools\deploy-pages.ps1 -BuildPath "D:\Builds\project05\WebGL" -NoPush
 #>
 param(
-    # Unity WebGL 빌드 폴더 (index.html이 있는 폴더). 기본값은 Project/Builds/WebGL (gitignore 대상)
-    [string]$BuildPath = (Join-Path $PSScriptRoot "..\Project\Builds\WebGL"),
+    # Unity WebGL 빌드 폴더 (index.html이 있는 폴더). 필수, 첫 번째 인자로 받는다
+    [Parameter(Mandatory = $true, Position = 0)]
+    [string]$BuildPath,
     # 사이트 저장소를 둘 로컬 경로. 없으면 clone 한다. 기본값은 이 저장소 옆 폴더
     [string]$SiteRepoPath = (Join-Path $PSScriptRoot "..\..\To-steak.github.io"),
     # 사이트 안의 게임 폴더 이름 (주소: https://to-steak.github.io/<SiteFolder>/)
