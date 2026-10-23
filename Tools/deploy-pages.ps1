@@ -21,8 +21,8 @@ param(
     # Unity WebGL 빌드 폴더 (index.html이 있는 폴더). 필수, 첫 번째 인자로 받는다
     [Parameter(Mandatory = $true, Position = 0)]
     [string]$BuildPath,
-    # 사이트 저장소를 둘 로컬 경로. 없으면 clone 한다. 기본값은 이 저장소 옆 폴더
-    [string]$SiteRepoPath = (Join-Path $PSScriptRoot "..\..\To-steak.github.io"),
+    # 사이트 저장소를 둘 로컬 경로. 없으면 clone 한다. 비우면 project_05 저장소 옆 폴더(../To-steak.github.io)
+    [string]$SiteRepoPath = "",
     # 사이트 안의 게임 폴더 이름 (주소: https://to-steak.github.io/<SiteFolder>/)
     [string]$SiteFolder = "project05",
     # 사이트 저장소 주소
@@ -32,6 +32,15 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+
+# Windows PowerShell 5.1은 param 기본값 안에서 $PSScriptRoot가 비어 있으므로 기본 경로는 여기서 정한다
+$scriptDirectory = $PSScriptRoot
+if ([string]::IsNullOrEmpty($scriptDirectory)) {
+    $scriptDirectory = Split-Path -Parent $MyInvocation.MyCommand.Definition
+}
+if ([string]::IsNullOrEmpty($SiteRepoPath)) {
+    $SiteRepoPath = Join-Path $scriptDirectory "..\..\To-steak.github.io"
+}
 # GitHub 파일 크기 제한 (100MB). 넘으면 push가 거절된다
 $MaxFileBytes = 100MB
 
@@ -86,7 +95,7 @@ if ($LASTEXITCODE -eq 0) {
     exit 0
 }
 
-$projectCommit = (& git -C $PSScriptRoot rev-parse --short HEAD).Trim()
+$projectCommit = (& git -C $scriptDirectory rev-parse --short HEAD).Trim()
 Invoke-Git $SiteRepoPath @("commit", "-m", "deploy: $SiteFolder WebGL 빌드 (project_05 $projectCommit)", "--", $targetRelativePath)
 
 if ($NoPush) {
