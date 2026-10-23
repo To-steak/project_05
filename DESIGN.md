@@ -524,6 +524,7 @@ Tick 없이 다른 System이 직접 호출하는 것:
 
 ## 6. WebGL 체크리스트
 - [ ] 첫 3시간 안에 빈 씬 WebGL 빌드·배포 확인
+- [x] 배포 위치 → GitHub Pages (To-steak.github.io/project05/, `Tools/deploy-pages`). 압축 헤더를 못 쓰므로 Decompression Fallback 켬
 - [ ] 압축 방식(Brotli/Gzip)과 서버 헤더 확인
 - [ ] 오디오는 첫 사용자 클릭 이후 재생
 - [ ] 적·드롭·VFX 전부 풀링

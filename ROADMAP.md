@@ -14,7 +14,10 @@
 - [x] Actions 워크플로 제거 (로컬 빌드로 전환)
 - [x] 빈 씬 WebGL 로컬 빌드 → itch.io 업로드 확인 (사용자 작업)
 
-배포는 **로컬 빌드 후 itch.io에 직접 업로드**한다. GitHub Actions 자동 빌드는 쓰지 않는다.
+배포는 **로컬 빌드 후 개인 사이트(To-steak.github.io)에 올린다.** GitHub Actions로 Unity 빌드는 하지 않는다.
+- Unity에서 WebGL을 `Project/Builds/WebGL`(gitignore 대상)에 빌드한 뒤 `Tools/deploy-pages.cmd`를 실행한다 (또는 `powershell -ExecutionPolicy Bypass -File Tools\deploy-pages.ps1`).
+- 스크립트가 사이트 저장소의 `docs/public/project05/`에 빌드를 넣고 push 한다. 사이트의 VitePress 배포 Actions가 돌고 나면 https://to-steak.github.io/project05/ 로 열린다.
+- GitHub Pages는 압축 응답 헤더를 설정할 수 없으므로 Player Settings의 **Decompression Fallback은 켜 둔다** (chore/webgl-deploy에서 켬).
 
 ---
 
@@ -58,7 +61,7 @@ UI는 `feat/core-siege`까지 OnGUI 디버그 패널로 대신한다 (결과 패
 - [ ] 연출 (VFX, SFX, 애니메이션)
 - [x] 카메라 수치와 원거리 사거리 제약 맞추기
 - [ ] 밸런싱 (난이도 계수, 비용, 점수 규칙)
-- [ ] 최종 WebGL 빌드와 itch.io 배포
+- [ ] 최종 WebGL 빌드와 GitHub Pages 배포 (`Tools/deploy-pages`)
 
 ---
 
