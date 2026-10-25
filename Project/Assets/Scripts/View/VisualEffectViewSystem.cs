@@ -17,7 +17,7 @@ namespace Project05.View
     public static class VisualEffectViewSystem
     {
         /// <summary>
-        /// 재생이 끝난 효과와 유지 시간이 지난 문구를 풀에 돌려주고, 남은 문구를 떠올리며 카메라를 향하게 한다.
+        /// 재생이 끝난 효과와 유지 시간이 지난 문구를 풀에 돌려주고, 남은 문구를 떠올린다 (방향은 나온 순간 카메라에 맞춘다).
         /// </summary>
         /// <param name="world">현재 판의 월드 (읽기 전용)</param>
         /// <param name="viewContext">현재 판의 화면 상태</param>
@@ -118,7 +118,16 @@ namespace Project05.View
 
             textView.SetText(text);
             textView.SetProgress(0f);
-            textView.transform.position = position;
+            // 나온 순간에만 카메라와 같은 방향을 보게 한다 (떠 있는 동안은 회전하지 않는다)
+            Camera mainCamera = viewContext.mainCamera;
+            if (mainCamera != null)
+            {
+                textView.transform.SetPositionAndRotation(position, mainCamera.transform.rotation);
+            }
+            else
+            {
+                textView.transform.position = position;
+            }
 
             ActiveFloatingText activeText = new ActiveFloatingText();
             activeText.textView = textView;
@@ -197,12 +206,11 @@ namespace Project05.View
         }
 
         /// <summary>
-        /// 문구를 진행도만큼 떠올리고 흐리게 하며 카메라와 같은 방향을 보게 한다. 끝난 문구는 풀에 돌려준다.
+        /// 문구를 진행도만큼 떠올리고 흐리게 한다. 방향은 나온 순간 정했으므로 바꾸지 않는다. 끝난 문구는 풀에 돌려준다.
         /// </summary>
         private static void PresentFloatingTexts(ViewContext viewContext, float now)
         {
             List<ActiveFloatingText> activeTexts = viewContext.activeFloatingTexts;
-            Camera mainCamera = viewContext.mainCamera;
             for (int textIndex = activeTexts.Count - 1; textIndex >= 0; textIndex--)
             {
                 ActiveFloatingText activeText = activeTexts[textIndex];
@@ -218,15 +226,7 @@ namespace Project05.View
                 }
 
                 float progress = Mathf.InverseLerp(activeText.startTime, activeText.endTime, now);
-                Vector3 position = activeText.startPosition + Vector3.up * (textView.RiseDistance * progress);
-                if (mainCamera != null)
-                {
-                    textView.transform.SetPositionAndRotation(position, mainCamera.transform.rotation);
-                }
-                else
-                {
-                    textView.transform.position = position;
-                }
+                textView.transform.position = activeText.startPosition + Vector3.up * (textView.RiseDistance * progress);
                 textView.SetProgress(progress);
             }
         }
