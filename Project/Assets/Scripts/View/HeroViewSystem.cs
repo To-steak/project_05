@@ -11,7 +11,8 @@ namespace Project05.View
     /// 히어로 보간, 이동·공격 애니메이션, 무적 깜빡임, 사망·부활 연출.
     /// Runner가 LateUpdate에서 정해진 순서로 호출한다. World는 읽기만 한다.
     /// feat/vfx: 피격·근거리 범위·사망·부활 효과 (히어로 기록).
-    /// feat/animation: 이동 블렌드(Logic 이동 거리 ÷ 이동 속도), 근거리·원거리 공격·사망·부활(히어로 기록), 사망 애니메이션 뒤 숨김.
+    /// feat/animation: 이동 블렌드(Logic 이동 거리 ÷ 이동 속도), 근거리 공격(동작 차례로)·피격·사망·부활(히어로 기록),
+    /// 레벨업(레벨 상태 비교), 승리(스테이지 클리어 기록, 멈춰 있을 때만), 사망 중 상체 레이어 끄기, 사망 애니메이션 뒤 숨김.
     /// 구현 브랜치: feat/hero-movement, feat/hero-combat, feat/core-siege (무적 깜빡임, 사망 시 숨김), feat/vfx, feat/animation
     /// </summary>
     public static class HeroViewSystem
@@ -55,22 +56,26 @@ namespace Project05.View
             }
 
             heroView.SetVisible(IsHeroVisible(in hero, heroView));
-            PresentAnimation(world, heroView, movementSqrDistance);
+            PresentAnimation(world, viewContext, heroView, movementSqrDistance);
         }
 
         /// <summary>
         /// 이동 블렌드(이번 틱 이동 거리 ÷ 이동 속도, DESIGN 5.12)와 히어로 기록 애니메이션을 반영한다.
-        /// 사망·부활을 공격보다 먼저 보고, 멈춰서 원거리 공격하면 대상을 바라본다.
-        /// 일시정지 중에는 애니메이션을 멈춘다. 패배는 마지막 목숨을 잃은 틱에 바로 오므라 사망 애니메이션을 끝까지 재생하도록
-        /// 멈추지 않고, 이동 블렌드만 0으로 둔다 (패배 중에는 틱이 멈춰 이동 거리가 마지막 값에 남아 있다).
+        /// 일시정지 중에는 애니메이션을 멈추되, 레벨업 선택 대기 중에는 레벨업 애니메이션이 보이도록 멈추지 않는다.
+        /// 패배는 마지막 목숨을 잃은 틱에 바로 오므로 사망 애니메이션을 끝까지 재생하도록 멈추지 않는다.
+        /// 월드가 멈춘 동안은 틱이 진행되지 않아 이동 거리가 마지막 값에 남아 있으므로 이동 블렌드는 0으로 둔다.
+        /// 사망 중에는 상체 레이어를 꺼 사망 자세를 덮지 않게 한다.
         /// </summary>
-        private static void PresentAnimation(World world, HeroView heroView, float movementSqrDistance)
+        private static void PresentAnimation(World world, ViewContext viewContext, HeroView heroView, float movementSqrDistance)
         {
             ref readonly Hero hero = ref world.hero;
-            heroView.SetAnimationPaused(world.pauseReason != PauseReason.None);
+            bool isPaused = world.pauseReason != PauseReason.None && world.pauseReason != PauseReason.LevelUpChoice;
+            bool isDead = hero.state == HeroState.Dead;
+            heroView.SetAnimationPaused(isPaused);
+            heroView.SetUpperBodyEnabled(!isDead);
 
-            bool isMoving = hero.state == HeroState.Moving
-                && world.flow.phase != GamePhase.Defeat
+            bool isMoving = !ViewInterpolation.IsSimulationStopped(world)
+                && hero.state == HeroState.Moving
                 && movementSqrDistance > MIN_FACING_SQR_DISTANCE;
             float speedRatio = isMoving && hero.moveSpeed > 0f
                 ? Mathf.Clamp01(Mathf.Sqrt(movementSqrDistance) / hero.moveSpeed)
@@ -85,30 +90,37 @@ namespace Project05.View
             {
                 heroView.PlayRespawn();
             }
-            if (hero.state == HeroState.Dead)
+
+            // 레벨업은 기록이 아니라 상태다. 판 시작 후 첫 프레임에는 기준만 잡고, 레벨이 오른 프레임에 한 번 재생한다
+            int level = world.progress.level;
+            bool hasLeveledUp = viewContext.hasHeroAnimatedLevel && level > viewContext.heroAnimatedLevel;
+            viewContext.heroAnimatedLevel = level;
+            viewContext.hasHeroAnimatedLevel = true;
+
+            if (isDead)
             {
                 return;
             }
 
+            if (hasLeveledUp)
+            {
+                heroView.PlayLevelUp();
+            }
+            if (world.heroDamagedRecords.Count > 0)
+            {
+                heroView.PlayHit();
+            }
             if (world.heroMeleeAttackRecords.Count > 0)
             {
-                heroView.PlayMeleeAttack();
+                // 근거리 공격마다 동작을 차례로 바꾼다 (Attack01 → 02 → 03 → 01 ...)
+                int variationCount = Mathf.Max(1, heroView.MeleeAttackVariationCount);
+                heroView.PlayMeleeAttack(viewContext.heroMeleeAttackCount % variationCount);
+                viewContext.heroMeleeAttackCount = (viewContext.heroMeleeAttackCount + 1) % variationCount;
             }
-
-            List<HeroRangedShotRecord> rangedRecords = world.heroRangedShotRecords;
-            if (rangedRecords.Count > 0)
+            // 승리 동작은 이동을 끊지 않도록 멈춰 서 있을 때만 재생한다
+            if (world.stageClearedRecords.Count > 0 && hero.state == HeroState.Idle)
             {
-                if (!isMoving)
-                {
-                    Transform heroTransform = heroView.transform;
-                    Vector3 direction = rangedRecords[rangedRecords.Count - 1].targetPosition - heroTransform.position;
-                    direction.y = 0f;
-                    if (direction.sqrMagnitude > MIN_FACING_SQR_DISTANCE)
-                    {
-                        heroTransform.rotation = Quaternion.LookRotation(direction);
-                    }
-                }
-                heroView.PlayRangedAttack();
+                heroView.PlayVictory();
             }
         }
 
