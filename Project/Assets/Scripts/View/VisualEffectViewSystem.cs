@@ -7,23 +7,23 @@ namespace Project05.View
 {
     /// <summary>
     /// 한 번 재생하는 효과와 떠오르는 문구의 공용 처리. 꺼내기(Spawn~)는 각 ViewSystem이 자기 기록을 읽고 호출하고,
-    /// Present가 유지 시간이 지난 것을 App.Pool에 돌려주고 문구를 떠올린다. 상태는 ViewContext 목록에만 둔다.
-    /// 유지 시간은 프리팹의 틱 값을 Time.time으로 바꿔 잰다 (일시정지 중에도 흐른다. 이미 나온 연출만 마저 끝낸다).
+    /// Present가 끝난 것을 App.Pool에 돌려주고 문구를 떠올린다. 상태는 ViewContext 목록에만 둔다.
+    /// 효과는 루트 파티클이 끝나면(IsAlive false) 돌려준다. 길이는 파티클 설정이 정한다 (일시정지 중에도 이미 나온 연출은 마저 끝난다).
+    /// 문구는 프리팹의 유지 틱을 Time.time으로 바꿔 잰다.
     /// Runner가 LateUpdate에서 효과를 꺼내는 ViewSystem들 다음에 호출한다. World는 읽기만 한다.
     /// 구현 브랜치: feat/vfx
     /// </summary>
     public static class VisualEffectViewSystem
     {
         /// <summary>
-        /// 유지 시간이 지난 효과·문구를 풀에 돌려주고, 남은 문구를 떠올리며 카메라를 향하게 한다.
+        /// 재생이 끝난 효과와 유지 시간이 지난 문구를 풀에 돌려주고, 남은 문구를 떠올리며 카메라를 향하게 한다.
         /// </summary>
         /// <param name="world">현재 판의 월드 (읽기 전용)</param>
         /// <param name="viewContext">현재 판의 화면 상태</param>
         public static void Present(World world, ViewContext viewContext)
         {
-            float now = Time.time;
-            ReleaseEndedEffects(viewContext, now);
-            PresentFloatingTexts(viewContext, now);
+            ReleaseEndedEffects(viewContext);
+            PresentFloatingTexts(viewContext, Time.time);
         }
 
         /// <summary>
@@ -66,6 +66,12 @@ namespace Project05.View
                 App.Pool.Release(instance);
                 return;
             }
+            if (!effectView.HasParticle)
+            {
+                Debug.LogError("[VisualEffectViewSystem] 효과 프리팹 " + prefab.name + "의 루트에 ParticleSystem이 없다. 끝을 알 수 없어 재생하지 않는다.", prefab);
+                App.Pool.Release(instance);
+                return;
+            }
 
             Transform effectTransform = instance.transform;
             effectTransform.SetPositionAndRotation(position, prefab.transform.rotation);
@@ -74,7 +80,6 @@ namespace Project05.View
 
             ActiveVisualEffect activeEffect = new ActiveVisualEffect();
             activeEffect.effectView = effectView;
-            activeEffect.endTime = Time.time + effectView.LifetimeTicks * Time.fixedDeltaTime;
             viewContext.activeVisualEffects.Add(activeEffect);
         }
 
@@ -114,22 +119,22 @@ namespace Project05.View
         }
 
         /// <summary>
-        /// 유지 시간이 지난 효과를 풀에 돌려준다. 뒤에서부터 돌며 마지막 원소와 바꿔 지운다 (순서는 상관없다).
+        /// 루트 파티클이 끝난 효과를 풀에 돌려준다. 뒤에서부터 돌며 마지막 원소와 바꿔 지운다 (순서는 상관없다).
         /// </summary>
-        private static void ReleaseEndedEffects(ViewContext viewContext, float now)
+        private static void ReleaseEndedEffects(ViewContext viewContext)
         {
             List<ActiveVisualEffect> activeEffects = viewContext.activeVisualEffects;
             for (int effectIndex = activeEffects.Count - 1; effectIndex >= 0; effectIndex--)
             {
-                ActiveVisualEffect activeEffect = activeEffects[effectIndex];
-                if (now < activeEffect.endTime)
+                VisualEffectView effectView = activeEffects[effectIndex].effectView;
+                if (effectView != null && effectView.IsAlive)
                 {
                     continue;
                 }
 
-                if (activeEffect.effectView != null)
+                if (effectView != null)
                 {
-                    App.Pool.Release(activeEffect.effectView.gameObject);
+                    App.Pool.Release(effectView.gameObject);
                 }
                 RemoveAtBySwap(activeEffects, effectIndex);
             }

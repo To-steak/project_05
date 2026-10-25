@@ -11,7 +11,7 @@
 - TowerViewSystem.cs (static class) : 타워 동기화, 건설·강화·피격·파괴·수리 효과, (예정) 사격·탑승 연출.
 - DropViewSystem.cs (static class) : 드롭 동기화, 획득 문구("+10G", 획득량별 문자열 캐시).
 - CoreViewSystem.cs (static class) : 코어 피격 효과, 화면 경고(CoreWarningView 세기를 유지 시간 동안 줄임).
-- VisualEffectViewSystem.cs (static class) : 한 번짜리 효과·떠오르는 문구 공용. Spawn~으로 App.Pool에서 꺼내고, Present가 유지 시간이 지나면 반납·문구를 떠올림. 꺼내는 ViewSystem들 다음에 호출.
+- VisualEffectViewSystem.cs (static class) : 한 번짜리 효과·떠오르는 문구 공용. Spawn~으로 App.Pool에서 꺼내고, Present가 효과는 파티클이 끝나면(IsAlive), 문구는 유지 시간이 지나면 반납·문구를 떠올림. 꺼내는 ViewSystem들 다음에 호출.
 - InteractionPromptViewSystem.cs (static class) : 지금 Space를 누르면 반응할 대상(World.interactionTargetKind) 위에 Space 아이콘 하나.
 - OffscreenIndicatorViewSystem.cs (static class) : 화면 밖 적 중 코어에 가까운 순 최대 N개를 화면 가장자리 방향 화살표로.
 - AudioViewSystem.cs (static class) : 배경음 선택(패배 정지, 보스 생존 시 보스, 아니면 일반)과 프레임 기록 → 효과음. 레벨업·패배는 ViewContext 값과 비교해 한 번. App.Audio로 재생.
@@ -25,10 +25,10 @@
 - CoreView.cs (MonoBehaviour) : 코어 오브젝트 컴포넌트. 로직 없음.
 - HeroCameraView.cs (MonoBehaviour) : 히어로 추적 CinemachineCamera 표시와 CinemachineFollow 참조, 초당 회전 각도. 판 시작 시 Binding Mode를 World Space로. 로직 없음.
 - InteractionPromptView.cs (MonoBehaviour) : Space 아이콘 오브젝트 (높이 오프셋, 카메라 바라보기).
-- VisualEffectView.cs (MonoBehaviour) : 효과 프리팹 루트. 유지 시간(틱), 꺼낼 때 파티클 다시 재생. 로직 없음.
+- VisualEffectView.cs (MonoBehaviour) : 효과 프리팹 루트(루트에 ParticleSystem 필수, Looping 끔). 꺼낼 때 루트 파티클 다시 재생, IsAlive로 끝났는지 알려 줌. 로직 없음.
 - FloatingTextView.cs (MonoBehaviour) : 떠오르는 문구 프리팹 루트. TMP_Text, 유지 시간(틱), 떠오르는 높이, 흐려지기 시작 진행도. 로직 없음.
 - CoreWarningView.cs (MonoBehaviour) : 코어 피격 화면 경고 (Overlay Canvas 아래, CanvasGroup 투명도). 유지 시간(틱), 최대 투명도. 로직 없음.
-- ActiveVisualEffect.cs (struct) : 재생 중인 효과와 반납 시각 (ViewContext 목록 원소).
+- ActiveVisualEffect.cs (struct) : 재생 중인 효과 (ViewContext 목록 원소).
 - ActiveFloatingText.cs (struct) : 떠오르는 중인 문구, 시작 위치·시각, 반납 시각 (ViewContext 목록 원소).
 - OffscreenIndicatorView.cs (MonoBehaviour) : 화면 밖 화살표 묶음 (Overlay Canvas 아래, 화살표 템플릿·최대 수·가장자리 여백). 판 시작 시 화살표를 복제한다.
 

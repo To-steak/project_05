@@ -4,7 +4,8 @@ namespace Project05.Authoring.Definition
 {
     /// <summary>
     /// 시각 효과 프리팹과 드롭 획득 문구. GameDefinition.visualEffect에 연결하면 게임 시작 시 DefinitionBaker가 View 테이블로 베이킹한다.
-    /// 효과 프리팹은 루트에 VisualEffectView, 문구 프리팹은 루트에 FloatingTextView가 있어야 한다. 원점은 바닥(엔티티 위치) 기준이다.
+    /// 효과 프리팹은 루트에 VisualEffectView와 ParticleSystem(Looping 끔)이, 문구 프리팹은 루트에 FloatingTextView가 있어야 한다. 원점은 바닥(엔티티 위치) 기준이다.
+    /// 효과의 길이는 파티클 설정(Duration, Start Lifetime)이 정하며, 끝나면 풀에 돌아간다.
     /// 비워 둔 칸은 효과를 내지 않는다. 적 사망 효과는 적 종류마다 EnemyDefinition.deathEffectPrefab에 둔다.
     /// </summary>
     [CreateAssetMenu(fileName = "VisualEffectDefinition", menuName = "Project05/Definition/Visual Effect")]
