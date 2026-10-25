@@ -7,7 +7,7 @@ namespace Project05.Editor
     /// 격자 기호: '.' 풀밭, '#' 길, 'S' 적 스폰(길), 'C' 코어(길), 'T' 타워 공터(풀밭), '-' 빈칸. 공백은 무시한다.
     /// 첫 줄이 북쪽(+Z), 줄의 왼쪽이 서쪽(-X)이다. 첫 칸(왼쪽 위) 중심이 origin이다.
     /// 타일 기준 방향(회전 0도일 때 열린 방향): 직선 북·남, 굽은 길 북·동, 갈림길 북·동·남, 막다른 길 북.
-    /// 프리팹이 이와 다르게 생겼으면 종류별 Yaw Offset(도, 시계 방향)으로 맞춘다.
+    /// 프리팹이 이와 다르게 생겼으면 종류별 Yaw Offset(도, 시계 방향)으로 맞춘다. 타일은 generateTiles를 켤 때만 만든다.
     /// </summary>
     [CreateAssetMenu(fileName = "LevelLayout", menuName = "Project05/Level Layout")]
     public class LevelLayout : ScriptableObject
@@ -52,6 +52,8 @@ namespace Project05.Editor
         public float endYawOffset;
 
         [Header("Options")]
+        // 레벨 생성 때 타일도 만들지. 타일을 Level Tile Painter로 직접 칠한다면 끄고, 스폰·경로·공터·코어·바닥 Collider만 만든다
+        public bool generateTiles;
         // 타일을 Batching Static으로 표시할지 (WebGL 그리기 호출 줄이기)
         public bool markTilesStatic = true;
         // 클릭 이동용 바닥 BoxCollider를 격자 전체에 하나 만들지 (InputCollector가 Physics.Raycast로 바닥을 찾는다)

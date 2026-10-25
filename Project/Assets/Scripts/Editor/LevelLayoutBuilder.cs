@@ -123,7 +123,10 @@ namespace Project05.Editor
                 }
             }
 
-            AddMissingPrefabWarnings(layout, cells, warnings);
+            if (layout.generateTiles)
+            {
+                AddMissingPrefabWarnings(layout, cells, warnings);
+            }
             return errors.Count == 0;
         }
 
@@ -164,7 +167,7 @@ namespace Project05.Editor
             }
             ClearChildren(root.transform);
 
-            int tileCount = BuildTiles(layout, cells, root.transform);
+            int tileCount = layout.generateTiles ? BuildTiles(layout, cells, root.transform) : 0;
             if (layout.createGroundCollider)
             {
                 BuildGroundCollider(layout, cells, root.transform);
