@@ -122,6 +122,23 @@ namespace Project05.Core
         }
 
         /// <summary>
+        /// 이번 프레임에 클릭(터치)이나 키가 끝났는지 읽는다. WebGL 오디오 잠금 해제용이라 World 없이(Main 씬에서도) 쓴다.
+        /// 브라우저가 소리를 허락하는 사용자 동작이 클릭·키 입력이므로, 누른 순간이 아니라 뗀 순간(클릭 완료)으로 본다.
+        /// </summary>
+        /// <returns>클릭·터치·키 중 하나라도 이번 프레임에 떼어졌으면 true</returns>
+        public bool WasAnyInputReleasedThisFrame()
+        {
+            Pointer pointer = Pointer.current;
+            if (pointer != null && pointer.press.wasReleasedThisFrame)
+            {
+                return true;
+            }
+
+            Keyboard keyboard = Keyboard.current;
+            return keyboard != null && keyboard.anyKey.wasReleasedThisFrame;
+        }
+
+        /// <summary>
         /// 레벨업 선택 중에 1 / 2 / 3 키가 눌리면 그 칸을 고르는 명령을 넣는다 (DESIGN 2장, 임시 키).
         /// 선택 중이 아니면 읽지 않는다. 같은 프레임에 여러 키가 눌려도 CommandSystem이 한 틱에 하나만 받는다.
         /// </summary>
