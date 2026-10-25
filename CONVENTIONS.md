@@ -84,6 +84,9 @@
 | HP | `HP`, `currentHP`, `MAX_HP` | `Hp`, `currentHp` |
 | XP | `XP`, `requiredXP` | `Xp`, `requiredXp` |
 | ID | `ID`, `entityID`, `EntityID` | `Id`, `entityId` |
+| HUD | `HUDView`, `HUDPresenter`, `_HUDRoot` | `HudView`, `hudPresenter` |
+
+- 이름 맨 앞에 와도 모두 대문자로 쓴다 (`_XPText`, `HUDView`). 지역 변수 이름이 타입 이름과 같아지면 앞에 뜻을 더한다 (`HUDView inGameHUDView`).
 
 ### 2.3 대소문자
 | 대상 | 규칙 | 예시 |
@@ -145,7 +148,7 @@ enemyCopy.currentHP -= damage;
 3. private 필드
 4. 상수 (`const`)
 
-- **제안 (확인 필요):** 메서드는 필드 아래에 public → private 순으로 둔다.
+- 메서드는 필드 아래에 public → private 순으로 둔다.
 
 ---
 
@@ -211,7 +214,7 @@ public static class HeroSystem
 | `asset` | 아트·사운드·프리팹·씬 등 에셋 추가 및 수정 | `asset: 적 사망 VFX 추가` |
 
 - 한 커밋에는 한 type만 담는다. 섞이면 커밋을 나눈다.
-- **확인 필요:** 요약·본문 언어 (한국어 / 영어).
+- 요약·본문은 한국어로 쓴다.
 
 ---
 
@@ -254,15 +257,14 @@ public static class HeroSystem
 - Unity에서 어떤 씬을 열고 무엇을 하면 확인되는지
 ```
 
-### 7.5 병렬 작업과 파일 충돌
-- 여러 브랜치를 동시에 진행할 때 **같은 파일을 동시에 고치지 않는다.** 레인별 담당 파일은 `ROADMAP.md`를 따른다.
+### 7.5 씬 파일과 공용 파일
+- 브랜치는 **한 번에 하나만** 연다 (`ROADMAP.md`). 병렬 레인은 충돌이 잦아 중단했다.
 - **`Game.unity`, `Main.unity`는 한 번에 한 브랜치만 수정한다.** Unity 씬 파일은 병합이 거의 불가능하다.
-  - 다른 브랜치는 프리팹 또는 레인별 테스트 씬(`Assets/Scenes/Test/~.unity`)에서 작업하고, 본 씬 배치는 병합 후 별도로 한다.
+  - 씬을 건드리기 어려운 작업은 프리팹 또는 테스트 씬(`Assets/Scenes/Test/~.unity`)에서 하고, 본 씬 배치는 병합 후 별도로 한다.
   - 테스트 씬은 Build Settings에 넣지 않는다.
-- `World.cs`, Component, Runner의 틱 연결은 `feat/component-contract`에서 미리 고정한다. 이후 브랜치에서 Component를 바꿔야 하면 PR 설명의 리뷰 포인트에 명시한다.
+- `World.cs`, Component, Runner의 틱 연결을 바꾸면 PR 설명의 리뷰 포인트에 명시한다.
 
 ---
 
 ## 8. 미결정
-- [ ] 메서드 배치 순서 (제안: 필드 아래 public → private)
-- [ ] 커밋 메시지 언어
+- 없음. (메서드 배치 → 4.1, 커밋 언어 → 6.2로 확정)
