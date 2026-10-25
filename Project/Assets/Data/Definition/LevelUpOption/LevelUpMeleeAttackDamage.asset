@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fa21280076fd47cc9feef50029842107, type: 3}
-  m_Name: LevelUpAttackDamage
+  m_Name: LevelUpMeleeAttackDamage
   m_EditorClassIdentifier: 
   effectKind: 2
   amount: 3
-  displayName: "캐릭터 공격력"
+  displayName: "근거리 공격력"

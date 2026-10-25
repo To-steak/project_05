@@ -81,6 +81,53 @@ namespace Project05.System
         }
 
         /// <summary>
+        /// 중심에서 반경 이내이면서 바라보는 방향 기준 부채꼴 안에 있는 살아있는 적을 모두 모은다 (XZ 평면, 적 중심점 판정).
+        /// 부채꼴 안 = dot(바라보는 방향, 적 방향) ≥ 반각 코사인. 중심과 같은 위치의 적은 방향이 없으므로 안에 있는 것으로 본다.
+        /// </summary>
+        /// <param name="world">현재 판의 월드</param>
+        /// <param name="center">부채꼴 중심</param>
+        /// <param name="facingDirection">바라보는 방향 (XZ 단위 벡터)</param>
+        /// <param name="radius">반경 (이하 포함)</param>
+        /// <param name="halfAngleCosine">부채꼴 반각의 코사인 (120도면 cos 60도 = 0.5)</param>
+        /// <param name="results">결과를 담을 재사용 목록 (먼저 비운다)</param>
+        /// <returns>모은 적 수</returns>
+        public static int CollectEnemiesInSector(World world, Vector3 center, Vector3 facingDirection, float radius, float halfAngleCosine, List<EntityID> results)
+        {
+            results.Clear();
+            float sqrRadius = radius * radius;
+            EntityStore<Enemy> enemies = world.enemies;
+            int capacity = enemies.Capacity;
+            for (int enemyIndex = 0; enemyIndex < capacity; enemyIndex++)
+            {
+                if (!enemies.IsAliveAt(enemyIndex))
+                {
+                    continue;
+                }
+
+                ref Enemy enemy = ref enemies.GetAt(enemyIndex);
+                float toEnemyX = enemy.currentPosition.x - center.x;
+                float toEnemyZ = enemy.currentPosition.z - center.z;
+                float sqrDistance = toEnemyX * toEnemyX + toEnemyZ * toEnemyZ;
+                if (sqrDistance > sqrRadius)
+                {
+                    continue;
+                }
+
+                // dot(방향, 적 방향 / 거리) ≥ cos  ⇔  dot(방향, 적 방향) ≥ cos × 거리 (나눗셈과 제곱근을 피하려고 거리 쪽으로 옮긴다)
+                if (sqrDistance > 0f)
+                {
+                    float dot = facingDirection.x * toEnemyX + facingDirection.z * toEnemyZ;
+                    if (dot < halfAngleCosine * Mathf.Sqrt(sqrDistance))
+                    {
+                        continue;
+                    }
+                }
+                results.Add(enemies.GetIDAt(enemyIndex));
+            }
+            return results.Count;
+        }
+
+        /// <summary>
         /// 시작점에서 끝점까지의 이동 구간에 처음 닿는 적을 찾는다 (직선 투사체 명중 판정).
         /// 적 중심과 구간의 최단 거리가 (적 반경 + 투사체 반경) 이하이면 닿은 것으로 보고, 그중 시작점에 가장 가까운 지점에서 닿는 적을 고른다.
         /// </summary>

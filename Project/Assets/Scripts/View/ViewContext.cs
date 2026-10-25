@@ -13,6 +13,8 @@ namespace Project05.View
     {
         // 히어로 View (씬에 없으면 null)
         public HeroView heroView;
+        // 히어로 둘레에 놓인 구체 View (HeroViewSystem이 Logic의 구체 수에 맞춰 풀에서 꺼내고 반납한다)
+        public readonly List<HeroOrbView> heroOrbViews = new List<HeroOrbView>(MAX_HERO_ORB_VIEW_CAPACITY);
         // 히어로 추적 Cinemachine 카메라 (씬에 없으면 null)
         public HeroCameraView heroCameraView;
         // 코어 View (씬에 없으면 null)
@@ -73,5 +75,8 @@ namespace Project05.View
         public readonly Dictionary<int, string> XPTextByAmount = new Dictionary<int, string>();
         // 동기화 중 사라진 ID를 모으는 재사용 목록 (Dictionary 순회 중 삭제를 피하고 매 프레임 할당을 막는다)
         public readonly List<EntityID> removedEntityIDs = new List<EntityID>(World.MAX_ENEMY_COUNT);
+
+        // 구체 View 목록의 처음 용량 (최대 구체 수는 데이터 값이라 넘으면 목록이 늘어난다)
+        private const int MAX_HERO_ORB_VIEW_CAPACITY = 8;
     }
 }

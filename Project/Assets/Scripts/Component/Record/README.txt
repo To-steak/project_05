@@ -8,8 +8,8 @@
 - WaveClearedRecord.cs (struct) : 스테이지, 웨이브.
 - BossSpawnedRecord.cs (struct) : 보스 EntityID, 위치.
 - StageClearedRecord.cs (struct) : 스테이지.
-- HeroMeleeAttackRecord.cs (struct) : 위치, 반경.
-- HeroRangedShotRecord.cs (struct) : 시작 위치, 대상 EntityID, 대상 위치.
+- HeroMeleeAttackRecord.cs (struct) : 위치, 방향, 반경, 부채꼴 각도.
+- HeroRangedShotRecord.cs (struct) : 시작 위치(구체 위치), 대상 EntityID, 대상 위치. 구체마다 하나.
 - HeroDamagedRecord.cs (struct) : 위치, 피해량.
 - HeroDiedRecord.cs (struct) : 위치, 남은 목숨.
 - HeroRespawnedRecord.cs (struct) : 위치.

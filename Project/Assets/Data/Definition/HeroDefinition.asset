@@ -15,10 +15,18 @@ MonoBehaviour:
   maxHP: 100
   lifeCount: 3
   moveSpeed: 0.12
-  attackDamage: 10
-  attackIntervalTicks: 25
+  meleeAttackDamage: 10
+  meleeAttackIntervalTicks: 25
   meleeRange: 2
+  meleeAngleDegrees: 120
+  rangedAttackDamage: 10
+  rangedAttackIntervalTicks: 25
   rangedRange: 8
+  orbBaseCount: 1
+  orbLevelStep: 5
+  orbMaxCount: 5
+  orbRadius: 1
+  orbDegreesPerTick: 14.4
   projectileSpeed: 0.4
   projectileRadius: 0.2
   contactRadius: 0.5
@@ -28,3 +36,4 @@ MonoBehaviour:
   interactionRadius: 2
   prefab: {fileID: 5650481211667183865, guid: a80ca79f092b25847ac449112af31625, type: 3}
   projectilePrefab: {fileID: 1684731799131702298, guid: 64d901d86ef66d24f873d8476b20a687, type: 3}
+  orbPrefab: {fileID: 2885959694536585123, guid: f35d1f636dea49e4a32662e95066d10c, type: 3}

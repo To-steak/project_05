@@ -203,8 +203,11 @@ namespace Project05.System
                     core.currentHP = core.maxHP;
                     break;
                 }
-                case LevelUpEffectKind.HeroAttackDamage:
-                    world.hero.attackDamage += option.amount;
+                case LevelUpEffectKind.HeroMeleeAttackDamage:
+                    world.hero.meleeAttackDamage += option.amount;
+                    break;
+                case LevelUpEffectKind.HeroRangedAttackDamage:
+                    world.hero.rangedAttackDamage += option.amount;
                     break;
                 case LevelUpEffectKind.GoldGainPercent:
                     world.progress.goldGainPercent += option.amount;

@@ -244,7 +244,8 @@ namespace Project05.System
             }
             direction /= Mathf.Sqrt(sqrDistance);
 
-            RequestProjectile(world, in tower, direction, world.hero.attackDamage);
+            // 탑승 사격 공격력 공식(타워 + (근거리 + 원거리) / 2)과 광역은 feat/boarded-splash에서 적용한다. 그때까지 히어로 두 공격력의 평균을 쓴다
+            RequestProjectile(world, in tower, direction, (world.hero.meleeAttackDamage + world.hero.rangedAttackDamage) / 2);
 
             TowerShotRecord shotRecord = new TowerShotRecord();
             shotRecord.towerID = towerID;

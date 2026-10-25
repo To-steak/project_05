@@ -84,6 +84,11 @@ namespace Project05.Core.Baking
                     Debug.LogWarning("[DefinitionBaker] " + definition.hero.name + ".projectilePrefab 이(가) 비어 있다. 원거리 투사체가 화면에 보이지 않는다.", definition.hero);
                 }
                 viewData.heroProjectilePrefab = definition.hero.projectilePrefab;
+                if (definition.hero.orbPrefab == null)
+                {
+                    Debug.LogWarning("[DefinitionBaker] " + definition.hero.name + ".orbPrefab 이(가) 비어 있다. 구체가 화면에 보이지 않는다.", definition.hero);
+                }
+                viewData.heroOrbPrefab = definition.hero.orbPrefab;
             }
 
             viewData.goldDropPrefab = definition.goldDropPrefab;
@@ -257,10 +262,18 @@ namespace Project05.Core.Baking
             heroStats.lifeCount = heroDefinition.lifeCount;
             heroStats.moveSpeed = heroDefinition.moveSpeed;
             heroStats.moveRepathDistance = heroDefinition.moveRepathDistance;
-            heroStats.attackDamage = heroDefinition.attackDamage;
-            heroStats.attackIntervalTicks = heroDefinition.attackIntervalTicks;
+            heroStats.meleeAttackDamage = heroDefinition.meleeAttackDamage;
+            heroStats.meleeAttackIntervalTicks = heroDefinition.meleeAttackIntervalTicks;
             heroStats.meleeRange = heroDefinition.meleeRange;
+            heroStats.meleeAngleDegrees = heroDefinition.meleeAngleDegrees;
+            heroStats.rangedAttackDamage = heroDefinition.rangedAttackDamage;
+            heroStats.rangedAttackIntervalTicks = heroDefinition.rangedAttackIntervalTicks;
             heroStats.rangedRange = heroDefinition.rangedRange;
+            heroStats.orbBaseCount = heroDefinition.orbBaseCount;
+            heroStats.orbLevelStep = heroDefinition.orbLevelStep;
+            heroStats.orbMaxCount = heroDefinition.orbMaxCount;
+            heroStats.orbRadius = heroDefinition.orbRadius;
+            heroStats.orbDegreesPerTick = heroDefinition.orbDegreesPerTick;
             heroStats.projectileSpeed = heroDefinition.projectileSpeed;
             heroStats.projectileRadius = heroDefinition.projectileRadius;
             heroStats.contactRadius = heroDefinition.contactRadius;

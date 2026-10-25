@@ -8,11 +8,15 @@ using UnityEngine;
 namespace Project05.System
 {
     /// <summary>
-    /// [Tick 4] 히어로 이동, 탑승/하차 상태, 공격 타이머 1개로 근거리 광역 / 원거리 자동 공격, 접촉 피해와 무적, 사망·목숨·부활을 처리한다.
-    /// 구현 브랜치: feat/hero-movement, feat/hero-combat, feat/core-siege
+    /// [Tick 4] 히어로 이동과 바라보는 방향, 탑승/하차 상태, 근거리(전방 부채꼴)·원거리(구체) 독립 자동 공격,
+    /// 접촉 피해와 무적, 사망·목숨·부활을 처리한다 (DESIGN 3.1).
+    /// 구현 브랜치: feat/hero-movement, feat/hero-combat, feat/core-siege, feat/hero-attack-split
     /// </summary>
     public static class HeroSystem
     {
+        // 이보다 짧은 이동은 방향 전환에 쓰지 않는다 (제자리에서 방향이 튀는 것을 막음)
+        private const float MIN_FACING_SQR_DISTANCE = 0.000001f;
+
         /// <summary>
         /// 히어로를 한 틱 진행한다.
         /// </summary>
@@ -23,6 +27,8 @@ namespace Project05.System
 
             // View 보간 기준점. 움직이지 않는 틱에도 갱신해야 이전 이동이 반복 보간되지 않는다
             hero.previousPosition = hero.currentPosition;
+            // 구체는 사망·탑승 중에도 계속 돈다 (다시 보일 때 각도가 튀지 않게)
+            UpdateOrbs(world);
 
             if (hero.state == HeroState.Dead)
             {
@@ -33,6 +39,7 @@ namespace Project05.System
             if (hero.state == HeroState.Moving)
             {
                 MoveAlongPath(ref hero);
+                UpdateFacing(ref hero);
             }
 
             if (hero.invincibilityRemainingTicks > 0)
@@ -193,7 +200,8 @@ namespace Project05.System
             hero.currentHP = hero.maxHP;
             hero.previousPosition = world.heroSpawnPosition;
             hero.currentPosition = world.heroSpawnPosition;
-            hero.attackCooldownTicks = 0;
+            hero.meleeAttackCooldownTicks = 0;
+            hero.rangedAttackCooldownTicks = 0;
             hero.invincibilityRemainingTicks = 0;
 
             HeroRespawnedRecord respawnedRecord = new HeroRespawnedRecord();
@@ -202,93 +210,141 @@ namespace Project05.System
         }
 
         /// <summary>
-        /// 공격 타이머 하나로 자동 공격한다 (DESIGN 3.1). 타이머가 준비된 틱에 상황을 보고 공격을 하나 고른다.
-        /// 근거리 x 이내에 적이 있으면 x 이내 모든 적에게 근거리 광역, 없고 R 이내에 적이 있으면 최근접 적에게 원거리 투사체.
-        /// R 이내에도 적이 없으면 타이머를 준비 상태로 둔 채 기다린다. 탑승 중·사망 중에는 자동 공격하지 않는다.
+        /// 근거리와 원거리를 각자 타이머로 자동 공격한다 (DESIGN 3.1). 같은 틱에 둘 다 나갈 수 있다.
+        /// 조건을 만족하는 적이 없으면 그 공격은 타이머를 준비 상태로 둔 채 기다린다.
+        /// 탑승 중·사망 중에는 공격하지 않는다 (타이머는 계속 준다).
         /// </summary>
         private static void TickAutoAttack(World world)
         {
             ref Hero hero = ref world.hero;
-            if (hero.attackCooldownTicks > 0)
+            if (hero.meleeAttackCooldownTicks > 0)
             {
-                hero.attackCooldownTicks--;
+                hero.meleeAttackCooldownTicks--;
+            }
+            if (hero.rangedAttackCooldownTicks > 0)
+            {
+                hero.rangedAttackCooldownTicks--;
             }
 
             if (hero.state == HeroState.Boarded || hero.state == HeroState.Dead)
             {
                 return;
             }
-            if (hero.attackCooldownTicks > 0)
-            {
-                return;
-            }
 
-            if (TryMeleeAttack(world) || TryRangedAttack(world))
+            if (hero.meleeAttackCooldownTicks <= 0 && TryMeleeAttack(world))
             {
-                world.hero.attackCooldownTicks = world.hero.attackIntervalTicks;
+                hero.meleeAttackCooldownTicks = hero.meleeAttackIntervalTicks;
+            }
+            if (hero.rangedAttackCooldownTicks <= 0 && TryRangedAttack(world))
+            {
+                hero.rangedAttackCooldownTicks = hero.rangedAttackIntervalTicks;
             }
         }
 
         /// <summary>
-        /// 근거리 사거리 안의 모든 적에게 피해를 준다. 피해 도중 적이 죽어 슬롯이 비어도 ID로 조회하므로 안전하다.
+        /// 근거리 사거리 안, 바라보는 방향 기준 부채꼴 안의 모든 적에게 피해를 준다.
+        /// 피해 도중 적이 죽어 슬롯이 비어도 ID로 조회하므로 안전하다.
         /// </summary>
         private static bool TryMeleeAttack(World world)
         {
             ref Hero hero = ref world.hero;
             List<EntityID> targetEnemyIDs = world.targetEnemyIDs;
-            if (TargetingSystem.CollectEnemiesInRadius(world, hero.currentPosition, hero.meleeRange, targetEnemyIDs) == 0)
+            if (TargetingSystem.CollectEnemiesInSector(world, hero.currentPosition, hero.facingDirection, hero.meleeRange, hero.meleeHalfAngleCosine, targetEnemyIDs) == 0)
             {
                 return false;
             }
 
             HeroMeleeAttackRecord meleeRecord = new HeroMeleeAttackRecord();
             meleeRecord.position = hero.currentPosition;
+            meleeRecord.direction = hero.facingDirection;
             meleeRecord.radius = hero.meleeRange;
+            meleeRecord.angleDegrees = hero.meleeAngleDegrees;
             world.heroMeleeAttackRecords.Add(meleeRecord);
 
             for (int targetIndex = 0; targetIndex < targetEnemyIDs.Count; targetIndex++)
             {
-                EnemySystem.ApplyDamage(world, targetEnemyIDs[targetIndex], hero.attackDamage);
+                EnemySystem.ApplyDamage(world, targetEnemyIDs[targetIndex], hero.meleeAttackDamage);
             }
             targetEnemyIDs.Clear();
             return true;
         }
 
         /// <summary>
-        /// 원거리 사거리 안의 최근접 적을 향해 직선 투사체 생성을 요청한다. 피해는 투사체가 명중할 때 ProjectileSystem이 준다.
+        /// 원거리 사거리 안의 최근접 적(히어로 기준)을 향해 구체마다 직선 투사체 생성을 요청한다. 피해는 투사체가 명중할 때 ProjectileSystem이 준다.
         /// 투사체는 SpawnSystem이 틱 마지막에 만들므로 다음 틱부터 날아간다. 최대 비행 거리는 원거리 사거리 R이다.
         /// </summary>
         private static bool TryRangedAttack(World world)
         {
             ref Hero hero = ref world.hero;
             EntityID targetID;
-            if (!TargetingSystem.TryFindNearestEnemy(world, hero.currentPosition, hero.rangedRange, out targetID))
+            if (hero.orbCount <= 0 || !TargetingSystem.TryFindNearestEnemy(world, hero.currentPosition, hero.rangedRange, out targetID))
             {
                 return false;
             }
 
             Vector3 targetPosition = world.enemies.Get(targetID).currentPosition;
-            Vector3 direction = targetPosition - hero.currentPosition;
-            direction.y = 0f;
-            float sqrDistance = direction.sqrMagnitude;
-            // 적과 겹쳐 있어 방향이 없으면 히어로가 바라볼 방향을 알 수 없으므로 +Z로 쏜다 (발사 지점에서 바로 명중한다)
-            direction = sqrDistance > 0f ? direction / Mathf.Sqrt(sqrDistance) : Vector3.forward;
+            for (int orbIndex = 0; orbIndex < hero.orbCount; orbIndex++)
+            {
+                Vector3 orbPosition = GetOrbPosition(in hero, orbIndex);
+                Vector3 direction = targetPosition - orbPosition;
+                direction.y = 0f;
+                float sqrDistance = direction.sqrMagnitude;
+                // 구체가 적과 겹쳐 방향이 없으면 바라보는 방향으로 쏜다 (발사 지점에서 바로 명중한다)
+                direction = sqrDistance > 0f ? direction / Mathf.Sqrt(sqrDistance) : hero.facingDirection;
 
-            ProjectileSpawnRequest request = new ProjectileSpawnRequest();
-            request.startPosition = hero.currentPosition;
-            request.direction = direction;
-            request.speed = hero.projectileSpeed;
-            request.radius = hero.projectileRadius;
-            request.maxDistance = hero.rangedRange;
-            request.damage = hero.attackDamage;
-            world.projectileSpawnRequests.Enqueue(request);
+                ProjectileSpawnRequest request = new ProjectileSpawnRequest();
+                request.startPosition = orbPosition;
+                request.direction = direction;
+                request.speed = hero.projectileSpeed;
+                request.radius = hero.projectileRadius;
+                request.maxDistance = hero.rangedRange;
+                request.damage = hero.rangedAttackDamage;
+                world.projectileSpawnRequests.Enqueue(request);
 
-            HeroRangedShotRecord shotRecord = new HeroRangedShotRecord();
-            shotRecord.startPosition = hero.currentPosition;
-            shotRecord.targetID = targetID;
-            shotRecord.targetPosition = targetPosition;
-            world.heroRangedShotRecords.Add(shotRecord);
+                HeroRangedShotRecord shotRecord = new HeroRangedShotRecord();
+                shotRecord.startPosition = orbPosition;
+                shotRecord.targetID = targetID;
+                shotRecord.targetPosition = targetPosition;
+                world.heroRangedShotRecords.Add(shotRecord);
+            }
             return true;
+        }
+
+        /// <summary>
+        /// 구체 수와 첫 구체 각도를 이번 틱 값으로 갱신한다 (DESIGN 3.1).
+        /// 구체 수 = min(시작 수 + 레벨 / 간격, 최대 수). 각도 = tickCount × 틱당 각도 (0 ~ 360).
+        /// 각도는 누적하지 않고 틱 수로 매번 계산하므로 오차가 쌓이지 않는다. 이전 각도는 View 보간용이다.
+        /// </summary>
+        private static void UpdateOrbs(World world)
+        {
+            ref Hero hero = ref world.hero;
+            hero.orbCount = Mathf.Min(hero.orbBaseCount + world.progress.level / hero.orbLevelStep, hero.orbMaxCount);
+            hero.previousOrbAngleDegrees = hero.currentOrbAngleDegrees;
+            hero.currentOrbAngleDegrees = Mathf.Repeat(world.tickCount * hero.orbDegreesPerTick, 360f);
+        }
+
+        /// <summary>
+        /// 이번 틱의 구체 위치. 구체 i의 각도 = 첫 구체 각도 + i × 360 / 구체 수, 위치 = 히어로 + (sin, 0, cos) × 반지름.
+        /// View(HeroViewSystem)도 같은 식에 보간한 위치·각도를 넣어 그린다.
+        /// </summary>
+        private static Vector3 GetOrbPosition(in Hero hero, int orbIndex)
+        {
+            float angleRadians = (hero.currentOrbAngleDegrees + orbIndex * 360f / hero.orbCount) * Mathf.Deg2Rad;
+            return hero.currentPosition + new Vector3(Mathf.Sin(angleRadians), 0f, Mathf.Cos(angleRadians)) * hero.orbRadius;
+        }
+
+        /// <summary>
+        /// 이번 틱에 움직였으면 그 방향을 바라본다 (DESIGN 3.1). 움직이지 않았으면 마지막 방향을 유지한다.
+        /// </summary>
+        private static void UpdateFacing(ref Hero hero)
+        {
+            Vector3 movement = hero.currentPosition - hero.previousPosition;
+            movement.y = 0f;
+            float sqrDistance = movement.sqrMagnitude;
+            if (sqrDistance > MIN_FACING_SQR_DISTANCE)
+            {
+                hero.facingDirection = movement / Mathf.Sqrt(sqrDistance);
+            }
         }
 
         /// <summary>
