@@ -51,6 +51,8 @@ namespace Project05.View
         public readonly Dictionary<EntityID, ProjectileView> projectileViews = new Dictionary<EntityID, ProjectileView>(World.MAX_PROJECTILE_COUNT);
         // 피격 플래시 중인 적 ID → 플래시가 끝나는 Time.time
         public readonly Dictionary<EntityID, float> enemyHitFlashEndTimes = new Dictionary<EntityID, float>(World.MAX_ENEMY_COUNT);
+        // 사망 애니메이션 중인 적 View (EnemyViewSystem이 반납 시각이 지나면 풀에 돌려준다)
+        public readonly List<ActiveEnemyCorpse> activeEnemyCorpses = new List<ActiveEnemyCorpse>(World.MAX_ENEMY_COUNT);
         // 살아있는 타워 ID → 타워 View
         public readonly Dictionary<EntityID, TowerView> towerViews = new Dictionary<EntityID, TowerView>();
         // 코어 피격 화면 경고 (씬에 없으면 null)
