@@ -25,13 +25,15 @@ namespace Project05.Core
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         // 디버그 패널 스크롤 위치
         private Vector2 _debugScrollPosition;
-        // 디버그 패널을 펼쳤는지
-        private bool _isDebugPanelExpanded = true;
+        // 디버그 패널을 펼쳤는지 (HUD를 가리지 않게 접은 채로 시작)
+        private bool _isDebugPanelExpanded;
         // 베이킹 확인 항목(길다)을 보일지
         private bool _isBakingDebugVisible;
 #endif
         private World _world;
         private ViewContext _viewContext;
+        // 인게임 HUD Presenter (씬에 HUDView가 없으면 null)
+        private HUDPresenter _inGameHUDPresenter;
         // 결과 패널 Presenter (씬에 ResultView가 없으면 null)
         private ResultPresenter _resultPresenter;
         // 레벨업 선택지 Presenter (씬에 LevelUpChoiceView가 없으면 null)
@@ -150,6 +152,10 @@ namespace Project05.Core
             CameraViewSystem.Present(_world, _viewContext);
 
             // ② Presenter 호출. 판 시작 시 씬에서 찾은 View로 만든 Presenter를 정해진 순서로 부른다
+            if (_inGameHUDPresenter != null)
+            {
+                _inGameHUDPresenter.Present(_world);
+            }
             if (_buildMenuPresenter != null)
             {
                 _buildMenuPresenter.Present(_world);
@@ -259,6 +265,8 @@ namespace Project05.Core
             }
 
             // UI Presenter (판 시작 시 1회). View가 씬에 없으면 그 UI 없이 진행한다
+            HUDView inGameHUDView = FindAnyObjectByType<HUDView>();
+            _inGameHUDPresenter = inGameHUDView != null ? new HUDPresenter(inGameHUDView) : null;
             ResultView resultView = FindAnyObjectByType<ResultView>();
             _resultPresenter = resultView != null ? new ResultPresenter(resultView) : null;
             LevelUpChoiceView levelUpChoiceView = FindAnyObjectByType<LevelUpChoiceView>();
@@ -282,6 +290,7 @@ namespace Project05.Core
             }
             _world = null;
             _viewContext = null;
+            _inGameHUDPresenter = null;
             _resultPresenter = null;
             _levelUpChoicePresenter = null;
             _buildMenuPresenter = null;
@@ -367,7 +376,7 @@ namespace Project05.Core
         }
 
         /// <summary>
-        /// 골드·XP·레벨·레벨업 대기·드롭 수를 보여준다 (feat/drop-progress 확인용. HUD가 생기기 전까지).
+        /// 골드·XP·레벨·레벨업 대기·드롭 수를 보여준다 (feat/drop-progress 확인용. 플레이 화면은 HUD가 표시한다).
         /// </summary>
         private void DrawProgressDebug()
         {
