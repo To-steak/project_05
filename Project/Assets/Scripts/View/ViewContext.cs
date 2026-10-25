@@ -59,6 +59,8 @@ namespace Project05.View
         public float coreWarningEndTime;
         // 재생 중인 한 번짜리 효과 (VisualEffectViewSystem이 유지 시간이 지나면 풀에 돌려준다)
         public readonly List<ActiveVisualEffect> activeVisualEffects = new List<ActiveVisualEffect>(World.MAX_ENEMY_COUNT);
+        // 재생 중인 효과를 월드 정지에 맞춰 멈춰 두었는지 (VisualEffectViewSystem)
+        public bool areVisualEffectsPaused;
         // 떠오르는 중인 문구
         public readonly List<ActiveFloatingText> activeFloatingTexts = new List<ActiveFloatingText>(World.MAX_DROP_COUNT);
         // 획득량 → 골드 획득 문구 (같은 양의 문구를 매번 새로 만들지 않도록)

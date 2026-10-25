@@ -8,8 +8,9 @@ namespace Project05.View
     /// <summary>
     /// 한 번 재생하는 효과와 떠오르는 문구의 공용 처리. 꺼내기(Spawn~)는 각 ViewSystem이 자기 기록을 읽고 호출하고,
     /// Present가 끝난 것을 App.Pool에 돌려주고 문구를 떠올린다. 상태는 ViewContext 목록에만 둔다.
-    /// 효과는 루트 파티클이 끝나면(IsAlive false) 돌려준다. 길이는 파티클 설정이 정한다 (일시정지 중에도 이미 나온 연출은 마저 끝난다).
+    /// 효과는 루트 파티클이 끝나면(IsAlive false) 돌려준다. 길이는 파티클 설정이 정한다.
     /// 문구는 프리팹의 유지 틱을 Time.time으로 바꿔 잰다.
+    /// 월드가 멈춘 동안(일시정지·패배, ViewInterpolation.IsSimulationStopped) 효과 파티클과 문구도 그 자리에 멈춘다.
     /// Runner가 LateUpdate에서 효과를 꺼내는 ViewSystem들 다음에 호출한다. World는 읽기만 한다.
     /// 구현 브랜치: feat/vfx
     /// </summary>
@@ -22,6 +23,15 @@ namespace Project05.View
         /// <param name="viewContext">현재 판의 화면 상태</param>
         public static void Present(World world, ViewContext viewContext)
         {
+            bool isStopped = ViewInterpolation.IsSimulationStopped(world);
+            SynchronizePause(viewContext, isStopped);
+            if (isStopped)
+            {
+                // 멈춘 동안은 반납도 진행도 하지 않는다. 문구는 흐른 시간만큼 시작·끝 시각을 미뤄 그 자리에 둔다
+                HoldFloatingTexts(viewContext, Time.deltaTime);
+                return;
+            }
+
             ReleaseEndedEffects(viewContext);
             PresentFloatingTexts(viewContext, Time.time);
         }
@@ -116,6 +126,52 @@ namespace Project05.View
             activeText.startTime = Time.time;
             activeText.endTime = activeText.startTime + textView.LifetimeTicks * Time.fixedDeltaTime;
             viewContext.activeFloatingTexts.Add(activeText);
+        }
+
+        /// <summary>
+        /// 월드가 멈추거나 다시 움직인 순간에만 재생 중인 효과를 모두 멈추거나 이어 재생한다.
+        /// 멈춘 동안에는 새 기록이 없어 새 효과가 나오지 않으므로 목록만 처리하면 된다.
+        /// </summary>
+        private static void SynchronizePause(ViewContext viewContext, bool isStopped)
+        {
+            if (viewContext.areVisualEffectsPaused == isStopped)
+            {
+                return;
+            }
+            viewContext.areVisualEffectsPaused = isStopped;
+
+            List<ActiveVisualEffect> activeEffects = viewContext.activeVisualEffects;
+            for (int effectIndex = 0; effectIndex < activeEffects.Count; effectIndex++)
+            {
+                VisualEffectView effectView = activeEffects[effectIndex].effectView;
+                if (effectView == null)
+                {
+                    continue;
+                }
+                if (isStopped)
+                {
+                    effectView.Pause();
+                }
+                else
+                {
+                    effectView.Resume();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 멈춘 프레임의 시간만큼 문구의 시작·끝 시각을 미룬다. 다시 움직이면 멈춘 자리부터 이어서 떠오른다.
+        /// </summary>
+        private static void HoldFloatingTexts(ViewContext viewContext, float deltaTime)
+        {
+            List<ActiveFloatingText> activeTexts = viewContext.activeFloatingTexts;
+            for (int textIndex = 0; textIndex < activeTexts.Count; textIndex++)
+            {
+                ActiveFloatingText activeText = activeTexts[textIndex];
+                activeText.startTime += deltaTime;
+                activeText.endTime += deltaTime;
+                activeTexts[textIndex] = activeText;
+            }
         }
 
         /// <summary>

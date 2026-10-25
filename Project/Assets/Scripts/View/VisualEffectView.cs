@@ -48,6 +48,30 @@ namespace Project05.View
             rootParticle.Play(true);
         }
 
+        /// <summary>
+        /// 루트 파티클을 자식까지 그 자리에 멈춘다 (월드 일시정지·패배 중).
+        /// </summary>
+        public void Pause()
+        {
+            ParticleSystem rootParticle = FindRootParticle();
+            if (rootParticle != null)
+            {
+                rootParticle.Pause(true);
+            }
+        }
+
+        /// <summary>
+        /// 멈춘 자리에서 자식까지 이어서 재생한다.
+        /// </summary>
+        public void Resume()
+        {
+            ParticleSystem rootParticle = FindRootParticle();
+            if (rootParticle != null)
+            {
+                rootParticle.Play(true);
+            }
+        }
+
         private ParticleSystem FindRootParticle()
         {
             if (!_hasSearchedRootParticle)

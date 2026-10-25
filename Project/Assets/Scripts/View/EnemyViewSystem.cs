@@ -30,7 +30,11 @@ namespace Project05.View
             ReleaseRemovedViews(world, viewContext);
             SynchronizeAliveEnemies(world, viewContext);
             StartHitFlashes(world, viewContext);
-            EndHitFlashes(viewContext);
+            // 월드가 멈춘 동안은 플래시를 끄지 않는다 (멈춘 화면에서 색만 바뀌지 않게)
+            if (!ViewInterpolation.IsSimulationStopped(world))
+            {
+                EndHitFlashes(viewContext);
+            }
             PresentEffects(world, viewContext);
         }
 

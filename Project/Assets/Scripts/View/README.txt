@@ -16,7 +16,7 @@
 - OffscreenIndicatorViewSystem.cs (static class) : 화면 밖 적 중 코어에 가까운 순 최대 N개를 화면 가장자리 방향 화살표로.
 - AudioViewSystem.cs (static class) : 배경음 선택(패배 정지, 보스 생존 시 보스, 아니면 일반)과 프레임 기록 → 효과음. 레벨업·패배는 ViewContext 값과 비교해 한 번. App.Audio로 재생.
 - CameraViewSystem.cs (static class) : Cinemachine 추적 대상(히어로 View Transform) 연결, Q/E로 Follow 오프셋을 히어로 기준 Y축 회전, 탑승 시 카메라 전환.
-- ViewInterpolation.cs (static class) : ViewSystem 공용 보간 비율 계산 (일시정지·패배 중 1 고정). 상태 없음.
+- ViewInterpolation.cs (static class) : ViewSystem 공용 보간 비율 계산 (일시정지·패배 중 1 고정), 시뮬레이션이 멈췄는지(효과·문구·경고·피격 플래시도 멈춤). 상태 없음.
 - HeroView.cs (MonoBehaviour) : 히어로 프리팹 컴포넌트 (Renderer 참조, 무적 깜빡임 틱). 보이기·숨기기만 한다. 로직 없음.
 - EnemyView.cs (MonoBehaviour) : 적 프리팹 컴포넌트. Renderer 참조와 피격 플래시 색·시간 설정, 색 바꾸기만 한다. 로직 없음.
 - ProjectileView.cs (MonoBehaviour) : 투사체 프리팹 컴포넌트. 로직 없음.
