@@ -19,6 +19,7 @@ MonoBehaviour:
   aggroRange: 3
   projectileSpeed: 0.5
   projectileRadius: 0.2
+  boardedSplashRadius: 2
   levels:
   - maxHP: 100
     attackDamage: 8
