@@ -37,6 +37,12 @@ namespace Project05.View
         public Vector3[] offscreenScreenPoints = new Vector3[0];
         // 화살표마다 고른 적의 코어까지 거리 제곱 (가까운 순 선택용, 매 프레임 재사용)
         public float[] offscreenSqrDistances = new float[0];
+        // 레벨업 효과음 기준 레벨 (이보다 오르면 효과음을 낸다, AudioViewSystem)
+        public int audioHeardLevel;
+        // audioHeardLevel을 판 시작 후 읽었는지 (첫 프레임에는 효과음 없이 기준만 잡는다)
+        public bool hasAudioHeardLevel;
+        // 이번 판의 패배 효과음을 냈는지 (Defeat는 기록이 아니라 상태라 한 번만 내도록)
+        public bool hasPlayedDefeatSound;
         // 살아있는 적 ID → 적 View
         public readonly Dictionary<EntityID, EnemyView> enemyViews = new Dictionary<EntityID, EnemyView>(World.MAX_ENEMY_COUNT);
         // 살아있는 드롭 ID → 드롭 View

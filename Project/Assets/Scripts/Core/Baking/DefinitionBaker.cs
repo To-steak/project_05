@@ -10,7 +10,7 @@ namespace Project05.Core.Baking
     /// 게임 시작 시 1회, ScriptableObject 정의(~Definition)를 로직용 struct 테이블(GameData)로 베이킹한다.
     /// 결과는 복사본이므로 Play 중 테이블을 바꿔도 원본 에셋은 바뀌지 않는다.
     /// 정의가 빠져 있으면 경고를 남기고 기본값(0)으로 채워, 어떤 경우에도 null 테이블을 돌려주지 않는다.
-    /// View용 테이블(프리팹, VFX)은 BakeView로 따로 만든다. 항목은 그것을 쓰는 ViewSystem 브랜치에서 추가한다.
+    /// View용 테이블(프리팹, VFX)은 BakeView로, 오디오 테이블(클립)은 BakeAudio로 따로 만든다. 항목은 그것을 쓰는 ViewSystem 브랜치에서 추가한다.
     /// </summary>
     public static class DefinitionBaker
     {
@@ -142,6 +142,67 @@ namespace Project05.Core.Baking
                 viewData.enemyPrefabs[enemyTypeIndex] = enemyDefinition.prefab;
             }
             return viewData;
+        }
+
+        /// <summary>
+        /// 루트 정의의 AudioDefinition을 오디오 테이블로 베이킹한다. 클립 배열은 항상 종류 enum 길이이며 빈 칸은 null이다.
+        /// 보스 배경음·보스 사망·탑승 사격이 비어 있으면 일반 배경음·적 사망·자동 사격 클립으로 채운다.
+        /// </summary>
+        /// <param name="definition">루트 정의 (null이거나 audio가 비어 있으면 소리 없는 테이블)</param>
+        /// <returns>오디오 테이블</returns>
+        public static AudioData BakeAudio(GameDefinition definition)
+        {
+            AudioData audioData = new AudioData();
+            if (definition == null)
+            {
+                return audioData;
+            }
+
+            AudioDefinition audioDefinition = definition.audio;
+            if (audioDefinition == null)
+            {
+                Debug.LogWarning("[DefinitionBaker] " + definition.name + ".audio 이(가) 비어 있다. 소리가 나지 않는다.", definition);
+                return audioData;
+            }
+
+            audioData.musicVolumeScale = audioDefinition.musicVolumeScale;
+            audioData.soundEffectVolumeScale = audioDefinition.soundEffectVolumeScale;
+            audioData.soundEffectVoiceCount = Mathf.Max(1, audioDefinition.soundEffectVoiceCount);
+
+            AudioClip[] musicClips = audioData.musicClips;
+            musicClips[(int)BackgroundMusicKind.MainMenu] = audioDefinition.mainMenuMusic;
+            musicClips[(int)BackgroundMusicKind.Game] = audioDefinition.gameMusic;
+            musicClips[(int)BackgroundMusicKind.Boss] = audioDefinition.bossMusic != null ? audioDefinition.bossMusic : audioDefinition.gameMusic;
+
+            AudioClip[] soundEffectClips = audioData.soundEffectClips;
+            soundEffectClips[(int)SoundEffectKind.WaveStarted] = audioDefinition.waveStartedClip;
+            soundEffectClips[(int)SoundEffectKind.WaveCleared] = audioDefinition.waveClearedClip;
+            soundEffectClips[(int)SoundEffectKind.BossSpawned] = audioDefinition.bossSpawnedClip;
+            soundEffectClips[(int)SoundEffectKind.StageCleared] = audioDefinition.stageClearedClip;
+            soundEffectClips[(int)SoundEffectKind.LevelUp] = audioDefinition.levelUpClip;
+            soundEffectClips[(int)SoundEffectKind.Defeat] = audioDefinition.defeatClip;
+            soundEffectClips[(int)SoundEffectKind.HeroMeleeAttack] = audioDefinition.heroMeleeAttackClip;
+            soundEffectClips[(int)SoundEffectKind.HeroRangedShot] = audioDefinition.heroRangedShotClip;
+            soundEffectClips[(int)SoundEffectKind.HeroDamaged] = audioDefinition.heroDamagedClip;
+            soundEffectClips[(int)SoundEffectKind.HeroDied] = audioDefinition.heroDiedClip;
+            soundEffectClips[(int)SoundEffectKind.HeroRespawned] = audioDefinition.heroRespawnedClip;
+            soundEffectClips[(int)SoundEffectKind.TowerBuilt] = audioDefinition.towerBuiltClip;
+            soundEffectClips[(int)SoundEffectKind.TowerUpgraded] = audioDefinition.towerUpgradedClip;
+            soundEffectClips[(int)SoundEffectKind.TowerShot] = audioDefinition.towerShotClip;
+            soundEffectClips[(int)SoundEffectKind.TowerBoardedShot] = audioDefinition.towerBoardedShotClip != null ? audioDefinition.towerBoardedShotClip : audioDefinition.towerShotClip;
+            soundEffectClips[(int)SoundEffectKind.TowerDamaged] = audioDefinition.towerDamagedClip;
+            soundEffectClips[(int)SoundEffectKind.TowerDestroyed] = audioDefinition.towerDestroyedClip;
+            soundEffectClips[(int)SoundEffectKind.TowerRepaired] = audioDefinition.towerRepairedClip;
+            soundEffectClips[(int)SoundEffectKind.EnemyDamaged] = audioDefinition.enemyDamagedClip;
+            soundEffectClips[(int)SoundEffectKind.EnemyDied] = audioDefinition.enemyDiedClip;
+            soundEffectClips[(int)SoundEffectKind.BossDied] = audioDefinition.bossDiedClip != null ? audioDefinition.bossDiedClip : audioDefinition.enemyDiedClip;
+            soundEffectClips[(int)SoundEffectKind.EnemyCoreAttack] = audioDefinition.enemyCoreAttackClip;
+            soundEffectClips[(int)SoundEffectKind.EnemyTowerAttack] = audioDefinition.enemyTowerAttackClip;
+            soundEffectClips[(int)SoundEffectKind.GoldCollected] = audioDefinition.goldCollectedClip;
+            soundEffectClips[(int)SoundEffectKind.XPCollected] = audioDefinition.XPCollectedClip;
+            soundEffectClips[(int)SoundEffectKind.CoreDamaged] = audioDefinition.coreDamagedClip;
+            soundEffectClips[(int)SoundEffectKind.CommandRejected] = audioDefinition.commandRejectedClip;
+            return audioData;
         }
 
         private static HeroStats BakeHero(HeroDefinition heroDefinition, GameDefinition owner)

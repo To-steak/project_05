@@ -4,7 +4,7 @@ namespace Project05.Foundation
 {
     /// <summary>
     /// 설정을 PlayerPrefs에 저장·로드한다 (WebGL에서는 IndexedDB에 저장된다, DESIGN 3.7).
-    /// 지금 항목은 BGM·SFX 볼륨(0 ~ 1)뿐이다. 실제 소리 적용은 AudioPlayer가 생기면 이 값을 읽는다.
+    /// 지금 항목은 BGM·SFX 볼륨(0 ~ 1)뿐이다. AudioPlayer가 매 프레임 이 값을 읽어 소리에 반영한다.
     /// 값은 바꿀 때 메모리와 PlayerPrefs에 쓰고, 디스크 기록(PlayerPrefs.Save)은 Save에서 한 번만 한다.
     /// </summary>
     public class SettingsStore

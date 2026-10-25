@@ -23,6 +23,8 @@ namespace Project05.Authoring.Definition
         public TowerDefinition[] towers = new TowerDefinition[0];
         // 레벨업 선택지 목록 (레벨업마다 이 중 3개를 중복 없이 뽑아 제시)
         public LevelUpOptionDefinition[] levelUpOptions = new LevelUpOptionDefinition[0];
+        // 배경음·효과음 클립과 믹스 수치 (오디오 테이블로 베이킹, 없으면 소리가 나지 않는다)
+        public AudioDefinition audio;
         // 골드 드롭 View 프리팹 (View 테이블로 베이킹, 없으면 보이지 않는다)
         public GameObject goldDropPrefab;
         // XP 드롭 View 프리팹 (View 테이블로 베이킹, 없으면 보이지 않는다)

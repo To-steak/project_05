@@ -13,5 +13,6 @@ ScriptableObject 정의. 에셋은 Assets/Data/Definition/에 둔다 (루트만 
 - DifficultyDefinition.cs (ScriptableObject) : 난이도 증가 계수, 보스 배율.
 - LevelUpOptionDefinition.cs (ScriptableObject) : 레벨업 선택지 효과 종류, 증가량, 표시 이름. 에셋은 Data/Definition/LevelUpOption/.
 - ProgressionDefinition.cs (ScriptableObject) : 레벨별 필요 XP.
+- AudioDefinition.cs (ScriptableObject) : 배경음(메뉴·게임·보스)과 효과음 클립, 믹스 배율, 효과음 동시 재생 수. GameDefinition.audio에 연결. 비운 클립은 소리 없음.
 
 구현하면서 이 목록과 실제 파일을 맞춘다. 컨벤션은 저장소 루트의 CONVENTIONS.md를 따른다.

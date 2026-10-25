@@ -15,7 +15,7 @@ namespace Project05.Core
 {
     /// <summary>
     /// DDOL에 올라가는 유일한 오브젝트. 현재 판의 World와 ViewContext를 보관하고 루프를 돌린다.
-    /// FixedUpdate: System Tick / Update: 입력 수집 / LateUpdate: 패배 시 기록 저장 → ViewSystem → Presenter → 프레임 기록 비우기.
+    /// FixedUpdate: System Tick / Update: 오디오 잠금 해제 확인, 입력 수집 / LateUpdate: 볼륨 반영, 패배 시 기록 저장 → ViewSystem → Presenter → 프레임 기록 비우기.
     /// Main 씬에서는 World 없이 메인 메뉴·설정·로딩 Presenter만 둔다.
     /// 실행 순서는 기본값(0)으로 두어 CinemachineBrain(100)보다 먼저 LateUpdate를 돈다.
     /// </summary>
@@ -116,6 +116,8 @@ namespace Project05.Core
         private void Update()
         {
             SynchronizeSession();
+            // Main 씬(World 없음)에서도 첫 클릭을 봐야 하므로 World 확인보다 먼저 한다
+            UnlockAudioOnFirstInput();
             if (_world == null)
             {
                 return;
@@ -128,6 +130,11 @@ namespace Project05.Core
         private void LateUpdate()
         {
             SynchronizeSession();
+            // 설정 슬라이더 값을 즉시 소리에 반영한다 (Main·Game 공통)
+            if (App.Audio != null)
+            {
+                App.Audio.SynchronizeVolumes();
+            }
             if (_world == null)
             {
                 // Main 씬: 로딩 진행률만 매 프레임 갱신한다
@@ -150,6 +157,7 @@ namespace Project05.Core
             InteractionPromptViewSystem.Present(_world, _viewContext);
             OffscreenIndicatorViewSystem.Present(_world, _viewContext);
             CameraViewSystem.Present(_world, _viewContext);
+            AudioViewSystem.Present(_world, _viewContext);
 
             // ② Presenter 호출. 판 시작 시 씬에서 찾은 View로 만든 Presenter를 정해진 순서로 부른다
             if (_inGameHUDPresenter != null)
@@ -200,11 +208,42 @@ namespace Project05.Core
 
             if (IsGameplayScene(activeScene))
             {
+                // 판 중 배경음은 AudioViewSystem이 게임 단계를 읽어 매 프레임 고른다
                 BeginSession(activeScene);
             }
             else if (activeScene.name == SceneLoader.MAIN_SCENE_NAME)
             {
                 BeginMainMenu();
+                RequestBackgroundMusic(BackgroundMusicKind.MainMenu);
+            }
+            else
+            {
+                RequestBackgroundMusic(BackgroundMusicKind.None);
+            }
+        }
+
+        /// <summary>
+        /// 아직 오디오가 잠겨 있으면, 이번 프레임에 클릭·키 입력이 끝났는지 보고 잠금을 푼다 (DESIGN 3.7, 6장).
+        /// Main 씬에서는 로딩 패널의 시작 버튼 클릭이 보통 첫 입력이 된다.
+        /// </summary>
+        private void UnlockAudioOnFirstInput()
+        {
+            if (App.Audio == null || App.Audio.IsUnlocked)
+            {
+                return;
+            }
+
+            if (_inputCollector.WasAnyInputReleasedThisFrame())
+            {
+                App.Audio.Unlock();
+            }
+        }
+
+        private static void RequestBackgroundMusic(BackgroundMusicKind musicKind)
+        {
+            if (App.Audio != null)
+            {
+                App.Audio.PlayBackgroundMusic(musicKind);
             }
         }
 
