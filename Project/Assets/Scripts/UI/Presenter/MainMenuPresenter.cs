@@ -37,7 +37,8 @@ namespace Project05.UI.Presenter
             }
 
             // Main 씬에 들어올 때 한 번 만드는 문자열이라 할당은 문제없다
-            _view.SetRecordText("최고 점수 " + App.Records.BestScore + "\n최고 도달 웨이브 " + FormatWave(App.Records.BestCumulativeWaveNumber));
+            _view.SetScoreText("최고 점수: " + App.Records.BestScore);
+            _view.SetWaveText("최고 기록: " + FormatWave(App.Records.BestCumulativeWaveNumber));
         }
 
         /// <summary>

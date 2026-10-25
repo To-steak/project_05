@@ -11,7 +11,8 @@ namespace Project05.UI.View
     {
         [SerializeField] private Button _startButton;
         [SerializeField] private Button _settingsButton;
-        [SerializeField] private TMP_Text _recordText;
+        [SerializeField] private TMP_Text _waveText;
+        [SerializeField] private TMP_Text _scoreText;
 
         /// <summary>
         /// 게임 시작 버튼. Presenter가 onClick을 구독한다.
@@ -30,14 +31,26 @@ namespace Project05.UI.View
         }
 
         /// <summary>
-        /// 기록 텍스트를 바꾼다.
+        /// 최고 점수 텍스트를 바꾼다.
         /// </summary>
         /// <param name="text">표시할 문장 (Presenter가 만든다)</param>
-        public void SetRecordText(string text)
+        public void SetScoreText(string text)
         {
-            if (_recordText != null)
+            if (_scoreText != null)
             {
-                _recordText.text = text;
+                _scoreText.text = text;
+            }
+        }
+
+        /// <summary>
+        /// 최고 웨이브 텍스트를 바꾼다.
+        /// </summary>
+        /// <param name="text">표시할 문장 (Presenter가 만든다)</param>
+        public void SetWaveText(string text)
+        {
+            if (_waveText != null)
+            {
+                _waveText.text = text;
             }
         }
     }
