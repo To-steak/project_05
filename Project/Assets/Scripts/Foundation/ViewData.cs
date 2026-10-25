@@ -13,6 +13,8 @@ namespace Project05.Foundation
         public GameObject[] enemyPrefabs = new GameObject[0];
         // 히어로 원거리 투사체 View 프리팹 (비어 있으면 null)
         public GameObject heroProjectilePrefab;
+        // 히어로 구체 View 프리팹 (없으면 구체가 보이지 않는다)
+        public GameObject heroOrbPrefab;
         // 골드 드롭 View 프리팹 (비어 있으면 null)
         public GameObject goldDropPrefab;
         // XP 드롭 View 프리팹 (비어 있으면 null)

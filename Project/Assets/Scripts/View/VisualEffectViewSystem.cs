@@ -45,13 +45,27 @@ namespace Project05.View
         /// <param name="scale">프리팹 크기에 곱할 배율 (근거리 범위는 반지름)</param>
         public static void Spawn(ViewContext viewContext, VisualEffectKind effectKind, Vector3 position, float scale)
         {
+            SpawnFacing(viewContext, effectKind, position, Quaternion.identity, scale);
+        }
+
+        /// <summary>
+        /// 종류의 효과를 위치에 방향을 주어 한 번 재생한다 (근거리 부채꼴처럼 방향이 있는 효과). 프리팹 회전 위에 방향을 곱한다.
+        /// 프리팹이 비어 있으면 아무것도 하지 않는다.
+        /// </summary>
+        /// <param name="viewContext">현재 판의 화면 상태</param>
+        /// <param name="effectKind">효과 종류</param>
+        /// <param name="position">효과 원점 (바닥 기준 엔티티 위치)</param>
+        /// <param name="facing">효과가 향할 방향 (프리팹의 +Z가 이 방향을 향한다)</param>
+        /// <param name="scale">프리팹 크기에 곱할 배율 (근거리 범위는 반지름)</param>
+        public static void SpawnFacing(ViewContext viewContext, VisualEffectKind effectKind, Vector3 position, Quaternion facing, float scale)
+        {
             GameObject[] effectPrefabs = App.ViewData.visualEffectPrefabs;
             int kindIndex = (int)effectKind;
             if (kindIndex < 0 || kindIndex >= effectPrefabs.Length)
             {
                 return;
             }
-            SpawnPrefab(viewContext, effectPrefabs[kindIndex], position, scale);
+            SpawnPrefab(viewContext, effectPrefabs[kindIndex], position, facing, scale);
         }
 
         /// <summary>
@@ -62,6 +76,11 @@ namespace Project05.View
         /// <param name="position">효과 원점 (바닥 기준 엔티티 위치)</param>
         /// <param name="scale">프리팹 크기에 곱할 배율</param>
         public static void SpawnPrefab(ViewContext viewContext, GameObject prefab, Vector3 position, float scale)
+        {
+            SpawnPrefab(viewContext, prefab, position, Quaternion.identity, scale);
+        }
+
+        private static void SpawnPrefab(ViewContext viewContext, GameObject prefab, Vector3 position, Quaternion facing, float scale)
         {
             if (prefab == null)
             {
@@ -84,7 +103,7 @@ namespace Project05.View
             }
 
             Transform effectTransform = instance.transform;
-            effectTransform.SetPositionAndRotation(position, prefab.transform.rotation);
+            effectTransform.SetPositionAndRotation(position, facing * prefab.transform.rotation);
             effectTransform.localScale = prefab.transform.localScale * scale;
             effectView.Restart();
 

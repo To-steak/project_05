@@ -11,9 +11,10 @@ namespace Project05.View
     /// 히어로 보간, 이동·공격 애니메이션, 무적 깜빡임, 사망·부활 연출.
     /// Runner가 LateUpdate에서 정해진 순서로 호출한다. World는 읽기만 한다.
     /// feat/vfx: 피격·근거리 범위·사망·부활 효과 (히어로 기록).
+    /// feat/hero-attack-split: Logic 바라보는 방향으로 회전, 구체 View(풀, 각도 보간), 근거리 범위 효과를 공격 방향으로 회전.
     /// feat/animation: 이동 블렌드(Logic 이동 거리 ÷ 이동 속도), 근거리 공격(동작 차례로)·피격·사망·부활(히어로 기록),
     /// 사망 중 상체 레이어 끄기, 사망 애니메이션 뒤 숨김.
-    /// 구현 브랜치: feat/hero-movement, feat/hero-combat, feat/core-siege (무적 깜빡임, 사망 시 숨김), feat/vfx, feat/animation
+    /// 구현 브랜치: feat/hero-movement, feat/hero-combat, feat/core-siege (무적 깜빡임, 사망 시 숨김), feat/vfx, feat/animation, feat/hero-attack-split
     /// </summary>
     public static class HeroViewSystem
     {
@@ -40,23 +41,73 @@ namespace Project05.View
             float alpha = ViewInterpolation.GetAlpha(world);
             Vector3 position = Vector3.LerpUnclamped(hero.previousPosition, hero.currentPosition, alpha);
 
-            // 이번 틱의 이동 방향을 바라본다. 멈춰 있으면 마지막 방향을 유지한다
-            Vector3 movement = hero.currentPosition - hero.previousPosition;
-            movement.y = 0f;
-
+            // Logic이 정한 방향을 그대로 바라본다 (근거리 부채꼴 판정 방향과 같다, DESIGN 3.1)
             Transform heroTransform = heroView.transform;
-            float movementSqrDistance = movement.sqrMagnitude;
-            if (movementSqrDistance > MIN_FACING_SQR_DISTANCE)
+            if (hero.facingDirection.sqrMagnitude > MIN_FACING_SQR_DISTANCE)
             {
-                heroTransform.SetPositionAndRotation(position, Quaternion.LookRotation(movement));
+                heroTransform.SetPositionAndRotation(position, Quaternion.LookRotation(hero.facingDirection));
             }
             else
             {
                 heroTransform.position = position;
             }
 
+            Vector3 movement = hero.currentPosition - hero.previousPosition;
+            movement.y = 0f;
             heroView.SetVisible(IsHeroVisible(in hero, heroView));
-            PresentAnimation(world, viewContext, heroView, movementSqrDistance);
+            PresentAnimation(world, viewContext, heroView, movement.sqrMagnitude);
+            PresentOrbs(world, viewContext, position, alpha);
+        }
+
+        /// <summary>
+        /// 구체 View를 Logic의 구체 수만큼 풀에서 꺼내거나 반납하고, 히어로 보간 위치 둘레에 놓는다 (DESIGN 3.1).
+        /// 각도는 이전·현재 틱 각도를 보간하고, 위치 식은 HeroSystem.GetOrbPosition과 같다.
+        /// 사망·탑승 중에는 모두 반납한다. 프리팹이 없으면 아무것도 하지 않는다.
+        /// </summary>
+        private static void PresentOrbs(World world, ViewContext viewContext, Vector3 heroPosition, float alpha)
+        {
+            ref readonly Hero hero = ref world.hero;
+            List<HeroOrbView> orbViews = viewContext.heroOrbViews;
+            bool isOrbVisible = hero.state != HeroState.Dead && hero.state != HeroState.Boarded;
+            int targetCount = isOrbVisible ? hero.orbCount : 0;
+
+            while (orbViews.Count > targetCount)
+            {
+                int lastIndex = orbViews.Count - 1;
+                if (orbViews[lastIndex] != null)
+                {
+                    App.Pool.Release(orbViews[lastIndex].gameObject);
+                }
+                orbViews.RemoveAt(lastIndex);
+            }
+
+            GameObject orbPrefab = App.ViewData.heroOrbPrefab;
+            while (orbPrefab != null && orbViews.Count < targetCount)
+            {
+                GameObject instance = App.Pool.Get(orbPrefab);
+                HeroOrbView orbView = instance.GetComponent<HeroOrbView>();
+                if (orbView == null)
+                {
+                    Debug.LogError("[HeroViewSystem] 구체 프리팹 " + orbPrefab.name + "에 HeroOrbView 컴포넌트가 없다.", orbPrefab);
+                    App.Pool.Release(instance);
+                    return;
+                }
+                orbViews.Add(orbView);
+            }
+
+            if (orbViews.Count == 0)
+            {
+                return;
+            }
+
+            float firstAngleDegrees = Mathf.LerpAngle(hero.previousOrbAngleDegrees, hero.currentOrbAngleDegrees, alpha);
+            float spacingDegrees = 360f / orbViews.Count;
+            for (int orbIndex = 0; orbIndex < orbViews.Count; orbIndex++)
+            {
+                float angleRadians = (firstAngleDegrees + orbIndex * spacingDegrees) * Mathf.Deg2Rad;
+                Vector3 offset = new Vector3(Mathf.Sin(angleRadians), 0f, Mathf.Cos(angleRadians)) * hero.orbRadius;
+                orbViews[orbIndex].transform.position = heroPosition + offset;
+            }
         }
 
         /// <summary>
@@ -109,7 +160,8 @@ namespace Project05.View
         }
 
         /// <summary>
-        /// 히어로 기록마다 효과를 낸다. 근거리 범위는 공격 반지름만큼 키운다 (프리팹은 반지름 1 크기).
+        /// 히어로 기록마다 효과를 낸다. 근거리 범위는 공격 반지름만큼 키우고 공격 방향으로 돌린다
+        /// (프리팹은 반지름 1 크기, +Z가 부채꼴 가운데).
         /// </summary>
         private static void PresentEffects(World world, ViewContext viewContext)
         {
@@ -117,7 +169,10 @@ namespace Project05.View
             for (int recordIndex = 0; recordIndex < meleeRecords.Count; recordIndex++)
             {
                 HeroMeleeAttackRecord meleeRecord = meleeRecords[recordIndex];
-                VisualEffectViewSystem.Spawn(viewContext, VisualEffectKind.HeroMeleeRange, meleeRecord.position, meleeRecord.radius);
+                Quaternion facing = meleeRecord.direction.sqrMagnitude > MIN_FACING_SQR_DISTANCE
+                    ? Quaternion.LookRotation(meleeRecord.direction)
+                    : Quaternion.identity;
+                VisualEffectViewSystem.SpawnFacing(viewContext, VisualEffectKind.HeroMeleeRange, meleeRecord.position, facing, meleeRecord.radius);
             }
 
             List<HeroDamagedRecord> damagedRecords = world.heroDamagedRecords;

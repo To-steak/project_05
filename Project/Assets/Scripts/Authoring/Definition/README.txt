@@ -5,7 +5,7 @@ ScriptableObject 정의. 에셋은 Assets/Data/Definition/에 둔다 (루트만 
 
 들어갈 파일:
 - GameDefinition.cs (ScriptableObject) : 모든 Definition을 가진 루트 + 코어 최대 HP. Assets/Resources/GameDefinition.asset 하나를 Bootstrap이 Resources.Load로 불러온다.
-- HeroDefinition.cs (ScriptableObject) : 히어로 수치 + 프리팹.
+- HeroDefinition.cs (ScriptableObject) : 히어로 수치(근거리·원거리 분리, 구체 설정) + 프리팹(히어로, 투사체, 구체).
 - EnemyDefinition.cs (ScriptableObject) : 적 수치 + 프리팹, 사망 VFX. 보스도 이 정의를 쓴다.
 - TowerDefinition.cs (ScriptableObject) : 타워 한 종류의 이름, 해금·건설·수리 비용, aggroRange, 투사체 속도·반경, 단계별 수치, 프리팹, 아이콘.
 - TowerLevelDefinition.cs (Serializable class) : 타워 한 단계의 최대 HP·공격력·사거리·공격 주기 틱·업그레이드 비용.

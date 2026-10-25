@@ -450,7 +450,7 @@ namespace Project05.Core
                     GUILayout.Label("  Tower slot " + tower.slotIndex + " Lv " + tower.level + " HP " + tower.currentHP + "/" + tower.maxHP + (tower.isBoarded ? " (Boarded)" : "") + " cooldown " + tower.attackCooldownTicks + "t");
                 }
             }
-            GUILayout.Label("Drops " + _world.drops.Count + "/" + _world.drops.Capacity + " Queue " + _world.dropSpawnRequests.Count + " / Hero Atk " + _world.hero.attackDamage);
+            GUILayout.Label("Drops " + _world.drops.Count + "/" + _world.drops.Capacity + " Queue " + _world.dropSpawnRequests.Count + " / Hero Atk " + _world.hero.meleeAttackDamage + "/" + _world.hero.rangedAttackDamage);
         }
 
         /// <summary>
@@ -485,7 +485,7 @@ namespace Project05.Core
             GUILayout.Label("Score " + _world.progress.score + " / Boss " + (flow.bossID.IsValid ? (_world.enemies.IsAlive(flow.bossID) ? "alive" : "dead") : "-"));
             GUILayout.Label("Spawned " + flow.spawnedEnemyCount + "/" + flow.waveEnemyCount + " Kill " + flow.killCount + " Next spawn " + flow.spawnCooldownTicks + "t Prep " + flow.phaseRemainingTicks + "t");
             GUILayout.Label("Enemies alive " + _world.enemies.Count + "/" + _world.enemies.Capacity + " Queue " + _world.enemySpawnRequests.Count);
-            GUILayout.Label("Hero attack cooldown " + _world.hero.attackCooldownTicks + "t / Projectiles " + _world.projectiles.Count + "/" + _world.projectiles.Capacity);
+            GUILayout.Label("Hero cooldown melee " + _world.hero.meleeAttackCooldownTicks + "t ranged " + _world.hero.rangedAttackCooldownTicks + "t orbs " + _world.hero.orbCount + " / Projectiles " + _world.projectiles.Count + "/" + _world.projectiles.Capacity);
             if (GUILayout.Button("[Debug] 웨이브 클리어"))
             {
                 Command clearWaveCommand = new Command();
@@ -511,7 +511,7 @@ namespace Project05.Core
             }
             GUILayout.Label("Core: " + _world.core.position + " HP " + _world.core.currentHP + "/" + _world.core.maxHP);
             GUILayout.Label("Hero: " + _world.hero.currentPosition + " HP " + _world.hero.currentHP + "/" + _world.hero.maxHP + " Lives " + _world.hero.remainingLives);
-            GUILayout.Label("  Speed " + _world.hero.moveSpeed + " Atk " + _world.hero.attackDamage + "/" + _world.hero.attackIntervalTicks + "t Melee " + _world.hero.meleeRange + " Ranged " + _world.hero.rangedRange);
+            GUILayout.Label("  Speed " + _world.hero.moveSpeed + " Melee " + _world.hero.meleeAttackDamage + "/" + _world.hero.meleeAttackIntervalTicks + "t " + _world.hero.meleeRange + "m " + _world.hero.meleeAngleDegrees + "deg Ranged " + _world.hero.rangedAttackDamage + "/" + _world.hero.rangedAttackIntervalTicks + "t " + _world.hero.rangedRange + "m");
 
             GUILayout.Label("── Baked: Definition ──");
             GUILayout.Label("Enemy types: " + _world.enemyStats.Length);
