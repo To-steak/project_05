@@ -1,5 +1,8 @@
+using System.Collections.Generic;
 using Project05.Component;
 using Project05.Component.Entity;
+using Project05.Component.Record;
+using Project05.Foundation;
 using UnityEngine;
 
 namespace Project05.View
@@ -7,7 +10,8 @@ namespace Project05.View
     /// <summary>
     /// 히어로 보간, 이동·공격 애니메이션, 무적 깜빡임, 사망·부활 연출.
     /// Runner가 LateUpdate에서 정해진 순서로 호출한다. World는 읽기만 한다.
-    /// 구현 브랜치: feat/hero-movement, feat/hero-combat, feat/core-siege (무적 깜빡임, 사망 시 숨김)
+    /// feat/vfx: 피격·근거리 범위·사망·부활 효과 (히어로 기록).
+    /// 구현 브랜치: feat/hero-movement, feat/hero-combat, feat/core-siege (무적 깜빡임, 사망 시 숨김), feat/vfx
     /// </summary>
     public static class HeroViewSystem
     {
@@ -21,6 +25,9 @@ namespace Project05.View
         /// <param name="viewContext">현재 판의 화면 상태</param>
         public static void Present(World world, ViewContext viewContext)
         {
+            // 효과는 히어로 View가 없어도 기록 위치에 낸다
+            PresentEffects(world, viewContext);
+
             HeroView heroView = viewContext.heroView;
             if (heroView == null)
             {
@@ -46,6 +53,37 @@ namespace Project05.View
             }
 
             heroView.SetVisible(IsHeroVisible(in hero, heroView.InvincibilityBlinkTicks));
+        }
+
+        /// <summary>
+        /// 히어로 기록마다 효과를 낸다. 근거리 범위는 공격 반지름만큼 키운다 (프리팹은 반지름 1 크기).
+        /// </summary>
+        private static void PresentEffects(World world, ViewContext viewContext)
+        {
+            List<HeroMeleeAttackRecord> meleeRecords = world.heroMeleeAttackRecords;
+            for (int recordIndex = 0; recordIndex < meleeRecords.Count; recordIndex++)
+            {
+                HeroMeleeAttackRecord meleeRecord = meleeRecords[recordIndex];
+                VisualEffectViewSystem.Spawn(viewContext, VisualEffectKind.HeroMeleeRange, meleeRecord.position, meleeRecord.radius);
+            }
+
+            List<HeroDamagedRecord> damagedRecords = world.heroDamagedRecords;
+            for (int recordIndex = 0; recordIndex < damagedRecords.Count; recordIndex++)
+            {
+                VisualEffectViewSystem.Spawn(viewContext, VisualEffectKind.HeroHit, damagedRecords[recordIndex].position, 1f);
+            }
+
+            List<HeroDiedRecord> diedRecords = world.heroDiedRecords;
+            for (int recordIndex = 0; recordIndex < diedRecords.Count; recordIndex++)
+            {
+                VisualEffectViewSystem.Spawn(viewContext, VisualEffectKind.HeroDied, diedRecords[recordIndex].position, 1f);
+            }
+
+            List<HeroRespawnedRecord> respawnedRecords = world.heroRespawnedRecords;
+            for (int recordIndex = 0; recordIndex < respawnedRecords.Count; recordIndex++)
+            {
+                VisualEffectViewSystem.Spawn(viewContext, VisualEffectKind.HeroRespawned, respawnedRecords[recordIndex].position, 1f);
+            }
         }
 
         /// <summary>

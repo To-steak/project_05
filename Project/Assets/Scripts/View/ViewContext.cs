@@ -53,6 +53,18 @@ namespace Project05.View
         public readonly Dictionary<EntityID, float> enemyHitFlashEndTimes = new Dictionary<EntityID, float>(World.MAX_ENEMY_COUNT);
         // 살아있는 타워 ID → 타워 View
         public readonly Dictionary<EntityID, TowerView> towerViews = new Dictionary<EntityID, TowerView>();
+        // 코어 피격 화면 경고 (씬에 없으면 null)
+        public CoreWarningView coreWarningView;
+        // 코어 피격 화면 경고가 끝나는 Time.time (CoreViewSystem)
+        public float coreWarningEndTime;
+        // 재생 중인 한 번짜리 효과 (VisualEffectViewSystem이 유지 시간이 지나면 풀에 돌려준다)
+        public readonly List<ActiveVisualEffect> activeVisualEffects = new List<ActiveVisualEffect>(World.MAX_ENEMY_COUNT);
+        // 떠오르는 중인 문구
+        public readonly List<ActiveFloatingText> activeFloatingTexts = new List<ActiveFloatingText>(World.MAX_DROP_COUNT);
+        // 획득량 → 골드 획득 문구 (같은 양의 문구를 매번 새로 만들지 않도록)
+        public readonly Dictionary<int, string> goldTextByAmount = new Dictionary<int, string>();
+        // 획득량 → XP 획득 문구
+        public readonly Dictionary<int, string> XPTextByAmount = new Dictionary<int, string>();
         // 동기화 중 사라진 ID를 모으는 재사용 목록 (Dictionary 순회 중 삭제를 피하고 매 프레임 할당을 막는다)
         public readonly List<EntityID> removedEntityIDs = new List<EntityID>(World.MAX_ENEMY_COUNT);
     }

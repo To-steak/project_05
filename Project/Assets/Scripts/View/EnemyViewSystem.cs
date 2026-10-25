@@ -11,8 +11,9 @@ namespace Project05.View
     /// 적 동기화(새 ID는 풀에서 꺼내고 사라진 ID는 반납), 보간, 피격 플래시, 사망 VFX.
     /// Runner가 LateUpdate에서 정해진 순서로 호출한다. World는 읽기만 한다.
     /// feat/enemy-wave: 동기화, 위치 보간, 이동 방향 바라보기.
-    /// feat/hero-combat: 피격 플래시 (EnemyDamagedRecord). 사망 VFX는 4단계 연출에서.
-    /// 구현 브랜치: feat/enemy-wave, feat/hero-combat
+    /// feat/hero-combat: 피격 플래시 (EnemyDamagedRecord).
+    /// feat/vfx: 피격 효과(EnemyDamagedRecord), 종류별 사망 효과(EnemyDiedRecord).
+    /// 구현 브랜치: feat/enemy-wave, feat/hero-combat, feat/vfx
     /// </summary>
     public static class EnemyViewSystem
     {
@@ -30,6 +31,32 @@ namespace Project05.View
             SynchronizeAliveEnemies(world, viewContext);
             StartHitFlashes(world, viewContext);
             EndHitFlashes(viewContext);
+            PresentEffects(world, viewContext);
+        }
+
+        /// <summary>
+        /// 피격 기록마다 피격 효과, 사망 기록마다 그 종류의 사망 효과를 기록 위치에 낸다.
+        /// 맞은 틱에 죽은 적도 기록 위치가 있으므로 View 유무와 관계없이 낸다.
+        /// </summary>
+        private static void PresentEffects(World world, ViewContext viewContext)
+        {
+            List<EnemyDamagedRecord> damagedRecords = world.enemyDamagedRecords;
+            for (int recordIndex = 0; recordIndex < damagedRecords.Count; recordIndex++)
+            {
+                VisualEffectViewSystem.Spawn(viewContext, VisualEffectKind.EnemyHit, damagedRecords[recordIndex].position, 1f);
+            }
+
+            List<EnemyDiedRecord> diedRecords = world.enemyDiedRecords;
+            GameObject[] deathEffectPrefabs = App.ViewData.enemyDeathEffectPrefabs;
+            for (int recordIndex = 0; recordIndex < diedRecords.Count; recordIndex++)
+            {
+                EnemyDiedRecord diedRecord = diedRecords[recordIndex];
+                if (diedRecord.enemyTypeIndex < 0 || diedRecord.enemyTypeIndex >= deathEffectPrefabs.Length)
+                {
+                    continue;
+                }
+                VisualEffectViewSystem.SpawnPrefab(viewContext, deathEffectPrefabs[diedRecord.enemyTypeIndex], diedRecord.position, 1f);
+            }
         }
 
         /// <summary>

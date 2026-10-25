@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Project05.Foundation
@@ -24,5 +25,17 @@ namespace Project05.Foundation
         public Sprite[] towerIcons = new Sprite[0];
         // 타워 종류별 표시 이름
         public string[] towerNames = new string[0];
+        // 적 종류별 사망 효과 프리팹 (인덱스 = 적 종류, 비어 있으면 null)
+        public GameObject[] enemyDeathEffectPrefabs = new GameObject[0];
+        // 한 번 재생하는 효과 프리팹 (인덱스 = VisualEffectKind, 비어 있으면 null)
+        public readonly GameObject[] visualEffectPrefabs = new GameObject[Enum.GetValues(typeof(VisualEffectKind)).Length];
+        // 골드 획득 문구 프리팹 (비어 있으면 null)
+        public GameObject goldTextPrefab;
+        // XP 획득 문구 프리팹 (비어 있으면 null)
+        public GameObject XPTextPrefab;
+        // 골드 획득 문구 형식 ({0} = 획득량)
+        public string goldTextFormat = string.Empty;
+        // XP 획득 문구 형식 ({0} = 획득량)
+        public string XPTextFormat = string.Empty;
     }
 }

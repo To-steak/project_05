@@ -14,6 +14,9 @@ namespace Project05.Core.Baking
     /// </summary>
     public static class DefinitionBaker
     {
+        // 획득 문구 형식이 비어 있을 때 쓰는 형식 (획득량 숫자만)
+        private const string NUMBER_ONLY_TEXT_FORMAT = "{0}";
+
         /// <summary>
         /// Resources 폴더에서 루트 정의(GameDefinition)를 불러온다.
         /// </summary>
@@ -121,6 +124,8 @@ namespace Project05.Core.Baking
                 viewData.towerNames[towerTypeIndex] = towerDefinition.displayName;
             }
 
+            BakeVisualEffects(definition, viewData);
+
             if (definition.enemies == null)
             {
                 return viewData;
@@ -128,6 +133,7 @@ namespace Project05.Core.Baking
 
             EnemyDefinition[] enemyDefinitions = definition.enemies;
             viewData.enemyPrefabs = new GameObject[enemyDefinitions.Length];
+            viewData.enemyDeathEffectPrefabs = new GameObject[enemyDefinitions.Length];
             for (int enemyTypeIndex = 0; enemyTypeIndex < enemyDefinitions.Length; enemyTypeIndex++)
             {
                 EnemyDefinition enemyDefinition = enemyDefinitions[enemyTypeIndex];
@@ -140,8 +146,41 @@ namespace Project05.Core.Baking
                     Debug.LogWarning("[DefinitionBaker] " + enemyDefinition.name + ".prefab 이(가) 비어 있다. 이 종류의 적은 화면에 보이지 않는다.", enemyDefinition);
                 }
                 viewData.enemyPrefabs[enemyTypeIndex] = enemyDefinition.prefab;
+                viewData.enemyDeathEffectPrefabs[enemyTypeIndex] = enemyDefinition.deathEffectPrefab;
             }
             return viewData;
+        }
+
+        /// <summary>
+        /// VisualEffectDefinition의 효과 프리팹을 종류 인덱스 배열로, 드롭 획득 문구 프리팹·형식을 그대로 옮긴다.
+        /// 정의가 없으면 경고 한 줄만 남기고 비워 둔다 (효과 없이 동작). 형식이 비어 있으면 획득량 숫자만 보인다.
+        /// </summary>
+        private static void BakeVisualEffects(GameDefinition definition, ViewData viewData)
+        {
+            VisualEffectDefinition effectDefinition = definition.visualEffect;
+            if (effectDefinition == null)
+            {
+                Debug.LogWarning("[DefinitionBaker] " + definition.name + ".visualEffect 이(가) 비어 있다. 시각 효과가 나오지 않는다.", definition);
+                return;
+            }
+
+            GameObject[] effectPrefabs = viewData.visualEffectPrefabs;
+            effectPrefabs[(int)VisualEffectKind.EnemyHit] = effectDefinition.enemyHitEffectPrefab;
+            effectPrefabs[(int)VisualEffectKind.HeroHit] = effectDefinition.heroHitEffectPrefab;
+            effectPrefabs[(int)VisualEffectKind.HeroMeleeRange] = effectDefinition.heroMeleeRangeEffectPrefab;
+            effectPrefabs[(int)VisualEffectKind.HeroDied] = effectDefinition.heroDiedEffectPrefab;
+            effectPrefabs[(int)VisualEffectKind.HeroRespawned] = effectDefinition.heroRespawnedEffectPrefab;
+            effectPrefabs[(int)VisualEffectKind.TowerHit] = effectDefinition.towerHitEffectPrefab;
+            effectPrefabs[(int)VisualEffectKind.TowerBuilt] = effectDefinition.towerBuiltEffectPrefab;
+            effectPrefabs[(int)VisualEffectKind.TowerUpgraded] = effectDefinition.towerUpgradedEffectPrefab;
+            effectPrefabs[(int)VisualEffectKind.TowerDestroyed] = effectDefinition.towerDestroyedEffectPrefab;
+            effectPrefabs[(int)VisualEffectKind.TowerRepaired] = effectDefinition.towerRepairedEffectPrefab;
+            effectPrefabs[(int)VisualEffectKind.CoreHit] = effectDefinition.coreHitEffectPrefab;
+
+            viewData.goldTextPrefab = effectDefinition.goldTextPrefab;
+            viewData.XPTextPrefab = effectDefinition.XPTextPrefab;
+            viewData.goldTextFormat = string.IsNullOrEmpty(effectDefinition.goldTextFormat) ? NUMBER_ONLY_TEXT_FORMAT : effectDefinition.goldTextFormat;
+            viewData.XPTextFormat = string.IsNullOrEmpty(effectDefinition.XPTextFormat) ? NUMBER_ONLY_TEXT_FORMAT : effectDefinition.XPTextFormat;
         }
 
         /// <summary>

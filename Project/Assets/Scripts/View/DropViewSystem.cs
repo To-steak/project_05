@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Project05.Component;
 using Project05.Component.Entity;
+using Project05.Component.Record;
 using Project05.Foundation;
 using UnityEngine;
 
@@ -10,8 +11,8 @@ namespace Project05.View
     /// 드롭 동기화(새 ID는 풀에서 꺼내고 사라진 ID는 반납). 드롭은 움직이지 않으므로 꺼낼 때 한 번 자리를 잡는다.
     /// 종류(골드 / XP)별 프리팹은 GameDefinition에서 베이킹된다. 프리팹이 없는 종류는 보이지 않는다.
     /// Runner가 LateUpdate에서 정해진 순서로 호출한다. World는 읽기만 한다.
-    /// 획득 연출(DropCollectedRecord)은 4단계 연출에서.
-    /// 구현 브랜치: feat/drop-progress
+    /// feat/vfx: 획득 문구 "+10G" (DropCollectedRecord). 문구는 획득량별로 ViewContext에 캐시해 같은 양이면 다시 만들지 않는다.
+    /// 구현 브랜치: feat/drop-progress, feat/vfx
     /// </summary>
     public static class DropViewSystem
     {
@@ -24,6 +25,45 @@ namespace Project05.View
         {
             ReleaseRemovedViews(world, viewContext);
             TakeNewViews(world, viewContext);
+            PresentCollectedTexts(world, viewContext);
+        }
+
+        /// <summary>
+        /// 획득 기록마다 종류에 맞는 문구 프리팹을 획득 위치에 띄운다.
+        /// </summary>
+        private static void PresentCollectedTexts(World world, ViewContext viewContext)
+        {
+            List<DropCollectedRecord> collectedRecords = world.dropCollectedRecords;
+            ViewData viewData = App.ViewData;
+            for (int recordIndex = 0; recordIndex < collectedRecords.Count; recordIndex++)
+            {
+                DropCollectedRecord collectedRecord = collectedRecords[recordIndex];
+                bool isGold = collectedRecord.kind == DropKind.Gold;
+                GameObject prefab = isGold ? viewData.goldTextPrefab : viewData.XPTextPrefab;
+                if (prefab == null)
+                {
+                    continue;
+                }
+
+                string text = isGold
+                    ? GetAmountText(viewContext.goldTextByAmount, viewData.goldTextFormat, collectedRecord.amount)
+                    : GetAmountText(viewContext.XPTextByAmount, viewData.XPTextFormat, collectedRecord.amount);
+                VisualEffectViewSystem.SpawnFloatingText(viewContext, prefab, collectedRecord.position, text);
+            }
+        }
+
+        /// <summary>
+        /// 획득량의 문구를 캐시에서 꺼낸다. 처음 보는 양이면 형식으로 만들어 넣는다.
+        /// </summary>
+        private static string GetAmountText(Dictionary<int, string> textByAmount, string format, int amount)
+        {
+            string text;
+            if (!textByAmount.TryGetValue(amount, out text))
+            {
+                text = string.Format(format, amount);
+                textByAmount.Add(amount, text);
+            }
+            return text;
         }
 
         /// <summary>
