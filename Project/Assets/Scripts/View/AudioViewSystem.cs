@@ -101,6 +101,7 @@ namespace Project05.View
             PlayIfRecorded(world.towerDamagedRecords.Count, SoundEffectKind.TowerDamaged, audioPlayer);
             PlayIfRecorded(world.towerDestroyedRecords.Count, SoundEffectKind.TowerDestroyed, audioPlayer);
             PlayIfRecorded(world.towerRepairedRecords.Count, SoundEffectKind.TowerRepaired, audioPlayer);
+            PlayIfRecorded(world.projectileExplodedRecords.Count, SoundEffectKind.BoardedShotExploded, audioPlayer);
 
             // 사격은 탑승 사격과 자동 사격을 가른다
             List<TowerShotRecord> towerShotRecords = world.towerShotRecords;

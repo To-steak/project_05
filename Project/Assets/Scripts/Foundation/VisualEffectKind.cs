@@ -29,5 +29,7 @@ namespace Project05.Foundation
         TowerRepaired,
         // 코어 피격 (CoreDamagedRecord)
         CoreHit,
+        // 탑승 사격 폭발 (ProjectileExplodedRecord, 반지름에 맞춰 크기 조절)
+        BoardedShotExploded,
     }
 }

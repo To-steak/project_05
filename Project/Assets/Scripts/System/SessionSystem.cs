@@ -147,6 +147,7 @@ namespace Project05.System
             world.towerBuiltRecords.Clear();
             world.towerUpgradedRecords.Clear();
             world.towerShotRecords.Clear();
+            world.projectileExplodedRecords.Clear();
             world.towerDamagedRecords.Clear();
             world.towerDestroyedRecords.Clear();
             world.towerRepairedRecords.Clear();

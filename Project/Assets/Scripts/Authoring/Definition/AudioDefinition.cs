@@ -65,6 +65,8 @@ namespace Project05.Authoring.Definition
         public AudioClip towerShotClip;
         // 탑승 중 클릭 사격 (비우면 자동 사격 소리를 쓴다)
         public AudioClip towerBoardedShotClip;
+        // 탑승 사격 폭발 (비우면 소리 없음)
+        public AudioClip boardedShotExplodedClip;
         // 피격
         public AudioClip towerDamagedClip;
         // 파괴

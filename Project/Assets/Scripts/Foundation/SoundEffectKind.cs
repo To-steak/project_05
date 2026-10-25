@@ -60,5 +60,7 @@ namespace Project05.Foundation
         LevelUp,
         // 패배 (기록 없음, 게임 단계가 Defeat가 된 것을 읽는다)
         Defeat,
+        // 탑승 사격 폭발 (ProjectileExplodedRecord)
+        BoardedShotExploded,
     }
 }

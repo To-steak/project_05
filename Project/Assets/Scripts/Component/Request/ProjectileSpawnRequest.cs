@@ -19,5 +19,7 @@ namespace Project05.Component.Request
         public float maxDistance;
         // 명중 시 피해량
         public int damage;
+        // 폭발 반경 (0이면 첫 적 1명만 맞히는 단일 명중, 0보다 크면 명중·소진 지점에서 폭발)
+        public float splashRadius;
     }
 }

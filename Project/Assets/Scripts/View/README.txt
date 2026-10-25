@@ -8,7 +8,7 @@
 - HeroViewSystem.cs (static class) : 히어로 보간, Logic 바라보는 방향으로 회전, 무적 깜빡임, 사망·부활 연출. 피격·근거리 범위(반지름 배율, 공격 방향으로 회전)·사망·부활 효과. 구체 View(Logic 구체 수만큼 풀에서 꺼냄, 각도 보간, 사망·탑승 중 반납). 애니메이션: 이동 블렌드(이번 틱 이동 거리 ÷ 이동 속도), 근거리 공격(동작 차례로)·피격·사망·부활(히어로 기록), 사망 중 상체 레이어 끄기, 사망 애니메이션 뒤 숨김. 일시정지 중 정지(패배 중에는 사망 애니메이션을 끝까지 재생).
 - EnemyViewSystem.cs (static class) : 적 동기화(새 ID는 풀에서 꺼내기, 사라진 ID는 반납), 보간, 피격 플래시, 피격 효과, 종류별 사망 효과. 애니메이션: 이동 블렌드, 코어·타워 공격(공격 기록, 대상 바라보기), 사망(사망 기록 → 매핑에서 떼어 CorpseTicks 동안 남겼다 반납), 월드 정지 중 정지.
 - ProjectileViewSystem.cs (static class) : 투사체 동기화(풀), 보간, 비행 방향.
-- TowerViewSystem.cs (static class) : 타워 동기화, 건설·강화·피격·파괴·수리 효과, (예정) 사격·탑승 연출.
+- TowerViewSystem.cs (static class) : 타워 동기화, 건설·강화·피격·파괴·수리 효과, 탑승 사격 폭발 효과(반경 배율), (예정) 사격·탑승 연출.
 - DropViewSystem.cs (static class) : 드롭 동기화, 획득 문구("+10G", 획득량별 문자열 캐시).
 - CoreViewSystem.cs (static class) : 코어 피격 효과, 화면 경고(CoreWarningView 세기를 유지 시간 동안 줄임).
 - VisualEffectViewSystem.cs (static class) : 한 번짜리 효과·떠오르는 문구 공용. Spawn~으로(방향 있는 효과는 SpawnFacing) App.Pool에서 꺼내고, Present가 효과는 파티클이 끝나면(IsAlive), 문구는 유지 시간이 지나면 반납·문구를 떠올림. 꺼내는 ViewSystem들 다음에 호출.

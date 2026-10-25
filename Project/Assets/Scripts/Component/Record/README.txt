@@ -16,6 +16,7 @@
 - TowerBuiltRecord.cs (struct) : 타워 EntityID, 위치.
 - TowerUpgradedRecord.cs (struct) : 타워 EntityID, 단계.
 - TowerShotRecord.cs (struct) : 타워 EntityID, 대상 위치, 탑승 사격 여부.
+- ProjectileExplodedRecord.cs (struct) : 폭발 중심, 폭발 반경 (탑승 사격 폭발).
 - TowerDamagedRecord.cs (struct) : 타워 EntityID, 위치, 피해량.
 - TowerDestroyedRecord.cs (struct) : 타워 EntityID, 위치.
 - TowerRepairedRecord.cs (struct) : 타워 EntityID.

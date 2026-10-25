@@ -22,5 +22,7 @@ namespace Project05.Component.Entity
         public float remainingDistance;
         // 명중 시 피해량
         public int damage;
+        // 폭발 반경 (0이면 단일 명중. 0보다 크면 명중·소진 지점에서 반경 안 적 전부에게 피해, 탑승 사격)
+        public float splashRadius;
     }
 }

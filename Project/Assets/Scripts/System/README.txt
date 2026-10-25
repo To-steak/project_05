@@ -8,8 +8,8 @@
 - GameFlowSystem.cs (static class) : [Tick 2] 준비 / 웨이브 / 보스 / 패배 전이. 준비 시간 후 웨이브 시작, ClearWave(다음 웨이브 준비), 누적 웨이브 번호 계산. 보스 종류는 isBoss인 첫 종류. 처치 수가 max에 도달하면 웨이브 클리어 또는 보스 생성 요청. 보스 처치 시 스테이지 클리어. 패배 판정 (코어 HP 0, 히어로 목숨 0).
 - WaveSystem.cs (static class) : [Tick 3] 스폰 간격마다 적 생성 요청 (총 max = x × 10). 임시 규칙: 일반 적(보스 아닌 첫 종류)만, 스폰 지점 순서대로.
 - HeroSystem.cs (static class) : [Tick 4] 이동과 바라보는 방향, 근거리(전방 부채꼴)·원거리(구체마다 투사체) 독립 자동 공격, 구체 수·각도 갱신, 접촉 피해와 무적, 사망·목숨·부활, 탑승(Board)·하차(Dismount).
-- TowerSystem.cs (static class) : [Tick 5] 미탑승 자동 공격, 탑승 시 좌클릭을 누르고 있는 동안 쿨타임마다 커서 방향 사격 (공격력 = 히어로 공격력). 타워 피해·파괴(공터 비움, 강제 하차, 공격하던 적 경로 복귀). 업그레이드·수리 처리 함수 제공.
-- ProjectileSystem.cs (static class) : [Tick 5.5] 직선 투사체 이동, 이동 구간의 첫 적 하나에 명중(피해 후 소멸), 최대 비행 거리 소진 시 소멸. 히어로 원거리·이후 타워 공용.
+- TowerSystem.cs (static class) : [Tick 5] 미탑승 자동 공격, 탑승 시 좌클릭을 누르고 있는 동안 쿨타임마다 커서 방향 폭발 사격 (공격력 = 타워 공격력 + (히어로 근거리 + 원거리) / 2, 폭발 반경은 타워 값). 타워 피해·파괴(공터 비움, 강제 하차, 공격하던 적 경로 복귀). 업그레이드·수리 처리 함수 제공.
+- ProjectileSystem.cs (static class) : [Tick 5.5] 직선 투사체 이동, 이동 구간의 첫 적 하나에 명중(피해 후 소멸), 최대 비행 거리 소진 시 소멸. 폭발 투사체(탑승 사격)는 명중한 적 위치·소진 지점에서 반경 안 적 전부에게 피해 + ProjectileExplodedRecord. 히어로 원거리·이후 타워 공용.
 - EnemySystem.cs (static class) : [Tick 6] 경로 이동, aggroRange 내 타워 우선 공격, 코어 포위·공격, 사망 처리(드롭 생성 요청, 처치 수 증가), 타워 포위 자리 배정·이동·공격, 타워 파괴 시 경로 복귀(ReturnToPath).
 - DropSystem.cs (static class) : [Tick 7] 획득 반경 내 드롭 획득 (탑승 중 불가), 획득 퍼센트 적용.
 - CoreSystem.cs (static class) : [Tick 8] 코어 피해 처리. ApplyDamage는 코어를 때리는 적(EnemySystem)이 직접 호출.
