@@ -62,8 +62,8 @@ namespace Project05.Editor
             {
                 SetPainting(!_isPainting);
             }
-            EditorGUILayout.LabelField("회전", (_quarterTurns * 90) + "°  ( ] 시계 방향 / [ 반시계 방향 )");
-            EditorGUILayout.HelpBox("클릭·드래그: 칠하기    Shift+클릭·드래그: 지우기    ] [: 회전    Esc: 끄기\nAlt+드래그와 우클릭은 Scene 뷰 카메라 조작 그대로", MessageType.None);
+            EditorGUILayout.LabelField("현재 회전", (_quarterTurns * 90) + "°", EditorStyles.boldLabel);
+            EditorGUILayout.HelpBox(CONTROLS_HELP, MessageType.None);
 
             DrawThumbnails();
         }
@@ -102,9 +102,10 @@ namespace Project05.Editor
                     Rect imageRect = new Rect(cellRect.x, cellRect.y, THUMBNAIL_SIZE, THUMBNAIL_SIZE);
                     Rect labelRect = new Rect(cellRect.x, cellRect.y + THUMBNAIL_SIZE, THUMBNAIL_SIZE, THUMBNAIL_LABEL_HEIGHT);
 
+                    // 고른 타일은 썸네일 둘레에만 테두리를 그린다 (이름 글자가 강조색에 묻히지 않게)
                     if (prefabIndex == _selectedIndex)
                     {
-                        EditorGUI.DrawRect(new Rect(cellRect.x - 2f, cellRect.y - 2f, cellRect.width + 4f, cellRect.height + 4f), SELECTED_COLOR);
+                        EditorGUI.DrawRect(new Rect(imageRect.x - SELECTED_BORDER, imageRect.y - SELECTED_BORDER, imageRect.width + SELECTED_BORDER * 2f, imageRect.height + SELECTED_BORDER * 2f), SELECTED_COLOR);
                     }
 
                     Texture2D preview = null;
@@ -442,7 +443,16 @@ namespace Project05.Editor
         private static readonly Color PAINT_COLOR = new Color(0.3f, 0.9f, 1f);
         private static readonly Color ERASE_COLOR = new Color(1f, 0.3f, 0.3f);
 
+        private const string CONTROLS_HELP =
+            "클릭 / 드래그 : 칠하기 (같은 칸은 교체)\n" +
+            "Shift + 클릭 / 드래그 : 지우기\n" +
+            "오른쪽 대괄호 키 ] : 시계 방향으로 90도 회전\n" +
+            "왼쪽 대괄호 키 [ : 반시계 방향으로 90도 회전\n" +
+            "Esc : 칠하기 끄기\n" +
+            "Alt + 드래그, 우클릭 드래그 : Scene 뷰 카메라 조작 (그대로)";
+
         private const float PAINT_BUTTON_HEIGHT = 28f;
+        private const float SELECTED_BORDER = 3f;
         private const float THUMBNAIL_SIZE = 72f;
         private const float THUMBNAIL_SPACING = 6f;
         private const float THUMBNAIL_LABEL_HEIGHT = 16f;
