@@ -60,8 +60,8 @@
 |---|---|---|---|---|
 | [x] | 1 | (결정, 코드 없음) | 테마와 아트·사운드 에셋 출처 결정 (DESIGN 7장) | 결정됨 |
 | [x] | 2 | `feat/hud` (PR #27) | OnGUI 디버그 패널을 대신하는 인게임 HUD: 히어로·코어 HP, 목숨, 골드, XP·레벨, 웨이브 `current/max`, 점수. View-Presenter 구조. 디버그 패널은 개발용으로 남긴다 | 디버그 패널을 접어도 한 판의 상태를 HUD만으로 읽을 수 있음 |
-| [ ] | 3 | `feat/audio` | `AudioPlayer`를 App에 추가하고 Bootstrap이 채움. BGM·SFX 재생, SettingsStore 볼륨 연결, 프레임 기록 → SFX. WebGL 첫 클릭 이후 재생 | 설정 볼륨이 즉시 반영되고, WebGL에서 첫 클릭 뒤 소리가 남 |
-| [ ] | 4 | `feat/vfx` | 프레임 기록 기반 VFX: 피격, 사망, 근거리 범위, 건설·파괴·수리·강화, 드롭 획득 "+10G" 표시, 코어 피격 화면 경고. 전부 `App.Pool`로 풀링 | 전투 중 VFX가 나오고, 반복 플레이에서 Instantiate가 늘지 않음 |
+| [x] | 3 | `feat/audio` (PR #29) | `AudioPlayer`를 App에 추가하고 Bootstrap이 채움. BGM·SFX 재생, SettingsStore 볼륨 연결, 프레임 기록 → SFX. WebGL 첫 클릭 이후 재생 | 설정 볼륨이 즉시 반영되고, WebGL에서 첫 클릭 뒤 소리가 남 |
+| [x] | 4 | `feat/vfx` (PR #30) | 프레임 기록 기반 VFX: 피격, 사망, 근거리 범위, 건설·파괴·수리·강화, 드롭 획득 "+10G" 표시, 코어 피격 화면 경고. 전부 `App.Pool`로 풀링 | 전투 중 VFX가 나오고, 반복 플레이에서 Instantiate가 늘지 않음 |
 | [ ] | 5 | `feat/animation` | Animator 연결. 이동은 Logic 속도 값, 공격·사망·부활은 프레임 기록으로 재생. 데미지 판정은 Logic 타이머 그대로 (DESIGN 5.12) | 히어로·적·타워가 상태에 맞는 애니메이션을 재생 |
 | [ ] | 6 | (사용자 작업) | 중간 WebGL 빌드 확인: 프레임, 압축 헤더, 탭 백그라운드 복귀 (DESIGN 6장) | itch.io에서 연출이 붙은 상태로 정상 동작 |
 | [ ] | 7 | `balance/~` | 밸런싱. 아래 셋으로 나눠 PR을 연다 | 목표 플레이 시간 안에 패배에 도달 |
