@@ -6,7 +6,7 @@ namespace Project05.View
     /// 히어로 프리팹 컴포넌트. Renderer·Animator 참조, 무적 깜빡임과 사망 연출 설정을 보관한다. 로직 없음.
     /// 언제 보이고 숨길지, 어떤 애니메이션을 재생할지는 HeroViewSystem이 정하고, 이 컴포넌트는 그대로 반영만 한다.
     /// Animator 파라미터 계약: Speed(float, 0 = 멈춤 ~ 1 = 이동 속도), MeleeAttackIndex(int, 0부터 차례로 돈다),
-    /// MeleeAttack·Hit·Die·Respawn·LevelUp·Victory(trigger). Controller에 없는 파라미터는 건너뛴다.
+    /// MeleeAttack·Hit·Die·Respawn(trigger). Controller에 없는 파라미터는 건너뛴다.
     /// 상체 레이어(아바타 마스크)가 있으면 사망 중에는 가중치를 0으로 내려 사망 자세를 덮지 않게 한다.
     /// </summary>
     public class HeroView : MonoBehaviour
@@ -33,8 +33,6 @@ namespace Project05.View
         private bool _hasHitParameter;
         private bool _hasDieParameter;
         private bool _hasRespawnParameter;
-        private bool _hasLevelUpParameter;
-        private bool _hasVictoryParameter;
 
         private static readonly int SPEED_PARAMETER_ID = Animator.StringToHash("Speed");
         private static readonly int MELEE_ATTACK_INDEX_PARAMETER_ID = Animator.StringToHash("MeleeAttackIndex");
@@ -42,8 +40,6 @@ namespace Project05.View
         private static readonly int HIT_PARAMETER_ID = Animator.StringToHash("Hit");
         private static readonly int DIE_PARAMETER_ID = Animator.StringToHash("Die");
         private static readonly int RESPAWN_PARAMETER_ID = Animator.StringToHash("Respawn");
-        private static readonly int LEVEL_UP_PARAMETER_ID = Animator.StringToHash("LevelUp");
-        private static readonly int VICTORY_PARAMETER_ID = Animator.StringToHash("Victory");
 
         /// <summary>
         /// 무적 중 깜빡임 한 번(보임 또는 숨김)의 길이 (틱)
@@ -128,22 +124,6 @@ namespace Project05.View
         }
 
         /// <summary>
-        /// 레벨업 애니메이션을 재생한다.
-        /// </summary>
-        public void PlayLevelUp()
-        {
-            SetTrigger(LEVEL_UP_PARAMETER_ID, _hasLevelUpParameter);
-        }
-
-        /// <summary>
-        /// 승리(스테이지 클리어) 애니메이션을 재생한다.
-        /// </summary>
-        public void PlayVictory()
-        {
-            SetTrigger(VICTORY_PARAMETER_ID, _hasVictoryParameter);
-        }
-
-        /// <summary>
         /// 사망 애니메이션을 재생한다. 남은 다른 트리거는 지워 사망이 끊기거나 바로 풀리지 않게 한다.
         /// </summary>
         public void PlayDie()
@@ -221,8 +201,6 @@ namespace Project05.View
             ResetTrigger(HIT_PARAMETER_ID, _hasHitParameter);
             ResetTrigger(DIE_PARAMETER_ID, _hasDieParameter);
             ResetTrigger(RESPAWN_PARAMETER_ID, _hasRespawnParameter);
-            ResetTrigger(LEVEL_UP_PARAMETER_ID, _hasLevelUpParameter);
-            ResetTrigger(VICTORY_PARAMETER_ID, _hasVictoryParameter);
         }
 
         private void Reset()
@@ -278,8 +256,6 @@ namespace Project05.View
                         _hasHitParameter = _hasHitParameter || nameHash == HIT_PARAMETER_ID;
                         _hasDieParameter = _hasDieParameter || nameHash == DIE_PARAMETER_ID;
                         _hasRespawnParameter = _hasRespawnParameter || nameHash == RESPAWN_PARAMETER_ID;
-                        _hasLevelUpParameter = _hasLevelUpParameter || nameHash == LEVEL_UP_PARAMETER_ID;
-                        _hasVictoryParameter = _hasVictoryParameter || nameHash == VICTORY_PARAMETER_ID;
                         break;
                 }
             }

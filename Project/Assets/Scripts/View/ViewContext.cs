@@ -37,10 +37,6 @@ namespace Project05.View
         public Vector3[] offscreenScreenPoints = new Vector3[0];
         // 화살표마다 고른 적의 코어까지 거리 제곱 (가까운 순 선택용, 매 프레임 재사용)
         public float[] offscreenSqrDistances = new float[0];
-        // 히어로 레벨업 애니메이션 기준 레벨 (이보다 오르면 재생한다, HeroViewSystem)
-        public int heroAnimatedLevel;
-        // heroAnimatedLevel을 판 시작 후 읽었는지 (첫 프레임에는 재생 없이 기준만 잡는다)
-        public bool hasHeroAnimatedLevel;
         // 다음 근거리 공격 동작 번호 (HeroViewSystem이 MeleeAttackIndex로 차례로 돌린다)
         public int heroMeleeAttackCount;
         // 레벨업 효과음 기준 레벨 (이보다 오르면 효과음을 낸다, AudioViewSystem)
