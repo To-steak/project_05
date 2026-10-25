@@ -7,7 +7,7 @@ namespace Project05.UI.View
     /// <summary>
     /// [Game] 인게임 HUD. 스테이지-웨이브, 처치 수, 준비 시간·보스 안내, 히어로 HP·목숨·부활, 코어 HP, 골드, 레벨·XP, 점수.
     /// 표시만 담당하며 World와 App을 모른다. Presenter가 값이 바뀐 항목만 호출한다.
-    /// 모든 참조는 선택이다. 연결하지 않은 항목은 건너뛴다 (배치는 에디터에서 자유롭게 한다).
+    /// 바는 Slider로 표시한다 (Interactable을 끄고 Handle을 지워 표시 전용으로 쓴다). 모든 참조는 선택이다. 연결하지 않은 항목은 건너뛴다 (배치는 에디터에서 자유롭게 한다).
     /// 숫자는 TMP_Text.SetText(format, 숫자)로 넣어 문자열을 만들지 않는다 (매 프레임 할당 방지).
     /// </summary>
     public class HUDView : MonoBehaviour
@@ -15,14 +15,14 @@ namespace Project05.UI.View
         [Header("웨이브")]
         [SerializeField] private TMP_Text _waveText;
         [SerializeField] private TMP_Text _killProgressText;
-        [SerializeField] private Image _killProgressFill;
+        [SerializeField] private Slider _killProgressSlider;
         // 준비 시간·보스 안내를 담는 오브젝트 (없으면 텍스트만 끄고 켠다)
         [SerializeField] private GameObject _phaseStatusRoot;
         [SerializeField] private TMP_Text _phaseStatusText;
 
         [Header("히어로")]
         [SerializeField] private TMP_Text _heroHPText;
-        [SerializeField] private Image _heroHPFill;
+        [SerializeField] private Slider _heroHPSlider;
         [SerializeField] private TMP_Text _livesText;
         // 부활 대기 안내를 담는 오브젝트 (없으면 텍스트만 끄고 켠다)
         [SerializeField] private GameObject _respawnRoot;
@@ -30,13 +30,13 @@ namespace Project05.UI.View
 
         [Header("코어")]
         [SerializeField] private TMP_Text _coreHPText;
-        [SerializeField] private Image _coreHPFill;
+        [SerializeField] private Slider _coreHPSlider;
 
         [Header("성장")]
         [SerializeField] private TMP_Text _goldText;
         [SerializeField] private TMP_Text _levelText;
         [SerializeField] private TMP_Text _levelXPText;
-        [SerializeField] private Image _levelXPFill;
+        [SerializeField] private Slider _levelXPSlider;
         [SerializeField] private TMP_Text _scoreText;
 
         private const string WAVE_FORMAT = "{0}-{1}";
@@ -73,7 +73,7 @@ namespace Project05.UI.View
             {
                 _killProgressText.SetText(RATIO_FORMAT, killCount, waveEnemyCount);
             }
-            SetFill(_killProgressFill, killCount, waveEnemyCount);
+            SetSliderRatio(_killProgressSlider, killCount, waveEnemyCount);
         }
 
         /// <summary>
@@ -120,7 +120,7 @@ namespace Project05.UI.View
             {
                 _heroHPText.SetText(RATIO_FORMAT, currentHP, maxHP);
             }
-            SetFill(_heroHPFill, currentHP, maxHP);
+            SetSliderRatio(_heroHPSlider, currentHP, maxHP);
         }
 
         /// <summary>
@@ -167,7 +167,7 @@ namespace Project05.UI.View
             {
                 _coreHPText.SetText(RATIO_FORMAT, currentHP, maxHP);
             }
-            SetFill(_coreHPFill, currentHP, maxHP);
+            SetSliderRatio(_coreHPSlider, currentHP, maxHP);
         }
 
         /// <summary>
@@ -198,7 +198,7 @@ namespace Project05.UI.View
             {
                 _levelXPText.SetText(RATIO_FORMAT, currentXP, requiredXP);
             }
-            SetFill(_levelXPFill, currentXP, requiredXP);
+            SetSliderRatio(_levelXPSlider, currentXP, requiredXP);
         }
 
         /// <summary>
@@ -237,13 +237,15 @@ namespace Project05.UI.View
         }
 
         /// <summary>
-        /// 채움 Image(Image Type: Filled)의 비율을 맞춘다. 최댓값이 0 이하이면 비운다.
+        /// 슬라이더를 current / max 비율로 맞춘다 (LoadingView와 같이 SetValueWithoutNotify). 최댓값이 0 이하이면 비운다.
+        /// 슬라이더의 Min/Max Value가 0 ~ 1이 아니어도 그 범위 안에서 비율대로 놓는다.
         /// </summary>
-        private static void SetFill(Image fill, int current, int max)
+        private static void SetSliderRatio(Slider slider, int current, int max)
         {
-            if (fill != null)
+            if (slider != null)
             {
-                fill.fillAmount = max > 0 ? Mathf.Clamp01((float)current / max) : 0f;
+                float ratio = max > 0 ? Mathf.Clamp01((float)current / max) : 0f;
+                slider.SetValueWithoutNotify(Mathf.Lerp(slider.minValue, slider.maxValue, ratio));
             }
         }
     }
