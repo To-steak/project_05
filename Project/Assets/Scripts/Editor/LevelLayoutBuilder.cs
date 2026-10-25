@@ -366,7 +366,14 @@ namespace Project05.Editor
                 spawnTransform.position = GetCellCenter(layout, spawn.y, spawn.x) + pathHeight;
                 SpawnPointAuthoring spawnPoint = spawnTransform.gameObject.AddComponent<SpawnPointAuthoring>();
                 SerializedObject serializedSpawnPoint = new SerializedObject(spawnPoint);
-                serializedSpawnPoint.FindProperty(SPAWN_PATH_PROPERTY_NAME).objectReferenceValue = path;
+                SerializedProperty pathProperty = serializedSpawnPoint.FindProperty(SPAWN_PATH_PROPERTY_NAME);
+                if (pathProperty == null)
+                {
+                    // SpawnPointAuthoring의 필드 이름이 바뀌면 여기서 알린다 (경로 없이 스폰만 만들어진다)
+                    Debug.LogError("[LevelLayoutBuilder] SpawnPointAuthoring에 직렬화 필드 '" + SPAWN_PATH_PROPERTY_NAME + "'이(가) 없다. 스폰 " + (spawnIndex + 1) + "에 경로를 연결하지 못했다. SPAWN_PATH_PROPERTY_NAME을 맞춘다.", spawnPoint);
+                    continue;
+                }
+                pathProperty.objectReferenceValue = path;
                 serializedSpawnPoint.ApplyModifiedPropertiesWithoutUndo();
             }
             return spawns.Count;

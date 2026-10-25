@@ -26,6 +26,10 @@ namespace Project05.Editor
         private Vector2Int _lastStrokeCell;
         private bool _hasLastStrokeCell;
 
+        private static readonly Color SELECTED_COLOR = new Color(0.25f, 0.6f, 1f);
+        private static readonly Color PAINT_COLOR = new Color(0.3f, 0.9f, 1f);
+        private static readonly Color ERASE_COLOR = new Color(1f, 0.3f, 0.3f);
+
         /// <summary>
         /// 창을 연다.
         /// </summary>
@@ -438,10 +442,6 @@ namespace Project05.Editor
 
         // 칠한 타일을 모아 두는 씬 루트 오브젝트 이름 (레벨 생성의 "Level (Generated)"와 따로 둔다)
         public const string PAINT_ROOT_NAME = "Level Tiles (Painted)";
-
-        private static readonly Color SELECTED_COLOR = new Color(0.25f, 0.6f, 1f);
-        private static readonly Color PAINT_COLOR = new Color(0.3f, 0.9f, 1f);
-        private static readonly Color ERASE_COLOR = new Color(1f, 0.3f, 0.3f);
 
         private const string CONTROLS_HELP =
             "클릭 / 드래그 : 칠하기 (같은 칸은 교체)\n" +
