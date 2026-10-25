@@ -37,6 +37,8 @@ namespace Project05.View
         public Vector3[] offscreenScreenPoints = new Vector3[0];
         // 화살표마다 고른 적의 코어까지 거리 제곱 (가까운 순 선택용, 매 프레임 재사용)
         public float[] offscreenSqrDistances = new float[0];
+        // 다음 근거리 공격 동작 번호 (HeroViewSystem이 MeleeAttackIndex로 차례로 돌린다)
+        public int heroMeleeAttackCount;
         // 레벨업 효과음 기준 레벨 (이보다 오르면 효과음을 낸다, AudioViewSystem)
         public int audioHeardLevel;
         // audioHeardLevel을 판 시작 후 읽었는지 (첫 프레임에는 효과음 없이 기준만 잡는다)
@@ -51,6 +53,8 @@ namespace Project05.View
         public readonly Dictionary<EntityID, ProjectileView> projectileViews = new Dictionary<EntityID, ProjectileView>(World.MAX_PROJECTILE_COUNT);
         // 피격 플래시 중인 적 ID → 플래시가 끝나는 Time.time
         public readonly Dictionary<EntityID, float> enemyHitFlashEndTimes = new Dictionary<EntityID, float>(World.MAX_ENEMY_COUNT);
+        // 사망 애니메이션 중인 적 View (EnemyViewSystem이 반납 시각이 지나면 풀에 돌려준다)
+        public readonly List<ActiveEnemyCorpse> activeEnemyCorpses = new List<ActiveEnemyCorpse>(World.MAX_ENEMY_COUNT);
         // 살아있는 타워 ID → 타워 View
         public readonly Dictionary<EntityID, TowerView> towerViews = new Dictionary<EntityID, TowerView>();
         // 코어 피격 화면 경고 (씬에 없으면 null)

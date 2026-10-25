@@ -11,7 +11,9 @@ namespace Project05.View
     /// 히어로 보간, 이동·공격 애니메이션, 무적 깜빡임, 사망·부활 연출.
     /// Runner가 LateUpdate에서 정해진 순서로 호출한다. World는 읽기만 한다.
     /// feat/vfx: 피격·근거리 범위·사망·부활 효과 (히어로 기록).
-    /// 구현 브랜치: feat/hero-movement, feat/hero-combat, feat/core-siege (무적 깜빡임, 사망 시 숨김), feat/vfx
+    /// feat/animation: 이동 블렌드(Logic 이동 거리 ÷ 이동 속도), 근거리 공격(동작 차례로)·피격·사망·부활(히어로 기록),
+    /// 사망 중 상체 레이어 끄기, 사망 애니메이션 뒤 숨김.
+    /// 구현 브랜치: feat/hero-movement, feat/hero-combat, feat/core-siege (무적 깜빡임, 사망 시 숨김), feat/vfx, feat/animation
     /// </summary>
     public static class HeroViewSystem
     {
@@ -43,7 +45,8 @@ namespace Project05.View
             movement.y = 0f;
 
             Transform heroTransform = heroView.transform;
-            if (movement.sqrMagnitude > MIN_FACING_SQR_DISTANCE)
+            float movementSqrDistance = movement.sqrMagnitude;
+            if (movementSqrDistance > MIN_FACING_SQR_DISTANCE)
             {
                 heroTransform.SetPositionAndRotation(position, Quaternion.LookRotation(movement));
             }
@@ -52,7 +55,57 @@ namespace Project05.View
                 heroTransform.position = position;
             }
 
-            heroView.SetVisible(IsHeroVisible(in hero, heroView.InvincibilityBlinkTicks));
+            heroView.SetVisible(IsHeroVisible(in hero, heroView));
+            PresentAnimation(world, viewContext, heroView, movementSqrDistance);
+        }
+
+        /// <summary>
+        /// 이동 블렌드(이번 틱 이동 거리 ÷ 이동 속도, DESIGN 5.12)와 히어로 기록 애니메이션을 반영한다.
+        /// 일시정지(레벨업 선택 대기 포함) 중에는 애니메이션을 멈춘다.
+        /// 패배는 마지막 목숨을 잃은 틱에 바로 오므로 사망 애니메이션을 끝까지 재생하도록 멈추지 않는다.
+        /// 월드가 멈춘 동안은 틱이 진행되지 않아 이동 거리가 마지막 값에 남아 있으므로 이동 블렌드는 0으로 둔다.
+        /// 사망 중에는 상체 레이어를 꺼 사망 자세를 덮지 않게 한다.
+        /// </summary>
+        private static void PresentAnimation(World world, ViewContext viewContext, HeroView heroView, float movementSqrDistance)
+        {
+            ref readonly Hero hero = ref world.hero;
+            bool isDead = hero.state == HeroState.Dead;
+            heroView.SetAnimationPaused(world.pauseReason != PauseReason.None);
+            heroView.SetUpperBodyEnabled(!isDead);
+
+            bool isMoving = !ViewInterpolation.IsSimulationStopped(world)
+                && hero.state == HeroState.Moving
+                && movementSqrDistance > MIN_FACING_SQR_DISTANCE;
+            float speedRatio = isMoving && hero.moveSpeed > 0f
+                ? Mathf.Clamp01(Mathf.Sqrt(movementSqrDistance) / hero.moveSpeed)
+                : 0f;
+            heroView.SetMoveSpeedRatio(speedRatio);
+
+            if (world.heroDiedRecords.Count > 0)
+            {
+                heroView.PlayDie();
+            }
+            if (world.heroRespawnedRecords.Count > 0)
+            {
+                heroView.PlayRespawn();
+            }
+
+            if (isDead)
+            {
+                return;
+            }
+
+            if (world.heroDamagedRecords.Count > 0)
+            {
+                heroView.PlayHit();
+            }
+            if (world.heroMeleeAttackRecords.Count > 0)
+            {
+                // 근거리 공격마다 동작을 차례로 바꾼다 (Attack01 → 02 → 03 → 01 ...)
+                int variationCount = Mathf.Max(1, heroView.MeleeAttackVariationCount);
+                heroView.PlayMeleeAttack(viewContext.heroMeleeAttackCount % variationCount);
+                viewContext.heroMeleeAttackCount = (viewContext.heroMeleeAttackCount + 1) % variationCount;
+            }
         }
 
         /// <summary>
@@ -87,15 +140,19 @@ namespace Project05.View
         }
 
         /// <summary>
-        /// 부활 대기 중에는 숨기고, 피격 무적 중에는 남은 무적 틱으로 깜빡인다 (DESIGN 3.1: 깜빡임은 View가 표현).
-        /// 남은 틱으로 계산하므로 일시정지 중에는 깜빡임도 멈춘다.
+        /// 부활 대기 중에는 사망 애니메이션 시간(DeathVisibleTicks)이 지나면 숨기고,
+        /// 피격 무적 중에는 남은 무적 틱으로 깜빡인다 (DESIGN 3.1: 깜빡임은 View가 표현).
+        /// 남은 틱으로 계산하므로 일시정지 중에는 깜빡임과 사망 표시 시간도 멈춘다.
+        /// 목숨이 없으면 부활 대기 틱이 줄지 않으므로 사망 자세 그대로 남는다.
         /// </summary>
-        private static bool IsHeroVisible(in Hero hero, int blinkTicks)
+        private static bool IsHeroVisible(in Hero hero, HeroView heroView)
         {
             if (hero.state == HeroState.Dead)
             {
-                return false;
+                int deadTicks = hero.respawnTicks - hero.respawnRemainingTicks;
+                return deadTicks < heroView.DeathVisibleTicks;
             }
+            int blinkTicks = heroView.InvincibilityBlinkTicks;
             if (hero.invincibilityRemainingTicks <= 0)
             {
                 return true;
