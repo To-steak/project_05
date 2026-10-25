@@ -12,7 +12,7 @@ namespace Project05.View
     /// Runner가 LateUpdate에서 정해진 순서로 호출한다. World는 읽기만 한다.
     /// feat/vfx: 피격·근거리 범위·사망·부활 효과 (히어로 기록).
     /// feat/animation: 이동 블렌드(Logic 이동 거리 ÷ 이동 속도), 근거리 공격(동작 차례로)·피격·사망·부활(히어로 기록),
-    /// 레벨업(레벨 상태 비교), 승리(스테이지 클리어 기록, 멈춰 있을 때만), 사망 중 상체 레이어 끄기, 사망 애니메이션 뒤 숨김.
+    /// 레벨업(레벨 상태 비교), 승리(스테이지 클리어 기록, 멈춰 있을 때만), 사망·레벨업 선택 중 상체 레이어 끄기, 사망 애니메이션 뒤 숨김.
     /// 구현 브랜치: feat/hero-movement, feat/hero-combat, feat/core-siege (무적 깜빡임, 사망 시 숨김), feat/vfx, feat/animation
     /// </summary>
     public static class HeroViewSystem
@@ -64,15 +64,17 @@ namespace Project05.View
         /// 일시정지 중에는 애니메이션을 멈추되, 레벨업 선택 대기 중에는 레벨업 애니메이션이 보이도록 멈추지 않는다.
         /// 패배는 마지막 목숨을 잃은 틱에 바로 오므로 사망 애니메이션을 끝까지 재생하도록 멈추지 않는다.
         /// 월드가 멈춘 동안은 틱이 진행되지 않아 이동 거리가 마지막 값에 남아 있으므로 이동 블렌드는 0으로 둔다.
-        /// 사망 중에는 상체 레이어를 꺼 사망 자세를 덮지 않게 한다.
+        /// 사망 중에는 상체 레이어를 꺼 사망 자세를 덮지 않게 하고, 레벨업 선택 대기 중에도 꺼 레벨업 동작만 보이게 한다.
         /// </summary>
         private static void PresentAnimation(World world, ViewContext viewContext, HeroView heroView, float movementSqrDistance)
         {
             ref readonly Hero hero = ref world.hero;
-            bool isPaused = world.pauseReason != PauseReason.None && world.pauseReason != PauseReason.LevelUpChoice;
+            bool isChoosingLevelUp = world.pauseReason == PauseReason.LevelUpChoice;
+            bool isPaused = world.pauseReason != PauseReason.None && !isChoosingLevelUp;
             bool isDead = hero.state == HeroState.Dead;
             heroView.SetAnimationPaused(isPaused);
-            heroView.SetUpperBodyEnabled(!isDead);
+            // 레벨업 선택 대기 중에는 상체 레이어를 꺼 레벨업 동작만 보이게 한다 (멈춘 적 앞에서 공격 동작이 이어지지 않게)
+            heroView.SetUpperBodyEnabled(!isDead && !isChoosingLevelUp);
 
             bool isMoving = !ViewInterpolation.IsSimulationStopped(world)
                 && hero.state == HeroState.Moving
