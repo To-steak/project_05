@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8431ea39e85451ba1d90f7ac293cec7, type: 3}
+  m_Name: VisualEffectDefinition
+  m_EditorClassIdentifier: Project05.Authoring::Project05.Authoring.Definition.VisualEffectDefinition
+  heroHitEffectPrefab: {fileID: 194062, guid: 8c27aeead6d968e4ba986702d6b84335, type: 3}
+  heroMeleeRangeEffectPrefab: {fileID: 194062, guid: 8c27aeead6d968e4ba986702d6b84335, type: 3}
+  heroDiedEffectPrefab: {fileID: 132290, guid: e49403f034d74ee44aa8a41b0ee4abfd, type: 3}
+  heroRespawnedEffectPrefab: {fileID: 132290, guid: e49403f034d74ee44aa8a41b0ee4abfd, type: 3}
+  enemyHitEffectPrefab: {fileID: 194062, guid: 8c27aeead6d968e4ba986702d6b84335, type: 3}
+  towerHitEffectPrefab: {fileID: 180128, guid: 6586ff0f14125534cae2f5d8f04b7871, type: 3}
+  towerBuiltEffectPrefab: {fileID: 168542, guid: 5702e2a6fea804b45b49b70d8feaf7ae, type: 3}
+  towerUpgradedEffectPrefab: {fileID: 120410, guid: 6636b3078b0905e489f698a11b7a6b6b, type: 3}
+  towerDestroyedEffectPrefab: {fileID: 191186, guid: 079954accd64b32419ec069129c81273, type: 3}
+  towerRepairedEffectPrefab: {fileID: 175238, guid: 26d069e6f78e6f8478e4dc0152bd6939, type: 3}
+  coreHitEffectPrefab: {fileID: 180128, guid: 6586ff0f14125534cae2f5d8f04b7871, type: 3}
+  goldTextPrefab: {fileID: 935920833692186670, guid: a379885f436c2664d81500d29a731b63, type: 3}
+  XPTextPrefab: {fileID: 869244410314210194, guid: 1ff6f1304863ccf48950e40b1e0e41d2, type: 3}
+  goldTextFormat: +{0}G
+  XPTextFormat: +{0}XP

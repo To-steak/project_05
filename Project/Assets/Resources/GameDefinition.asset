@@ -30,6 +30,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 53d6b531b93f43e38585131c5e46b599, type: 2}
   - {fileID: 11400000, guid: 10669fb6e0904ae6b663a1cbb8211a2c, type: 2}
   audio: {fileID: 11400000, guid: 819c0c8ab2eb18846848b3443e871a04, type: 2}
+  visualEffect: {fileID: 11400000, guid: 9f01cd6b66617804ca8200087e4f5e92, type: 2}
   goldDropPrefab: {fileID: 3398451688107233883, guid: e36c1b58dd29e4045ac8885be9d66fc3, type: 3}
   xpDropPrefab: {fileID: 6473786798948704933, guid: d49c7d7dad14080468b3dcf2f4d054c2, type: 3}
   coreMaxHP: 500

@@ -156,6 +156,8 @@ namespace Project05.Core
             CoreViewSystem.Present(_world, _viewContext);
             InteractionPromptViewSystem.Present(_world, _viewContext);
             OffscreenIndicatorViewSystem.Present(_world, _viewContext);
+            // 위 ViewSystem들이 꺼낸 효과·문구의 유지 시간 처리
+            VisualEffectViewSystem.Present(_world, _viewContext);
             CameraViewSystem.Present(_world, _viewContext);
             AudioViewSystem.Present(_world, _viewContext);
 
@@ -296,6 +298,11 @@ namespace Project05.Core
             _viewContext.mainCamera = Camera.main;
             _viewContext.interactionPromptView = FindAnyObjectByType<InteractionPromptView>();
             _viewContext.offscreenIndicatorView = FindAnyObjectByType<OffscreenIndicatorView>();
+            _viewContext.coreWarningView = FindAnyObjectByType<CoreWarningView>();
+            if (_viewContext.coreWarningView != null)
+            {
+                _viewContext.coreWarningView.SetIntensity(0f);
+            }
             if (_viewContext.offscreenIndicatorView != null)
             {
                 _viewContext.offscreenArrows = _viewContext.offscreenIndicatorView.CreateArrows();
