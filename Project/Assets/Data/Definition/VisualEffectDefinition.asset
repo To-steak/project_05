@@ -22,6 +22,7 @@ MonoBehaviour:
   towerUpgradedEffectPrefab: {fileID: 120410, guid: 6636b3078b0905e489f698a11b7a6b6b, type: 3}
   towerDestroyedEffectPrefab: {fileID: 191186, guid: 079954accd64b32419ec069129c81273, type: 3}
   towerRepairedEffectPrefab: {fileID: 175238, guid: 26d069e6f78e6f8478e4dc0152bd6939, type: 3}
+  boardedShotExplodedEffectPrefab: {fileID: 191186, guid: 079954accd64b32419ec069129c81273, type: 3}
   coreHitEffectPrefab: {fileID: 180128, guid: 6586ff0f14125534cae2f5d8f04b7871, type: 3}
   goldTextPrefab: {fileID: 935920833692186670, guid: a379885f436c2664d81500d29a731b63, type: 3}
   XPTextPrefab: {fileID: 869244410314210194, guid: 1ff6f1304863ccf48950e40b1e0e41d2, type: 3}

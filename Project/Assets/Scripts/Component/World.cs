@@ -130,6 +130,8 @@ namespace Project05.Component
         public readonly List<TowerUpgradedRecord> towerUpgradedRecords = new List<TowerUpgradedRecord>(INITIAL_RECORD_CAPACITY);
         // 타워 사격
         public readonly List<TowerShotRecord> towerShotRecords = new List<TowerShotRecord>(INITIAL_RECORD_CAPACITY);
+        // 이번 프레임의 폭발 투사체(탑승 사격) 폭발 기록
+        public readonly List<ProjectileExplodedRecord> projectileExplodedRecords = new List<ProjectileExplodedRecord>(INITIAL_RECORD_CAPACITY);
         // 타워 피격
         public readonly List<TowerDamagedRecord> towerDamagedRecords = new List<TowerDamagedRecord>(INITIAL_RECORD_CAPACITY);
         // 타워 파괴

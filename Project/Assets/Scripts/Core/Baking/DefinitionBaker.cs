@@ -181,6 +181,7 @@ namespace Project05.Core.Baking
             effectPrefabs[(int)VisualEffectKind.TowerDestroyed] = effectDefinition.towerDestroyedEffectPrefab;
             effectPrefabs[(int)VisualEffectKind.TowerRepaired] = effectDefinition.towerRepairedEffectPrefab;
             effectPrefabs[(int)VisualEffectKind.CoreHit] = effectDefinition.coreHitEffectPrefab;
+            effectPrefabs[(int)VisualEffectKind.BoardedShotExploded] = effectDefinition.boardedShotExplodedEffectPrefab;
 
             viewData.goldTextPrefab = effectDefinition.goldTextPrefab;
             viewData.XPTextPrefab = effectDefinition.XPTextPrefab;
@@ -234,6 +235,7 @@ namespace Project05.Core.Baking
             soundEffectClips[(int)SoundEffectKind.TowerUpgraded] = audioDefinition.towerUpgradedClip;
             soundEffectClips[(int)SoundEffectKind.TowerShot] = audioDefinition.towerShotClip;
             soundEffectClips[(int)SoundEffectKind.TowerBoardedShot] = audioDefinition.towerBoardedShotClip != null ? audioDefinition.towerBoardedShotClip : audioDefinition.towerShotClip;
+            soundEffectClips[(int)SoundEffectKind.BoardedShotExploded] = audioDefinition.boardedShotExplodedClip;
             soundEffectClips[(int)SoundEffectKind.TowerDamaged] = audioDefinition.towerDamagedClip;
             soundEffectClips[(int)SoundEffectKind.TowerDestroyed] = audioDefinition.towerDestroyedClip;
             soundEffectClips[(int)SoundEffectKind.TowerRepaired] = audioDefinition.towerRepairedClip;
@@ -382,6 +384,7 @@ namespace Project05.Core.Baking
                 stats.siegeFirstRingRadius = towerDefinition.siegeFirstRingRadius;
                 stats.projectileSpeed = towerDefinition.projectileSpeed;
                 stats.projectileRadius = towerDefinition.projectileRadius;
+                stats.boardedSplashRadius = towerDefinition.boardedSplashRadius;
 
                 TowerLevelDefinition[] levelDefinitions = towerDefinition.levels;
                 if (levelDefinitions == null || levelDefinitions.Length == 0)

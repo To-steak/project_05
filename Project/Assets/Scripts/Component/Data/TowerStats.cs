@@ -19,6 +19,8 @@ namespace Project05.Component.Data
         public float projectileSpeed;
         // 투사체 명중 판정 반경
         public float projectileRadius;
+        // 탑승 사격 폭발 반경
+        public float boardedSplashRadius;
         // 단계별 수치 (0번이 건설 직후 단계)
         public TowerLevelStats[] levels;
     }

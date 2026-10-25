@@ -8,11 +8,11 @@
 - HeroState.cs (enum) : Moving 또는 Idle, Boarded, Dead (부활 대기).
 - Enemy.cs (struct) : previousPosition, currentPosition, 경로 인덱스, 다음 웨이포인트 인덱스, 현재·최대 HP, 이동 속도, 접촉 반경, 접촉 피해, 코어·타워 공격력과 공격 주기 틱, 공격 타이머, 상태, 공격 대상 타워 EntityID, 포위 자리, 드롭 골드·XP, 보스 여부.
 - EnemyState.cs (enum) : FollowingPath, AttackingTower, MovingToSiegeSlot (경로 끝 → 포위 자리), AttackingCore.
-- Tower.cs (struct) : 위치, 공터 인덱스, 타워 종류, 업그레이드 단계, 현재·최대 HP, 공격력, 사거리, 공격 주기 틱, 공격 타이머, aggroRange, 포위 자리 사용 현황, 탑승 여부.
+- Tower.cs (struct) : 위치, 공터 인덱스, 타워 종류, 업그레이드 단계, 현재·최대 HP, 공격력, 사거리, 공격 주기 틱, 공격 타이머, 탑승 사격 폭발 반경, aggroRange, 포위 자리 사용 현황, 탑승 여부.
 - TowerSlot.cs (struct) : 공터 위치, 건설된 타워 EntityID (비어 있으면 무효 ID), 건설 요청 대기 여부.
 - Drop.cs (struct) : 위치, 종류(골드/XP), 양.
 - DropKind.cs (enum) : Gold, XP
 - HeroAttackKind.cs (enum) : Melee, Ranged
-- Projectile.cs (struct) : previousPosition, currentPosition, 방향, 속도, 명중 반경, 남은 비행 거리, 피해량. 직선 비행, 이동 구간의 첫 적 하나에 명중.
+- Projectile.cs (struct) : previousPosition, currentPosition, 방향, 속도, 명중 반경, 남은 비행 거리, 피해량, 폭발 반경. 직선 비행, 이동 구간의 첫 적 하나에 명중. 폭발 반경이 있으면(탑승 사격) 명중·소진 지점에서 반경 안 적 전부에게 피해.
 
 구현하면서 이 목록과 실제 파일을 맞춘다. 컨벤션은 저장소 루트의 CONVENTIONS.md를 따른다.

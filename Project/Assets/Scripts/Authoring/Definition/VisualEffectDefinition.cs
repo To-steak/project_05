@@ -39,6 +39,8 @@ namespace Project05.Authoring.Definition
         public GameObject towerDestroyedEffectPrefab;
         // 타워 수리
         public GameObject towerRepairedEffectPrefab;
+        // 탑승 사격 폭발 (반지름 1 크기로 만든다. 폭발 반경만큼 키운다)
+        public GameObject boardedShotExplodedEffectPrefab;
 
         // ───── 코어 ─────
 

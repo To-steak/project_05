@@ -12,7 +12,8 @@ namespace Project05.View
     /// Runner가 LateUpdate에서 정해진 순서로 호출한다. World는 읽기만 한다.
     /// feat/tower ①: 동기화만. 새 타워 ID는 종류별 프리팹을 풀에서 꺼내 공터 위치에 두고, 사라진 ID는 반납한다.
     /// feat/vfx: 건설·강화·피격·파괴·수리 효과 (타워 기록). 강화·수리 기록에는 위치가 없어 살아있는 타워의 위치를 읽는다.
-    /// 구현 브랜치: feat/tower, feat/vfx
+    /// feat/boarded-splash: 탑승 사격 폭발 효과 (ProjectileExplodedRecord, 반경 배율).
+    /// 구현 브랜치: feat/tower, feat/vfx, feat/boarded-splash
     /// </summary>
     public static class TowerViewSystem
     {
@@ -55,6 +56,14 @@ namespace Project05.View
             for (int recordIndex = 0; recordIndex < upgradedRecords.Count; recordIndex++)
             {
                 SpawnAtTower(world, viewContext, upgradedRecords[recordIndex].towerID, VisualEffectKind.TowerUpgraded);
+            }
+
+            // 탑승 사격 폭발. 프리팹은 반지름 1 크기라 폭발 반경만큼 키운다
+            List<ProjectileExplodedRecord> explodedRecords = world.projectileExplodedRecords;
+            for (int recordIndex = 0; recordIndex < explodedRecords.Count; recordIndex++)
+            {
+                ProjectileExplodedRecord explodedRecord = explodedRecords[recordIndex];
+                VisualEffectViewSystem.Spawn(viewContext, VisualEffectKind.BoardedShotExploded, explodedRecord.position, explodedRecord.radius);
             }
 
             List<TowerRepairedRecord> repairedRecords = world.towerRepairedRecords;

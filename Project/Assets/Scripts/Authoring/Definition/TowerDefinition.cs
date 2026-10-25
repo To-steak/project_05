@@ -25,6 +25,8 @@ namespace Project05.Authoring.Definition
         [Min(0.01f)] public float projectileSpeed = 0.5f;
         // 투사체 명중 판정 반경 (적 반경과 더해 판정)
         [Min(0f)] public float projectileRadius = 0.2f;
+        // 탑승 사격 폭발 반경 (명중·소진 지점 중심, 적 중심점 판정. 미탑승 자동 공격은 단일 명중)
+        [Min(0f)] public float boardedSplashRadius = 2f;
         // 단계별 수치 (0번이 건설 직후 단계, 강화 2단계면 3개)
         public TowerLevelDefinition[] levels = new TowerLevelDefinition[0];
         // 타워 View 프리팹 (View 테이블로 베이킹)

@@ -14,7 +14,7 @@ namespace Project05.System
     /// feat/tower ②: 탑승 중에는 자동 공격 대신, 좌클릭을 누르고 있는 동안 공격 타이머가 준비될 때마다 커서 방향으로 쏜다 (공격력 = 히어로 공격력).
     /// 타워 피해와 파괴(공터 비움, 탑승 중이면 강제 하차, 공격하던 적은 경로로 복귀).
     /// feat/core-menu: 업그레이드(TryUpgrade)·수리(TryRepair).
-    /// 구현 브랜치: feat/tower (자동 공격 → 탑승 사격·HP·파괴), feat/core-menu (업그레이드·수리)
+    /// 구현 브랜치: feat/tower (자동 공격 → 탑승 사격·HP·파괴), feat/core-menu (업그레이드·수리), feat/boarded-splash (탑승 사격 공격력·폭발)
     /// </summary>
     public static class TowerSystem
     {
@@ -223,7 +223,8 @@ namespace Project05.System
         }
 
         /// <summary>
-        /// 탑승 사격: 좌클릭을 누르고 있고 커서가 지면을 가리키면 그 방향으로 직선 투사체를 쏜다. 공격력은 히어로 공격력, 최대 비행 거리는 타워 사거리.
+        /// 탑승 사격: 좌클릭을 누르고 있고 커서가 지면을 가리키면 그 방향으로 폭발 투사체를 쏜다 (DESIGN 3.2).
+        /// 공격력 = 타워 공격력 + (히어로 근거리 공격력 + 원거리 공격력) / 2. 최대 비행 거리는 타워 사거리이고, 명중·소진 지점에서 폭발 반경만큼 터진다.
         /// 누르고 있지 않으면 타이머를 준비 상태로 둔 채 기다린다 (누르는 순간 바로 쏜다).
         /// </summary>
         private static bool TryBoardedFire(World world, EntityID towerID, ref Tower tower)
@@ -244,8 +245,9 @@ namespace Project05.System
             }
             direction /= Mathf.Sqrt(sqrDistance);
 
-            // 탑승 사격 공격력 공식(타워 + (근거리 + 원거리) / 2)과 광역은 feat/boarded-splash에서 적용한다. 그때까지 히어로 두 공격력의 평균을 쓴다
-            RequestProjectile(world, in tower, direction, (world.hero.meleeAttackDamage + world.hero.rangedAttackDamage) / 2);
+            ref Hero hero = ref world.hero;
+            int boardedDamage = tower.attackDamage + (hero.meleeAttackDamage + hero.rangedAttackDamage) / 2;
+            RequestProjectile(world, in tower, direction, boardedDamage, tower.boardedSplashRadius);
 
             TowerShotRecord shotRecord = new TowerShotRecord();
             shotRecord.towerID = towerID;
@@ -255,7 +257,7 @@ namespace Project05.System
             return true;
         }
 
-        private static void RequestProjectile(World world, in Tower tower, Vector3 direction, int damage)
+        private static void RequestProjectile(World world, in Tower tower, Vector3 direction, int damage, float splashRadius)
         {
             ProjectileSpawnRequest request = new ProjectileSpawnRequest();
             request.startPosition = tower.position;
@@ -264,6 +266,7 @@ namespace Project05.System
             request.radius = tower.projectileRadius;
             request.maxDistance = tower.range;
             request.damage = damage;
+            request.splashRadius = splashRadius;
             world.projectileSpawnRequests.Enqueue(request);
         }
 
@@ -284,7 +287,7 @@ namespace Project05.System
             float sqrDistance = direction.sqrMagnitude;
             direction = sqrDistance > 0f ? direction / Mathf.Sqrt(sqrDistance) : Vector3.forward;
 
-            RequestProjectile(world, in tower, direction, tower.attackDamage);
+            RequestProjectile(world, in tower, direction, tower.attackDamage, 0f);
 
             TowerShotRecord shotRecord = new TowerShotRecord();
             shotRecord.towerID = towerID;

@@ -62,6 +62,7 @@ namespace Project05.System
                 tower.aggroRange = stats.aggroRange;
                 tower.projectileSpeed = stats.projectileSpeed;
                 tower.projectileRadius = stats.projectileRadius;
+                tower.boardedSplashRadius = stats.boardedSplashRadius;
                 tower.attackCooldownTicks = 0;
                 tower.isBoarded = false;
                 TowerSystem.ApplyLevel(world, ref tower, 0);
@@ -131,6 +132,7 @@ namespace Project05.System
                 projectile.radius = request.radius;
                 projectile.remainingDistance = request.maxDistance;
                 projectile.damage = request.damage;
+                projectile.splashRadius = request.splashRadius;
             }
         }
 
