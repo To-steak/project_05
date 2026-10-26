@@ -45,7 +45,7 @@ namespace Project05.UI.View
         }
 
         /// <summary>
-        /// 결과 텍스트를 바꾼다.
+        /// 도달 웨이브 텍스트를 바꾼다.
         /// </summary>
         /// <param name="text">표시할 문장 (Presenter가 만든다)</param>
         public void SetWaveText(string text)
@@ -57,14 +57,14 @@ namespace Project05.UI.View
         }
 
         /// <summary>
-        /// 결과 텍스트를 바꾼다.
+        /// 점수 텍스트를 바꾼다.
         /// </summary>
         /// <param name="text">표시할 문장 (Presenter가 만든다)</param>
         public void SetScoreText(string text)
         {
-            if (_waveText != null)
+            if (_scoreText != null)
             {
-                _waveText.text = text;
+                _scoreText.text = text;
             }
         }
     }
