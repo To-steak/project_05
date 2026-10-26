@@ -14,7 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hero: {fileID: 11400000, guid: ecded1d3d634497fa811760c5ba39f2d, type: 2}
   enemies:
+  - {fileID: 11400000, guid: b000439d5a606c34aa8aacc7b020ef78, type: 2}
+  - {fileID: 11400000, guid: ebcd0af01225ce94db0d1a2e82857fc6, type: 2}
+  - {fileID: 11400000, guid: 7f967c619a5bb6c4da23b859b4d84457, type: 2}
   - {fileID: 11400000, guid: f7bdbc6967f0ada418ccce8213ab95a5, type: 2}
+  - {fileID: 11400000, guid: 21194c3ff30345e8ba6665c5f0443e11, type: 2}
+  - {fileID: 11400000, guid: 227eaefa277d3be4e8a7adecc14a315e, type: 2}
+  - {fileID: 11400000, guid: c9a3111713bd8e345942fb5c0d859e96, type: 2}
+  - {fileID: 11400000, guid: 0df00536572480c49b9b349c55d1bf5d, type: 2}
+  - {fileID: 11400000, guid: 626b9a44b1a56b546a8886720dccabf7, type: 2}
   waveRule: {fileID: 11400000, guid: 0e861e4a6d3441d6b01c4a0d588b4b56, type: 2}
   difficulty: {fileID: 11400000, guid: 41526376c2d34d7c84cd046526408483, type: 2}
   progression: {fileID: 11400000, guid: 0da9eeeed63949c9bc841a032e1859ea, type: 2}

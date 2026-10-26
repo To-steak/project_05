@@ -8,7 +8,7 @@ namespace Project05.Authoring.Scene
     /// </summary>
     public class CoreAuthoring : MonoBehaviour
     {
-        private const float GIZMO_RADIUS = 1f;
+        private const float GIZMO_RADIUS = 2f;
 
         private void OnDrawGizmos()
         {
