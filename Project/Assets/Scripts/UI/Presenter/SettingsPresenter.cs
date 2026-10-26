@@ -4,7 +4,7 @@ using Project05.UI.View;
 namespace Project05.UI.Presenter
 {
     /// <summary>
-    /// [Main·Game] 설정 패널. Main에서는 메인 메뉴가, Game에서는 일시정지 메뉴가 연다. 열 때 App.Settings의 값을 슬라이더에 맞추고, 슬라이더가 바뀌면 App.Settings에 쓴다.
+    /// [Main·Game] 설정 패널. Main에서는 메인 메뉴가, Game에서는 일시정지 메뉴가 연다. 열 때 App.Settings의 값을 슬라이더와 값 글자에 맞추고, 슬라이더가 바뀌면 App.Settings에 쓰고 값 글자를 갱신한다.
     /// 닫을 때 한 번 디스크에 기록한다 (WebGL에서 슬라이더를 움직일 때마다 IndexedDB에 쓰지 않도록).
     /// </summary>
     public class SettingsPresenter
@@ -62,11 +62,13 @@ namespace Project05.UI.Presenter
         private void OnBGMVolumeChanged(float volume)
         {
             App.Settings.SetBGMVolume(volume);
+            _view.SetBGMVolumeText(volume);
         }
 
         private void OnSFXVolumeChanged(float volume)
         {
             App.Settings.SetSFXVolume(volume);
+            _view.SetSFXVolumeText(volume);
         }
     }
 }
