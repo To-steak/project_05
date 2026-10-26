@@ -148,14 +148,14 @@ namespace Project05.System
         }
 
         /// <summary>
-        /// 보스 생성을 요청하고 보스 단계로 넘어간다. 보스 종류는 isBoss인 첫 종류, 스폰 지점은 일반 적처럼 순서대로 이어서 쓴다.
+        /// 보스 생성을 요청하고 보스 단계로 넘어간다. 보스 종류는 isBoss인 종류 중 무작위, 스폰 지점은 일반 적처럼 순서대로 이어서 쓴다.
         /// 보스 종류나 스폰 지점이 없으면 보스 없이 스테이지를 클리어한다.
         /// 보스 ID는 SpawnSystem이 생성하면서 flow.bossID에 넣는다.
         /// </summary>
         private static void RequestBoss(World world)
         {
             ref GameFlowState flow = ref world.flow;
-            int bossTypeIndex = FindBossTypeIndex(world.enemyStats);
+            int bossTypeIndex = WaveSystem.PickRandomEnemyTypeIndex(world.enemyStats, true, world.random);
             if (bossTypeIndex == NO_ENEMY_TYPE || world.spawnPoints.Length == 0)
             {
                 ClearWave(world);
@@ -171,18 +171,6 @@ namespace Project05.System
 
             flow.bossID = default(EntityID);
             flow.phase = GamePhase.BossInProgress;
-        }
-
-        private static int FindBossTypeIndex(EnemyStats[] enemyStats)
-        {
-            for (int enemyTypeIndex = 0; enemyTypeIndex < enemyStats.Length; enemyTypeIndex++)
-            {
-                if (enemyStats[enemyTypeIndex].isBoss)
-                {
-                    return enemyTypeIndex;
-                }
-            }
-            return NO_ENEMY_TYPE;
         }
 
         /// <summary>

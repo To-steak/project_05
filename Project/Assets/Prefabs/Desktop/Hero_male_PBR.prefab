@@ -777,7 +777,7 @@ GameObject:
   - component: {fileID: 4030192373019901660}
   - component: {fileID: 1661298824837592272}
   m_Layer: 0
-  m_Name: Hero_male
+  m_Name: Hero_male_PBR
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -10,18 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 68e988738c924a38bca56774c00aeef8, type: 3}
-  m_Name: EnemyTank
+  m_Name: Enemy Mushroom
   m_EditorClassIdentifier: 
-  baseHP: 60
-  moveSpeed: 0.03
-  radius: 0.7
-  contactDamage: 15
-  coreDamage: 10
-  towerDamage: 10
-  attackIntervalTicks: 75
-  baseDropGold: 4
-  baseDropXP: 3
+  baseHP: 20
+  moveSpeed: 0.05
+  radius: 0.5
+  contactDamage: 6
+  coreDamage: 3
+  towerDamage: 5
+  attackIntervalTicks: 20
+  baseDropGold: 2
+  baseDropXP: 1
   isBoss: 0
   killScore: 1
-  prefab: {fileID: 4145008173129900958, guid: 28f26c8ab1688e949a362c7eecdd2b48, type: 3}
+  prefab: {fileID: 800294414179170261, guid: f12cda11ab3b7834ba99ca5bcc7ed93c, type: 3}
   deathEffectPrefab: {fileID: 0}
