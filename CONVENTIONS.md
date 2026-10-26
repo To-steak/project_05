@@ -18,6 +18,7 @@
 | `UI/Presenter/` | UI View와 World를 연결 | `GoldPresenter` |
 | `Foundation/` | 프로그램 전체 수명의 기반 기능. static `App`과 그 기능들 | `App`, `SettingsStore`, `ViewPool` |
 | `Core/` | DDOL Runner, 부트스트랩, 베이킹. 모든 어셈블리를 조립하는 최상위 | `Runner`, `Bootstrap` |
+| `Editor/` | 에디터 전용 도구. 빌드에 들어가지 않는다. 씬에 타일과 Authoring을 만들어 주는 것까지만 하고 게임 실행 코드는 참조하지 않는다 | `LevelTilePainterWindow`, `LevelPathBuilder` |
 
 - **베이킹 채택:** Authoring의 원본은 Core에서 Component의 struct로 변환된다. System은 Component만 참조한다.
 - 각 폴더의 `README.txt`에 들어갈 `.cs` 목록이 있다. 구현하면서 목록과 실제 파일을 맞춘다.
@@ -35,6 +36,7 @@
 | View | Component, Foundation |
 | UI | Component, Foundation |
 | Core | 전부 |
+| Editor (에디터 전용) | Authoring |
 
 - System이 View, UI, Foundation을 참조하면 컴파일 에러가 나야 한다.
 - App을 Core에 두면 View·UI → Core → View·UI 순환 참조가 되므로 Foundation으로 분리한다.
