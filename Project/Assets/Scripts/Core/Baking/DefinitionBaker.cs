@@ -79,6 +79,11 @@ namespace Project05.Core.Baking
 
             if (definition.hero != null)
             {
+                if (definition.hero.prefab == null)
+                {
+                    Debug.LogWarning("[DefinitionBaker] " + definition.hero.name + ".prefab 이(가) 비어 있다. 씬에 놓인 히어로 View를 찾아 쓴다.", definition.hero);
+                }
+                viewData.heroPrefab = definition.hero.prefab;
                 if (definition.hero.projectilePrefab == null)
                 {
                     Debug.LogWarning("[DefinitionBaker] " + definition.hero.name + ".projectilePrefab 이(가) 비어 있다. 원거리 투사체가 화면에 보이지 않는다.", definition.hero);
