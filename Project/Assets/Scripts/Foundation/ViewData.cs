@@ -11,6 +11,8 @@ namespace Project05.Foundation
     {
         // 적 종류별 View 프리팹 (인덱스 = 적 종류, GameData.enemyStats와 같음. 비어 있으면 null)
         public GameObject[] enemyPrefabs = new GameObject[0];
+        // 히어로 View 프리팹 (판 시작 시 Runner가 풀에서 꺼낸다. 비어 있으면 씬에 놓인 히어로를 쓴다)
+        public GameObject heroPrefab;
         // 히어로 원거리 투사체 View 프리팹 (비어 있으면 null)
         public GameObject heroProjectilePrefab;
         // 히어로 구체 View 프리팹 (없으면 구체가 보이지 않는다)

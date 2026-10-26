@@ -79,6 +79,7 @@ namespace Project05.Core.Baking
 
             if (definition.hero != null)
             {
+                viewData.heroPrefab = SelectHeroPrefab(definition.hero);
                 if (definition.hero.projectilePrefab == null)
                 {
                     Debug.LogWarning("[DefinitionBaker] " + definition.hero.name + ".projectilePrefab 이(가) 비어 있다. 원거리 투사체가 화면에 보이지 않는다.", definition.hero);
@@ -154,6 +155,35 @@ namespace Project05.Core.Baking
                 viewData.enemyDeathEffectPrefabs[enemyTypeIndex] = enemyDefinition.deathEffectPrefab;
             }
             return viewData;
+        }
+
+        /// <summary>
+        /// 빌드 플랫폼에 맞는 히어로 프리팹을 고른다 (WebGL = Poly, 그 밖 = PBR).
+        /// 맞는 칸이 비어 있으면 다른 칸을 쓴다. 빌드에서는 다른 칸이 빌드 직전에 비워져 있어 에디터에서만 의미가 있다.
+        /// 둘 다 비어 있으면 null이고, Runner가 씬에 놓인 히어로 View를 쓴다.
+        /// </summary>
+        private static GameObject SelectHeroPrefab(HeroDefinition heroDefinition)
+        {
+#if UNITY_WEBGL
+            GameObject platformPrefab = heroDefinition.webPrefab;
+            GameObject otherPrefab = heroDefinition.desktopPrefab;
+            string platformFieldName = "webPrefab";
+#else
+            GameObject platformPrefab = heroDefinition.desktopPrefab;
+            GameObject otherPrefab = heroDefinition.webPrefab;
+            string platformFieldName = "desktopPrefab";
+#endif
+            if (platformPrefab != null)
+            {
+                return platformPrefab;
+            }
+            if (otherPrefab != null)
+            {
+                Debug.LogWarning("[DefinitionBaker] " + heroDefinition.name + "." + platformFieldName + " 이(가) 비어 있다. 다른 플랫폼용 프리팹 " + otherPrefab.name + "을(를) 쓴다.", heroDefinition);
+                return otherPrefab;
+            }
+            Debug.LogWarning("[DefinitionBaker] " + heroDefinition.name + "의 히어로 프리팹이 모두 비어 있다. 씬에 놓인 히어로 View를 찾아 쓴다.", heroDefinition);
+            return null;
         }
 
         /// <summary>

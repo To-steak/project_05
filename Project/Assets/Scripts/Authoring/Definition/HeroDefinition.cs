@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Project05.Authoring.Definition
 {
@@ -55,8 +56,10 @@ namespace Project05.Authoring.Definition
         [Min(0f)] public float pickupRadius;
         // Space 상호작용 반경 (공터, 타워 탑승, 코어)
         [Min(0f)] public float interactionRadius;
-        // 히어로 View 프리팹 (View 테이블로 베이킹)
-        public GameObject prefab;
+        // WebGL 빌드용 히어로 View 프리팹 (Poly, View 테이블로 베이킹). Desktop 빌드에서는 빌드 직전에 비워 빌드에 넣지 않는다
+        [FormerlySerializedAs("prefab")] public GameObject webPrefab;
+        // Desktop 빌드용 히어로 View 프리팹 (PBR, View 테이블로 베이킹). WebGL 빌드에서는 빌드 직전에 비워 빌드에 넣지 않는다
+        public GameObject desktopPrefab;
         // 원거리 투사체 View 프리팹 (View 테이블로 베이킹, 없으면 투사체가 보이지 않는다)
         public GameObject projectilePrefab;
         // 구체 View 프리팹 (View 테이블로 베이킹, 없으면 구체가 보이지 않는다)

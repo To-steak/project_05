@@ -10,18 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 68e988738c924a38bca56774c00aeef8, type: 3}
-  m_Name: EnemyNormal
+  m_Name: Enemy Cactus
   m_EditorClassIdentifier: 
-  baseHP: 20
+  baseHP: 50
   moveSpeed: 0.05
   radius: 0.5
-  contactDamage: 10
-  coreDamage: 5
-  towerDamage: 5
-  attackIntervalTicks: 50
+  contactDamage: 80
+  coreDamage: 20
+  towerDamage: 20
+  attackIntervalTicks: 20
   baseDropGold: 2
   baseDropXP: 1
   isBoss: 0
   killScore: 1
-  prefab: {fileID: 4145008173129900958, guid: 28f26c8ab1688e949a362c7eecdd2b48, type: 3}
+  prefab: {fileID: 4919895468147568498, guid: 9c99eddfd1ca98941a44de870cf8394d, type: 3}
   deathEffectPrefab: {fileID: 0}

@@ -51,7 +51,7 @@ namespace Project05.UI.Presenter
             {
                 CoreUnlockEntryView entry = _unlockEntries[towerTypeIndex];
                 // 판 시작 시 한 번 만드는 문자열이라 할당은 문제없다
-                entry.SetContent(GetIcon(towerTypeIndex), GetName(towerTypeIndex), towerStats[towerTypeIndex].unlockCost + GOLD_SUFFIX);
+                entry.SetContent(GetIcon(towerTypeIndex), GetName(towerTypeIndex), "비용: "+ towerStats[towerTypeIndex].unlockCost + GOLD_SUFFIX);
                 if (entry.UnlockButton != null)
                 {
                     entry.UnlockButton.onClick.AddListener(CreateCommandHandler(CommandKind.UnlockTowerType, towerTypeIndex));

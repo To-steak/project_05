@@ -35,6 +35,7 @@ MonoBehaviour:
   respawnTicks: 150
   pickupRadius: 2.5
   interactionRadius: 2
-  prefab: {fileID: 3015343269813259014, guid: 37874278bc81df44a8e2a94c67b1ee5d, type: 3}
+  webPrefab: {fileID: 5053499482435116722, guid: d430047ac89b4f54985462fa42b19468, type: 3}
+  desktopPrefab: {fileID: 3015343269813259014, guid: 37874278bc81df44a8e2a94c67b1ee5d, type: 3}
   projectilePrefab: {fileID: 1684731799131702298, guid: 64d901d86ef66d24f873d8476b20a687, type: 3}
   orbPrefab: {fileID: 2885959694536585123, guid: f35d1f636dea49e4a32662e95066d10c, type: 3}

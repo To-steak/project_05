@@ -45,7 +45,8 @@ namespace Project05.UI.Presenter
 
             _isShown = true;
             // 패배 시 한 번만 만드는 문자열이라 할당은 문제없다
-            _view.SetResultText("점수 " + world.progress.score + "\n도달 웨이브 " + world.flow.stageNumber + "-" + world.flow.waveNumber);
+            _view.SetWaveText("도달 웨이브 " + world.flow.stageNumber + "-" + world.flow.waveNumber);
+            _view.SetScoreText("점수 " + world.progress.score);
             _view.SetVisible(true);
         }
 

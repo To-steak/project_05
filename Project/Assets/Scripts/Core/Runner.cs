@@ -292,8 +292,8 @@ namespace Project05.Core
             // 판마다 다른 시드. System은 시간을 읽지 않으므로 Core가 정해서 넘긴다
             SessionSystem.InitializeRandom(_world, global::System.Environment.TickCount);
             _viewContext = new ViewContext();
-            // 씬의 표현용 참조 수집 (판 시작 시 1회)
-            _viewContext.heroView = FindAnyObjectByType<HeroView>();
+            // 씬의 표현용 참조 수집 (판 시작 시 1회). 히어로 View는 프리팹에서 만든다
+            _viewContext.heroView = SpawnHeroView(_world);
             _viewContext.heroCameraView = FindAnyObjectByType<HeroCameraView>();
             _viewContext.mainCamera = Camera.main;
             _viewContext.interactionPromptView = FindAnyObjectByType<InteractionPromptView>();
@@ -325,6 +325,39 @@ namespace Project05.Core
             SettingsView settingsView = FindAnyObjectByType<SettingsView>();
             SettingsPresenter settingsPresenter = settingsView != null ? new SettingsPresenter(settingsView) : null;
             _pauseMenuPresenter = pauseMenuView != null ? new PauseMenuPresenter(pauseMenuView, _world, settingsPresenter) : null;
+        }
+
+        /// <summary>
+        /// 히어로 View를 HeroDefinition 프리팹으로 풀에서 꺼내 시작 위치·방향에 둔다. 판이 끝나면 풀 정리(ClearViewPool)로 함께 사라진다.
+        /// 프리팹이 비어 있으면 씬에 놓인 히어로 View를 쓴다 (예전 방식). 프리팹이 있는데 씬에도 히어로가 남아 있으면 둘이 겹치지 않게 씬 쪽을 끈다.
+        /// </summary>
+        private static HeroView SpawnHeroView(World world)
+        {
+            HeroView sceneHeroView = FindAnyObjectByType<HeroView>();
+            GameObject heroPrefab = App.ViewData.heroPrefab;
+            if (heroPrefab == null)
+            {
+                return sceneHeroView;
+            }
+            if (sceneHeroView != null)
+            {
+                Debug.LogWarning("[Runner] 씬에 히어로 View '" + sceneHeroView.name + "'가 놓여 있다. 프리팹으로 만든 히어로를 쓰고 씬 쪽은 끈다. 씬에서 지운다.", sceneHeroView);
+                sceneHeroView.gameObject.SetActive(false);
+            }
+
+            GameObject instance = App.Pool.Get(heroPrefab);
+            HeroView heroView = instance.GetComponent<HeroView>();
+            if (heroView == null)
+            {
+                Debug.LogError("[Runner] 히어로 프리팹 " + heroPrefab.name + "에 HeroView 컴포넌트가 없다.", heroPrefab);
+                App.Pool.Release(instance);
+                return null;
+            }
+
+            ref readonly Hero hero = ref world.hero;
+            Quaternion rotation = hero.facingDirection.sqrMagnitude > 0f ? Quaternion.LookRotation(hero.facingDirection) : Quaternion.identity;
+            heroView.transform.SetPositionAndRotation(hero.currentPosition, rotation);
+            return heroView;
         }
 
         private void EndSession()

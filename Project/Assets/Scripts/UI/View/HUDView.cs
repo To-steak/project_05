@@ -39,14 +39,14 @@ namespace Project05.UI.View
         [SerializeField] private Slider _levelXPSlider;
         [SerializeField] private TMP_Text _scoreText;
 
-        private const string WAVE_FORMAT = "{0}-{1}";
-        private const string RATIO_FORMAT = "{0}/{1}";
+        private const string WAVE_FORMAT = "{0} - {1}";
+        private const string RATIO_FORMAT = "{0} / {1}";
         private const string PREPARATION_FORMAT = "다음 웨이브까지 {0}초";
         private const string BOSS_TEXT = "보스 등장";
-        private const string LIVES_FORMAT = "목숨 {0}";
+        private const string LIVES_FORMAT = "남은 목숨 {0}개";
         private const string RESPAWN_FORMAT = "부활까지 {0}초";
-        private const string GOLD_FORMAT = "{0}G";
-        private const string LEVEL_FORMAT = "Lv {0}";
+        private const string GOLD_FORMAT = "획득한 골드 {0}G";
+        private const string LEVEL_FORMAT = "레벨 {0}";
         private const string SCORE_FORMAT = "점수 {0}";
 
         /// <summary>
