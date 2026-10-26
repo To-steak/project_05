@@ -11,7 +11,8 @@ namespace Project05.UI.View
     public class ResultView : MonoBehaviour
     {
         [SerializeField] private GameObject _panelRoot;
-        [SerializeField] private TMP_Text _resultText;
+        [SerializeField] private TMP_Text _waveText;
+        [SerializeField] private TMP_Text _scoreText;
         [SerializeField] private Button _restartButton;
         [SerializeField] private Button _mainMenuButton;
 
@@ -47,11 +48,23 @@ namespace Project05.UI.View
         /// 결과 텍스트를 바꾼다.
         /// </summary>
         /// <param name="text">표시할 문장 (Presenter가 만든다)</param>
-        public void SetResultText(string text)
+        public void SetWaveText(string text)
         {
-            if (_resultText != null)
+            if (_waveText != null)
             {
-                _resultText.text = text;
+                _waveText.text = text;
+            }
+        }
+
+        /// <summary>
+        /// 결과 텍스트를 바꾼다.
+        /// </summary>
+        /// <param name="text">표시할 문장 (Presenter가 만든다)</param>
+        public void SetScoreText(string text)
+        {
+            if (_waveText != null)
+            {
+                _waveText.text = text;
             }
         }
     }
