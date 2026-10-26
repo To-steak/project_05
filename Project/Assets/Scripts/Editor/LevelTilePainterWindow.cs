@@ -27,6 +27,10 @@ namespace Project05.Editor
         private int _strokeUndoGroup;
         private Vector2Int _lastStrokeCell;
         private bool _hasLastStrokeCell;
+        // 창 가장자리 여백 스타일 (GUI 스킨이 준비된 뒤 OnGUI에서 한 번 만든다)
+        private GUIStyle _paddingStyle;
+        // 썸네일 목록 안쪽 여백 스타일 (선택 테두리가 스크롤 영역 가장자리에서 잘리지 않게)
+        private GUIStyle _thumbnailAreaStyle;
 
         private static readonly string[] MODE_LABELS = { "타일", "스폰", "코어", "공터" };
         private static readonly Color SELECTED_COLOR = new Color(0.25f, 0.6f, 1f);
@@ -57,15 +61,35 @@ namespace Project05.Editor
 
         private void OnGUI()
         {
+            if (_paddingStyle == null)
+            {
+                _paddingStyle = new GUIStyle();
+                _paddingStyle.padding = new RectOffset(WINDOW_PADDING, WINDOW_PADDING, WINDOW_PADDING, WINDOW_PADDING);
+            }
+
+            if (_thumbnailAreaStyle == null)
+            {
+                _thumbnailAreaStyle = new GUIStyle();
+                _thumbnailAreaStyle.padding = new RectOffset(THUMBNAIL_AREA_PADDING, THUMBNAIL_AREA_PADDING, THUMBNAIL_AREA_PADDING, THUMBNAIL_AREA_PADDING);
+            }
+
+            EditorGUILayout.BeginVertical(_paddingStyle);
+            DrawContent();
+            EditorGUILayout.EndVertical();
+        }
+
+        private void DrawContent()
+        {
             _tileSet = (LevelTileSet)EditorGUILayout.ObjectField("Level Tile Set", _tileSet, typeof(LevelTileSet), false);
             if (_tileSet == null)
             {
+                GUILayout.Space(ELEMENT_SPACING);
                 EditorGUILayout.HelpBox("격자 설정과 타일 목록을 담은 Level Tile Set 에셋을 넣는다.\n(Create → Project05 → Level Tile Set)", MessageType.Info);
                 SetPainting(false);
                 return;
             }
 
-            EditorGUILayout.Space();
+            GUILayout.Space(ELEMENT_SPACING);
             LevelPaintMode mode = (LevelPaintMode)GUILayout.Toolbar((int)_mode, MODE_LABELS, GUILayout.Height(MODE_BUTTON_HEIGHT));
             if (mode != _mode)
             {
@@ -73,19 +97,22 @@ namespace Project05.Editor
                 SetPainting(true);
             }
 
+            GUILayout.Space(ELEMENT_SPACING);
             string paintLabel = _isPainting ? "칠하기 끄기 (Esc)" : "칠하기 켜기";
             if (GUILayout.Button(paintLabel, GUILayout.Height(PAINT_BUTTON_HEIGHT)))
             {
                 SetPainting(!_isPainting);
             }
 
+            GUILayout.Space(ELEMENT_SPACING);
             if (_mode == LevelPaintMode.Tile)
             {
                 EditorGUILayout.LabelField("현재 회전", (_quarterTurns * 90) + "°", EditorStyles.boldLabel);
+                GUILayout.Space(ELEMENT_SPACING);
             }
             EditorGUILayout.HelpBox(GetControlsHelp(), MessageType.None);
 
-            EditorGUILayout.Space();
+            GUILayout.Space(ELEMENT_SPACING);
             if (GUILayout.Button("경로 생성 (칠한 길 타일 → 웨이포인트)", GUILayout.Height(PAINT_BUTTON_HEIGHT)))
             {
                 LevelPathBuilder.Build(_tileSet);
@@ -93,11 +120,12 @@ namespace Project05.Editor
 
             if (_mode == LevelPaintMode.Tile)
             {
-                EditorGUILayout.Space();
+                GUILayout.Space(ELEMENT_SPACING);
                 if (GUILayout.Button("이름에 'path'가 들어간 타일을 모두 길로 표시"))
                 {
                     MarkPathPrefabsByName();
                 }
+                GUILayout.Space(ELEMENT_SPACING);
                 DrawThumbnails();
             }
         }
@@ -130,13 +158,21 @@ namespace Project05.Editor
             }
 
             _selectedIndex = Mathf.Clamp(_selectedIndex, 0, prefabs.Length - 1);
-            int columnCount = Mathf.Max(1, (int)((position.width - THUMBNAIL_MARGIN) / (THUMBNAIL_SIZE + THUMBNAIL_SPACING)));
+            float availableWidth = position.width - WINDOW_PADDING * 2f - SCROLLBAR_WIDTH - THUMBNAIL_AREA_PADDING * 2f;
+            int columnCount = Mathf.Max(1, (int)((availableWidth + THUMBNAIL_SPACING) / (THUMBNAIL_SIZE + THUMBNAIL_SPACING)));
             int rowCount = (prefabs.Length + columnCount - 1) / columnCount;
             bool isLoading = false;
 
             _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition);
+            // 추가: 썸네일 목록 전체를 안쪽 여백으로 감싼다
+            EditorGUILayout.BeginVertical(_thumbnailAreaStyle);
             for (int row = 0; row < rowCount; row++)
             {
+                // 변경: 첫 줄이 아니면 위에 세로 간격 (마지막 줄 아래 간격은 여백이 맡는다)
+                if (row > 0)
+                {
+                    GUILayout.Space(THUMBNAIL_SPACING);
+                }
                 EditorGUILayout.BeginHorizontal();
                 for (int column = 0; column < columnCount; column++)
                 {
@@ -145,11 +181,17 @@ namespace Project05.Editor
                     {
                         break;
                     }
+                    // 첫 칸이 아니면 앞에 가로 간격
+                    if (column > 0)
+                    {
+                        GUILayout.Space(THUMBNAIL_SPACING);
+                    }
                     isLoading = DrawThumbnail(prefabs[prefabIndex], prefabIndex) || isLoading;
                 }
                 EditorGUILayout.EndHorizontal();
-                GUILayout.Space(THUMBNAIL_SPACING);
             }
+            // 추가: 위에서 연 안쪽 여백을 닫는다
+            EditorGUILayout.EndVertical();
             EditorGUILayout.EndScrollView();
 
             if (isLoading)
@@ -164,10 +206,10 @@ namespace Project05.Editor
         /// </summary>
         private bool DrawThumbnail(GameObject prefab, int prefabIndex)
         {
-            Rect cellRect = GUILayoutUtility.GetRect(THUMBNAIL_SIZE, THUMBNAIL_SIZE + THUMBNAIL_LABEL_HEIGHT * 2f, GUILayout.Width(THUMBNAIL_SIZE));
+            Rect cellRect = GUILayoutUtility.GetRect(THUMBNAIL_SIZE, THUMBNAIL_SIZE + THUMBNAIL_INNER_SPACING + THUMBNAIL_LABEL_HEIGHT * 2f, GUILayout.Width(THUMBNAIL_SIZE));
             Rect imageRect = new Rect(cellRect.x, cellRect.y, THUMBNAIL_SIZE, THUMBNAIL_SIZE);
-            Rect labelRect = new Rect(cellRect.x, imageRect.yMax, THUMBNAIL_SIZE, THUMBNAIL_LABEL_HEIGHT);
-            Rect toggleRect = new Rect(cellRect.x, labelRect.yMax, THUMBNAIL_SIZE, THUMBNAIL_LABEL_HEIGHT);
+            Rect labelRect = new Rect(cellRect.x, imageRect.yMax + THUMBNAIL_INNER_SPACING, THUMBNAIL_SIZE, THUMBNAIL_LABEL_HEIGHT);
+            Rect toggleRect = new Rect(cellRect.x + (THUMBNAIL_SIZE - PATH_TOGGLE_WIDTH) * 0.5f, labelRect.yMax, PATH_TOGGLE_WIDTH, THUMBNAIL_LABEL_HEIGHT);
 
             // 고른 타일은 썸네일 둘레에만 테두리를 그린다 (이름 글자가 강조색에 묻히지 않게)
             if (prefabIndex == _selectedIndex)
@@ -633,11 +675,22 @@ namespace Project05.Editor
         private const float PAINT_BUTTON_HEIGHT = 28f;
         private const float SELECTED_BORDER = 3f;
         private const float THUMBNAIL_SIZE = 72f;
-        private const float THUMBNAIL_SPACING = 6f;
+        private const float THUMBNAIL_SPACING = 10f;
         private const float THUMBNAIL_LABEL_HEIGHT = 16f;
-        private const float THUMBNAIL_MARGIN = 24f;
         private const float PREVIEW_FILL_ALPHA = 0.15f;
         // 같은 방향으로 보는 회전 차이 (도)
         private const float SAME_ROTATION_DEGREES = 1f;
+        // 창 가장자리 여백 (픽셀)
+        private const int WINDOW_PADDING = 10;
+        // 요소 사이 세로 간격 (픽셀)
+        private const float ELEMENT_SPACING = 10f;
+        // 썸네일 그림과 이름 사이 간격
+        private const float THUMBNAIL_INNER_SPACING = 2f;
+        // "길" 체크 너비 (썸네일 가운데 놓기용)
+        private const float PATH_TOGGLE_WIDTH = 36f;
+        // 세로 스크롤바 너비 (열 개수 계산에서 뺀다)
+        private const float SCROLLBAR_WIDTH = 16f;
+        // 썸네일 목록 안쪽 여백 (픽셀, 선택 테두리 SELECTED_BORDER보다 커야 잘리지 않는다)
+        private const int THUMBNAIL_AREA_PADDING = 15;
     }
 }

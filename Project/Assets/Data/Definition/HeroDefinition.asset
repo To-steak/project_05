@@ -15,6 +15,7 @@ MonoBehaviour:
   maxHP: 100
   lifeCount: 3
   moveSpeed: 0.12
+  moveRepathDistance: 0.5
   meleeAttackDamage: 10
   meleeAttackIntervalTicks: 25
   meleeRange: 2
@@ -34,6 +35,6 @@ MonoBehaviour:
   respawnTicks: 150
   pickupRadius: 2.5
   interactionRadius: 2
-  prefab: {fileID: 5650481211667183865, guid: a80ca79f092b25847ac449112af31625, type: 3}
+  prefab: {fileID: 3015343269813259014, guid: 37874278bc81df44a8e2a94c67b1ee5d, type: 3}
   projectilePrefab: {fileID: 1684731799131702298, guid: 64d901d86ef66d24f873d8476b20a687, type: 3}
   orbPrefab: {fileID: 2885959694536585123, guid: f35d1f636dea49e4a32662e95066d10c, type: 3}

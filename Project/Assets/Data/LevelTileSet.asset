@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c666a68d64d74d9895af20e198e20589, type: 3}
+  m_Name: LevelTileSet
+  m_EditorClassIdentifier: Project05.Editor::Project05.Editor.LevelTileSet
+  cellSize: 1
+  origin: {x: 0, y: 0, z: 0}
+  tileScale: 1
+  pathSurfaceHeight: 0
+  grassSurfaceHeight: 0
+  prefabs:
+  - {fileID: 919132149155446097, guid: c3001f321bb94734a84954482e7ccce5, type: 3}
+  - {fileID: 919132149155446097, guid: 3e19dfa9210a6f54795b95a6282cbc9f, type: 3}
+  - {fileID: 919132149155446097, guid: 93635b4ac28aff240bce52000541f29f, type: 3}
+  - {fileID: 919132149155446097, guid: c8dfe5b39490c0a4e8cefb539c3583f8, type: 3}
+  - {fileID: 919132149155446097, guid: 6f633d4a1c8048243a9d74f18847c8a5, type: 3}
+  - {fileID: 919132149155446097, guid: 5a83fee17aa822740a37bdb8720b838a, type: 3}
+  - {fileID: 919132149155446097, guid: 11398faee5eaac74d9fe6fcca31206be, type: 3}
+  - {fileID: 919132149155446097, guid: f2e82031833b2e24a82c7f97c148f6cc, type: 3}
+  - {fileID: 919132149155446097, guid: bdbf24bfd68906543ac330c03e222c80, type: 3}
+  - {fileID: 919132149155446097, guid: eb34aeb90424b4546a863964a50538c1, type: 3}
+  - {fileID: 919132149155446097, guid: cebf8f0271c192449947b31ad54a6aa1, type: 3}
+  - {fileID: 919132149155446097, guid: af8da08026523304bb064a1de364d486, type: 3}
+  - {fileID: 919132149155446097, guid: 696686a00782c3d4fbda779eee96a5b7, type: 3}
+  - {fileID: 919132149155446097, guid: 012d1f5fa1f460a4fba3d7079c8c1dc5, type: 3}
+  - {fileID: 919132149155446097, guid: cbc1ce1c0e9e76349b70d3a4b8973be8, type: 3}
+  - {fileID: 919132149155446097, guid: 0b1552726f687454d9d3179e6df9dd6a, type: 3}
+  - {fileID: 919132149155446097, guid: 3a83f2fc3af94674585c139fc2ed495f, type: 3}
+  - {fileID: 919132149155446097, guid: de5e0b2c40643874090e24dfeb6feff1, type: 3}
+  - {fileID: 919132149155446097, guid: 4b01b4eda96f89f4ab4f536947cfe74e, type: 3}
+  - {fileID: 919132149155446097, guid: 49eb6658083b0b44c94b8840e0801950, type: 3}
+  - {fileID: 919132149155446097, guid: 974a4f0984a4e1e48a44680cabc2559b, type: 3}
+  - {fileID: 919132149155446097, guid: b98a8ee501695da48b56d335adf7224b, type: 3}
+  - {fileID: 919132149155446097, guid: 5a88a13bd0b0f7f43a2dee4408f4fd28, type: 3}
+  - {fileID: 919132149155446097, guid: bb275e8ec90e8ef4cb563d5f66781855, type: 3}
+  - {fileID: 919132149155446097, guid: d06cb3c08428ba94bb1b6d2caf90add4, type: 3}
+  - {fileID: 919132149155446097, guid: 3d99a5e11102fc0408410eb1b1caf939, type: 3}
+  - {fileID: 919132149155446097, guid: 16281e5353c707146940f4404f97ca62, type: 3}
+  - {fileID: 919132149155446097, guid: 27b9d82cb05c641489ae858e9ae58997, type: 3}
+  - {fileID: 919132149155446097, guid: a946437bba7fcb044923265425009d07, type: 3}
+  pathPrefabs:
+  - {fileID: 919132149155446097, guid: bdbf24bfd68906543ac330c03e222c80, type: 3}
+  - {fileID: 919132149155446097, guid: 5a88a13bd0b0f7f43a2dee4408f4fd28, type: 3}
+  markTilesStatic: 1
+  createGroundCollider: 1
