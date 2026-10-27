@@ -66,7 +66,7 @@ Claude와 협업할 때 기준으로 삼은 문서입니다.
 - [Nature Kit 2.1](https://opengameart.org/content/nature-kit) - by [Kenney](https://www.patreon.com/cw/kenney) ([License](./License/Nature%20Kit%20(2.1)-License.txt))
 - [Input Prompts 1.5A](https://kenney.nl/assets/input-prompts) - by [Kenney](https://www.patreon.com/cw/kenney) ([License](./License/Input%20Prompts%20(1.5A)-License.txt))
 - [UI Pack - Adventure 1.1](https://kenney.nl/assets/ui-pack-adventure) - by [Kenney](https://www.patreon.com/cw/kenney) ([License](./License/UI%20Pack%20-%20Adventure%20(1.1)-License.txt))
-- [Cursor Pack](https://kenney.nl/assets/cursor-pack) - by [Kenney](https://www.patreon.com/cw/kenney)
+- [Cursor Pack](https://kenney.nl/assets/cursor-pack) - by [Kenney](https://www.patreon.com/cw/kenney)([License](./License/Cursor%20Pack%20(1.1)-License.txt))
 
 아래 폰트는 [SIL Open Font License 1.1](./License/DNFBitBitTTF-License.txt)이 적용됩니다.
 
